@@ -1,32 +1,30 @@
 package com.omni.besthardware.models;
 
-import jakarta.persistence.Column;
-import jakarta.persistence.Entity;
-import jakarta.persistence.Id;
-import jakarta.persistence.Table;
-
+import jakarta.persistence.*;
+import lombok.Getter;
+import lombok.Setter;
+import lombok.NoArgsConstructor;
 
 @Entity
 @Table(name = "monitor")
-public class monitorModel {
+@PrimaryKeyJoinColumn(name = "idComponente")
+@Getter
+@Setter
+@NoArgsConstructor
+public class monitorModel extends componenteModel {
 
-    @Id
-    private int idComponente;
-
-    @Column(name = "marca", length = 128)
+    @Column(name = "marca", nullable = false, length = 128)
     private String marca;
 
-    @Column(name = "tamanho", length = 2)
-    private char tamanho;
+    @Column(name = "tamanho", nullable = false, length = 2)
+    private String tamanho;
 
-    @Column(name = "resolucao", length = 64)
+    @Column(name = "resolucao", nullable = false, length = 64)
     private String resolucao;
 
-    @Column(name = "frequencia")
-    private int frequencia;
+    @Column(name = "frequencia", nullable = false)
+    private Integer frequencia;
 
-    @Column(name = "tipo", length = 64)
+    @Column(name = "tipo", nullable = false, length = 64)
     private String tipo;
-
-
 }

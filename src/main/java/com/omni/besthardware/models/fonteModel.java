@@ -1,25 +1,24 @@
 package com.omni.besthardware.models;
 
-import jakarta.persistence.Column;
-import jakarta.persistence.Entity;
-import jakarta.persistence.Id;
-import jakarta.persistence.Table;
+import jakarta.persistence.*;
+import lombok.Getter;
+import lombok.Setter;
+import lombok.NoArgsConstructor;
 
 @Entity
 @Table(name = "fonte")
-public class fonteModel {
+@PrimaryKeyJoinColumn(name = "idComponente")
+@Getter
+@Setter
+@NoArgsConstructor
+public class fonteModel extends componenteModel {
 
-    @Id
-    private int idComponente;
+    @Column(name = "marca", nullable = false, length = 128)
+    private String marca;
 
+    @Column(name = "potencia", nullable = false)
+    private Integer potencia;
 
-    @Column(name = "marca", length = 128)
-    private int marca;
-
-    @Column(name = "potencia")
-    private int potencia;
-
-    @Column(name = "certificacao", length = 128)
+    @Column(name = "certificacao", nullable = false, length = 128)
     private String certificacao;
-    
 }

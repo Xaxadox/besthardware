@@ -1,33 +1,35 @@
 package com.omni.besthardware.models;
 
 import jakarta.persistence.*;
-import lombok.AllArgsConstructor;
-import lombok.Data;
+import lombok.Getter;
+import lombok.Setter;
 import lombok.NoArgsConstructor;
-
+import lombok.AllArgsConstructor;
 import java.math.BigDecimal;
 
 @Entity
 @Table(name = "itemOrcamento")
-@Data
+@Getter
+@Setter
 @NoArgsConstructor
 @AllArgsConstructor
 public class itemOrcamentoModel {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private int id;
+    private Integer id;
 
-    @Column(name = "quantidade")
-    private int quantidade;
+    @Column(name = "quantidade", nullable = false)
+    private Integer quantidade;
 
     @Column(name = "preco", precision = 10, scale = 2, nullable = false)
     private BigDecimal preco;
 
-    @Column(name = "idOrcamento")
-    private int idOrcamento;
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "idOrcamento", nullable = false)
+    private orcamentoModel orcamento;
 
-    @Column(name = "idComponente")
-    private int idComponente;
-
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "idComponente", nullable = false)
+    private componenteModel componente;
 }

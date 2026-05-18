@@ -1,28 +1,27 @@
 package com.omni.besthardware.models;
 
-
-import jakarta.persistence.Column;
-import jakarta.persistence.Entity;
-import jakarta.persistence.Id;
-import jakarta.persistence.Table;
+import jakarta.persistence.*;
+import lombok.Getter;
+import lombok.Setter;
+import lombok.NoArgsConstructor;
 
 @Entity
 @Table(name = "armazenamento")
-public class armazenamentoModel {
+@PrimaryKeyJoinColumn(name = "idComponente")
+@Getter
+@Setter
+@NoArgsConstructor
+public class armazenamentoModel extends componenteModel {
 
-    @Id
-    private Integer idComponente;
+    @Column(name = "tipo", nullable = false, length = 3)
+    private String tipo;
 
-    @Column(name = "tipo", length = 3)
-    private char tipo;
+    @Column(name = "entrada", nullable = false, length = 4)
+    private String entrada;
 
-    @Column(name = "entrada", length = 4)
-    private char entrada;
+    @Column(name = "velocidadeEscrita", nullable = false)
+    private Integer velocidadeEscrita;
 
-    @Column(name = "velocidadeEscrita")
-    private int velocidadeEscrita;
-
-    @Column(name = "velocidadeLeitura")
-    private int velocidadeLeitura;
-
+    @Column(name = "velocidadeLeitura", nullable = false)
+    private Integer velocidadeLeitura;
 }

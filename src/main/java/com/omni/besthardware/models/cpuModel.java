@@ -1,31 +1,31 @@
 package com.omni.besthardware.models;
 
-import jakarta.persistence.Column;
-import jakarta.persistence.Entity;
-import jakarta.persistence.Id;
-import jakarta.persistence.Table;
+import jakarta.persistence.*;
+import lombok.Getter;
+import lombok.Setter;
+import lombok.NoArgsConstructor;
 import java.time.LocalDate;
 
 @Entity
 @Table(name = "cpu")
-public class cpuModel {
-        @Id
-        private Integer idComponente;
+@PrimaryKeyJoinColumn(name = "idComponente")
+@Getter
+@Setter
+@NoArgsConstructor
+public class cpuModel extends componenteModel {
 
-        @Column(name = "modelo", length = 128)
+        @Column(name = "modelo", nullable = false, length = 128)
         private String modelo;
 
-        @Column(name = "frequencia")
-        private int frequencia;
+        @Column(name = "frequencia", nullable = false)
+        private Integer frequencia;
 
-        @Column(name = "consumo")
-        private int consumo;
+        @Column(name = "consumo", nullable = false)
+        private Integer consumo;
 
-        @Column(name = "anoLancamento")
-        private LocalDate anoLacamento;
+        @Column(name = "anoLancamento", nullable = false)
+        private LocalDate anoLancamento;
 
-        @Column(name = "nucleos")
-        private int nucleos;
-
-
+        @Column(name = "nucleos", nullable = false)
+        private Integer nucleos;
 }
