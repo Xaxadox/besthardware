@@ -31,4 +31,13 @@ public class componenteModel {
     @ManyToMany(mappedBy = "componentes")
     private Set<perfilModel> perfis = new HashSet<>();
     //Indica que a relacao esta sendo gerenciada pelo PerfilModel
+    
+    @ManyToMany
+    @JoinTable(
+        name = "compatibilidadeComponente",
+        joinColumns = @JoinColumn(name = "idComponente"),
+        inverseJoinColumns = @JoinColumn(name = "idComponenteCompativel")
+    )
+    
+    private Set<componenteModel> componentesCompativeis = new HashSet<>();
 }
