@@ -6,6 +6,7 @@ import lombok.Setter;
 import lombok.NoArgsConstructor;
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.List;
 
 @Entity
@@ -38,5 +39,5 @@ public class orcamentoModel {
 
     // Relação bidirecional (opcional, dependendo das consultas necessárias)
     @OneToMany(mappedBy = "orcamento", fetch = FetchType.LAZY, cascade = CascadeType.ALL)
-    private List<itemOrcamentoModel> itens;
+    private List<itemOrcamentoModel> itens = new ArrayList<>();
 }

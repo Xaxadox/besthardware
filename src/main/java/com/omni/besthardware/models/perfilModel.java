@@ -4,6 +4,8 @@ import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.Setter;
 import lombok.NoArgsConstructor;
+
+import java.util.ArrayList;
 import java.util.List;
 
 @Entity
@@ -16,11 +18,11 @@ public class perfilModel {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Integer id;
-    
+
     @Column(name = "nome", nullable = false, length = 128)
     private String nome;
 
-   
+
     @ManyToMany(fetch = FetchType.LAZY)
     @JoinTable(name = "perfilComponente",
             joinColumns = @JoinColumn(name = "idPerfil"),
@@ -29,5 +31,5 @@ public class perfilModel {
             // A chave que aponta para o outro lado
     )
     //Acesso a tabela perfilComponente, fiz dessa forma para nao quebrar a compatibilidade com o JPA
-    private List<componenteModel> componentes;
+    private List<componenteModel> componentes = new ArrayList<>();
 }
