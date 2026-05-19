@@ -1,5 +1,6 @@
 package com.omni.besthardware.models;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.Setter;
@@ -27,6 +28,7 @@ public class itemOrcamentoModel {
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "idOrcamento", nullable = false)
+    @JsonIgnore
     private orcamentoModel orcamento;
 
     @ManyToOne(fetch = FetchType.LAZY)
