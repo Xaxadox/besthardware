@@ -1,16 +1,25 @@
 package com.omni.besthardware.models;
 
-import jakarta.persistence.Id;
+import jakarta.persistence.Column;
+import jakarta.persistence.Embeddable;
+import lombok.Getter;
+import lombok.Setter;
+import lombok.NoArgsConstructor;
+import lombok.AllArgsConstructor;
+import lombok.EqualsAndHashCode;
+import java.io.Serializable;
 
-public class perfilComponenteModel {
+@Embeddable
+@Getter
+@Setter
+@NoArgsConstructor
+@AllArgsConstructor
+@EqualsAndHashCode // Essencial para chaves compostas no Hibernate
+public class perfilComponenteModel implements Serializable {
 
-    @Id
-    private int idPerfil;
+    @Column(name = "idPerfil")
+    private Integer idPerfil;
 
-
-    @Id
-    private int idComponente;
-
-
-
+    @Column(name = "idComponente")
+    private Integer idComponente;
 }
