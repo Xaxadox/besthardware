@@ -24,4 +24,7 @@ public class armazenamentoModel extends componenteModel {
 
     @Column(name = "velocidadeLeitura", nullable = false)
     private Integer velocidadeLeitura;
+
+    @Column(name = "memoria", nullable = false)
+    private Integer memoria;
 }

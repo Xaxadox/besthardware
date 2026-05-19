@@ -112,9 +112,10 @@ public class testeConfig implements CommandLineRunner {
 
         ramModel ram = new ramModel();
         ram.setTipo("DDR4");
-        ram.setPreco(new BigDecimal("249.90"));
+        ram.setPreco(new BigDecimal("449.90"));
         ram.setFrequencia(3200);
         ram.setMarca("Kingston");
+        ram.setMemoria(8);
 
         fonteModel fonte = new fonteModel();
         fonte.setTipo("Fonte");
@@ -129,6 +130,7 @@ public class testeConfig implements CommandLineRunner {
         armazenamento.setEntrada("NVME");
         armazenamento.setVelocidadeEscrita(3000);
         armazenamento.setVelocidadeLeitura(3500);
+        armazenamento.setMemoria(256);
 
         monitorModel monitor = new monitorModel();
         monitor.setTipo("IPS");
