@@ -21,4 +21,7 @@ public class ramModel extends componenteModel {
 
         @Column(name = "marca", nullable = false, length = 128)
         private String marca;
+
+        @Column(name = "memoria", nullable = false)
+        private Integer memoria;
 }
