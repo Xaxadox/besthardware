@@ -1,7 +1,7 @@
 # Best Hardware API
 
 ## 1. Domínio do Problema
-O sistema gerencia o catálogo e a orçamentação de peças de hardware (CPUs, GPUs, Placas-mãe, etc). Os utilizadores podem criar orçamentos personalizados contendo múltiplos componentes, e os componentes podem pertencer a perfis específicos de uso (ex: Gamer, Profissional) e ser providenciados por múltiplos fornecedores.
+O sistema Best Hardware gerencia o catálogo e a orçamentação de peças de hardware para montagem de computadores. Os usuários podem criar orçamentos personalizados com múltiplos componentes, associar componentes a perfis de uso, como Gamer ou Profissional, e registrar relações de compatibilidade entre peças, como CPU e placa-mãe pelo mesmo socket.
 
 ## 2. Diagrama ER 
 ![Diagrama ER](docs/BestHardwareDER.png)
