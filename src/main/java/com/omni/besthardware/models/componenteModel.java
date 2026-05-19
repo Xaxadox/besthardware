@@ -17,9 +17,7 @@ import java.util.Set;
 @AllArgsConstructor
 @Inheritance(strategy = InheritanceType.JOINED)
 public class componenteModel {
-    @ManyToMany(mappedBy = "componentes")
-    private Set<perfilModel> perfis = new HashSet<>();
-    //Indica que a relacao esta sendo gerenciada pelo PerfilModel
+    
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Integer id;
@@ -30,7 +28,7 @@ public class componenteModel {
     @Column(name= "preco", nullable = false, precision = 10, scale = 2)
     private BigDecimal preco;
 
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "idPerfil")
-    private perfilModel perfil;
+    @ManyToMany(mappedBy = "componentes")
+    private Set<perfilModel> perfis = new HashSet<>();
+    //Indica que a relacao esta sendo gerenciada pelo PerfilModel
 }
