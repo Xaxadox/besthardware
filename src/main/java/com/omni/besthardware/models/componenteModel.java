@@ -34,7 +34,7 @@ public class componenteModel {
     
     @ManyToMany
     @JoinTable(
-        name = "compatibilidadeComponente",
+        name = "compatibilidade",
         joinColumns = @JoinColumn(name = "idComponente"),
         inverseJoinColumns = @JoinColumn(name = "idComponenteCompativel")
     )
