@@ -13,11 +13,13 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 public class armazenamentoModel extends componenteModel {
 
-    @Column(name = "tipo", nullable = false, length = 3)
-    private String tipo;
+    @Column(name = "tecnologia", nullable = false, length = 64)
+    private String tecnologia;
+    //HDD ou SSD
 
-    @Column(name = "entrada", nullable = false, length = 4)
-    private String entrada;
+    @Column(name = "padrao", nullable = false, length = 64)
+    private String padrao;
+    //SATA OU NVME
 
     @Column(name = "velocidadeEscrita", nullable = false)
     private Integer velocidadeEscrita;

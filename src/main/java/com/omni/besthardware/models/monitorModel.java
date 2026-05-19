@@ -25,6 +25,6 @@ public class monitorModel extends componenteModel {
     @Column(name = "frequencia", nullable = false)
     private Integer frequencia;
 
-    @Column(name = "tipo", nullable = false, length = 64)
-    private String tipo;
+    @Column(name = "tecnologia", nullable = false, length = 64)
+    private String tecnologia;
 }

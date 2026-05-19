@@ -13,8 +13,8 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 public class ramModel extends componenteModel {
 
-        @Column(name = "tipo", nullable = false, length = 4)
-        private String tipo;
+        @Column(name = "geracao", nullable = false, length = 64)
+        private String geracao;
 
         @Column(name = "frequencia", nullable = false)
         private Integer frequencia;

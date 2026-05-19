@@ -60,8 +60,8 @@ public class testeConfig implements CommandLineRunner {
         // USUÁRIOS
         // =========================
         usuarioModel usuario1 = new usuarioModel();
-        usuario1.setNome("Caio Rosa");
-        usuario1.setEmail("caio.rosa@email.com");
+        usuario1.setNome("Caio");
+        usuario1.setEmail("caio@email.com");
 
         usuarioModel usuario2 = new usuarioModel();
         usuario2.setNome("Agnaldo");
@@ -111,7 +111,8 @@ public class testeConfig implements CommandLineRunner {
         gpu.setMarca("NVIDIA");
 
         ramModel ram = new ramModel();
-        ram.setTipo("DDR4");
+        ram.setTipo("ram");
+        ram.setGeracao("DDR4");
         ram.setPreco(new BigDecimal("449.90"));
         ram.setFrequencia(3200);
         ram.setMarca("Kingston");
@@ -125,15 +126,17 @@ public class testeConfig implements CommandLineRunner {
         fonte.setCertificacao("80 Plus Bronze");
 
         armazenamentoModel armazenamento = new armazenamentoModel();
-        armazenamento.setTipo("SSD");
+        armazenamento.setTipo("Armazenamento");
+        armazenamento.setTecnologia("SSD");
         armazenamento.setPreco(new BigDecimal("299.90"));
-        armazenamento.setEntrada("NVME");
+        armazenamento.setPadrao("NVME");
         armazenamento.setVelocidadeEscrita(3000);
         armazenamento.setVelocidadeLeitura(3500);
         armazenamento.setMemoria(256);
 
         monitorModel monitor = new monitorModel();
-        monitor.setTipo("IPS");
+        monitor.setTipo("Monitor");
+        monitor.setTecnologia("IPS");
         monitor.setPreco(new BigDecimal("899.90"));
         monitor.setMarca("LG");
         monitor.setTamanho("24");
