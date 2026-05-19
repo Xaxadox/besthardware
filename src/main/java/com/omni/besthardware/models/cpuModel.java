@@ -28,4 +28,7 @@ public class cpuModel extends componenteModel {
 
         @Column(name = "nucleos", nullable = false)
         private Integer nucleos;
+        
+        @Column(name = "socket", nullable = false, length = 64)
+        private String socket;
 }
