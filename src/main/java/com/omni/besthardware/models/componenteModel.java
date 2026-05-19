@@ -6,6 +6,8 @@ import lombok.Setter;
 import lombok.NoArgsConstructor;
 import lombok.AllArgsConstructor;
 import java.math.BigDecimal;
+import java.util.HashSet;
+import java.util.Set;
 
 @Entity
 @Table(name="componente")
@@ -15,7 +17,9 @@ import java.math.BigDecimal;
 @AllArgsConstructor
 @Inheritance(strategy = InheritanceType.JOINED)
 public class componenteModel {
-
+    @ManyToMany(mappedBy = "componentes")
+    private Set<perfilModel> perfis = new HashSet<>();
+    //Indica que a relacao esta sendo gerenciada pelo PerfilModel
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Integer id;
