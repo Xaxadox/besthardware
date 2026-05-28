@@ -2,6 +2,8 @@ package com.omni.besthardware.models;
 
 import jakarta.persistence.*;
 import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotNull;
+import jakarta.validation.constraints.Positive;
 import jakarta.validation.constraints.Size;
 import lombok.Getter;
 import lombok.Setter;
@@ -30,6 +32,8 @@ public class MonitorModel extends ComponenteModel {
     @Column(name = "resolucao", nullable = false, length = 64)
     private String resolucao;
 
+    @NotNull
+    @Positive
     @Column(name = "frequencia", nullable = false)
     private Integer frequencia;
 
@@ -38,3 +42,4 @@ public class MonitorModel extends ComponenteModel {
     @Column(name = "tecnologia", nullable = false, length = 64)
     private String tecnologia;
 }
+

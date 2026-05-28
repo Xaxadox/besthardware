@@ -3,6 +3,8 @@ package com.omni.besthardware.models;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotNull;
+import jakarta.validation.constraints.Positive;
 import jakarta.validation.constraints.Size;
 import lombok.Getter;
 import lombok.Setter;
@@ -31,6 +33,8 @@ public class ComponenteModel {
     @Column(name = "tipo", nullable = false, length = 64)
     private String tipo;
 
+    @NotNull
+    @Positive
     @Column(name= "preco", nullable = false, precision = 10, scale = 2)
     private BigDecimal preco;
 
@@ -48,3 +52,4 @@ public class ComponenteModel {
     )
     private Set<ComponenteModel> componentesCompativeis = new HashSet<>();
 }
+

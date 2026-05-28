@@ -2,6 +2,8 @@ package com.omni.besthardware.models;
 
 import jakarta.persistence.*;
 import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotNull;
+import jakarta.validation.constraints.Positive;
 import jakarta.validation.constraints.Size;
 import lombok.Getter;
 import lombok.Setter;
@@ -27,12 +29,19 @@ public class ArmazenamentoModel extends ComponenteModel {
     private String padrao;
     //SATA OU NVME
 
+    @NotNull
+    @Positive
     @Column(name = "velocidadeEscrita", nullable = false)
     private Integer velocidadeEscrita;
 
+    @NotNull
+    @Positive
     @Column(name = "velocidadeLeitura", nullable = false)
     private Integer velocidadeLeitura;
 
+    @NotNull
+    @Positive
     @Column(name = "memoria", nullable = false)
     private Integer memoria;
 }
+

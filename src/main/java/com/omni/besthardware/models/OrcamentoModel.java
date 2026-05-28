@@ -2,6 +2,8 @@ package com.omni.besthardware.models;
 
 import jakarta.persistence.*;
 import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotNull;
+import jakarta.validation.constraints.Positive;
 import jakarta.validation.constraints.Size;
 import lombok.Getter;
 import lombok.Setter;
@@ -30,6 +32,8 @@ public class OrcamentoModel {
     @Column(name = "dataCriacao", nullable = false)
     private LocalDateTime dataCriacao;
 
+    @NotNull
+    @Positive
     @Column(name = "preco", nullable = false, precision = 10, scale = 2)
     private BigDecimal preco;
 
@@ -45,3 +49,4 @@ public class OrcamentoModel {
     @OneToMany(mappedBy = "orcamento", fetch = FetchType.LAZY, cascade = CascadeType.ALL)
     private List<ItemOrcamentoModel> itens = new ArrayList<>();
 }
+

@@ -2,6 +2,8 @@ package com.omni.besthardware.models;
 
 import jakarta.persistence.*;
 import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotNull;
+import jakarta.validation.constraints.Positive;
 import jakarta.validation.constraints.Size;
 import lombok.Getter;
 import lombok.Setter;
@@ -20,6 +22,8 @@ public class RamModel extends ComponenteModel {
         @Column(name = "geracao", nullable = false, length = 64)
         private String geracao;
 
+        @NotNull
+        @Positive
         @Column(name = "frequencia", nullable = false)
         private Integer frequencia;
 
@@ -28,6 +32,9 @@ public class RamModel extends ComponenteModel {
         @Column(name = "marca", nullable = false, length = 128)
         private String marca;
 
+        @NotNull
+        @Positive
         @Column(name = "memoria", nullable = false)
         private Integer memoria;
 }
+

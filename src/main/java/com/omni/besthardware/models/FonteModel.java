@@ -2,6 +2,8 @@ package com.omni.besthardware.models;
 
 import jakarta.persistence.*;
 import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotNull;
+import jakarta.validation.constraints.Positive;
 import jakarta.validation.constraints.Size;
 import lombok.Getter;
 import lombok.Setter;
@@ -20,6 +22,8 @@ public class FonteModel extends ComponenteModel {
     @Column(name = "marca", nullable = false, length = 128)
     private String marca;
 
+    @NotNull
+    @Positive
     @Column(name = "potencia", nullable = false)
     private Integer potencia;
 
@@ -28,3 +32,4 @@ public class FonteModel extends ComponenteModel {
     @Column(name = "certificacao", nullable = false, length = 128)
     private String certificacao;
 }
+

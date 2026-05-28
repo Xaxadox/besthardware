@@ -2,6 +2,8 @@ package com.omni.besthardware.models;
 
 import jakarta.persistence.*;
 import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotNull;
+import jakarta.validation.constraints.Positive;
 import jakarta.validation.constraints.Size;
 import lombok.Getter;
 import lombok.Setter;
@@ -21,15 +23,21 @@ public class CpuModel extends ComponenteModel {
         @Column(name = "modelo", nullable = false, length = 128)
         private String modelo;
 
+        @NotNull
+        @Positive
         @Column(name = "frequencia", nullable = false)
         private Integer frequencia;
 
+        @NotNull
+        @Positive
         @Column(name = "consumo", nullable = false)
         private Integer consumo;
 
         @Column(name = "anoLancamento", nullable = false)
         private LocalDate anoLancamento;
 
+        @NotNull
+        @Positive
         @Column(name = "nucleos", nullable = false)
         private Integer nucleos;
         
@@ -38,3 +46,4 @@ public class CpuModel extends ComponenteModel {
         @Column(name = "socket", nullable = false, length = 64)
         private String socket;
 }
+

@@ -2,6 +2,8 @@ package com.omni.besthardware.models;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
+import jakarta.validation.constraints.NotNull;
+import jakarta.validation.constraints.Positive;
 import lombok.Getter;
 import lombok.Setter;
 import lombok.NoArgsConstructor;
@@ -20,9 +22,13 @@ public class ItemOrcamentoModel {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Integer id;
 
+    @NotNull
+    @Positive
     @Column(name = "quantidade", nullable = false)
     private Integer quantidade;
 
+    @NotNull
+    @Positive
     @Column(name = "preco", precision = 10, scale = 2, nullable = false)
     private BigDecimal preco;
 
@@ -35,3 +41,4 @@ public class ItemOrcamentoModel {
     @JoinColumn(name = "idComponente", nullable = false)
     private ComponenteModel componente;
 }
+

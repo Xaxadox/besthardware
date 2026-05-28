@@ -2,6 +2,8 @@ package com.omni.besthardware.models;
 
 import jakarta.persistence.*;
 import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotNull;
+import jakarta.validation.constraints.Positive;
 import jakarta.validation.constraints.Size;
 import lombok.Getter;
 import lombok.Setter;
@@ -20,9 +22,13 @@ public class GpuModel extends ComponenteModel {
     @Column(name = "modelo", nullable = false, length = 128)
     private String modelo;
 
+    @NotNull
+    @Positive
     @Column(name = "memoria", nullable = false)
     private Integer memoria;
 
+    @NotNull
+    @Positive
     @Column(name = "consumo", nullable = false)
     private Integer consumo;
 
@@ -31,3 +37,4 @@ public class GpuModel extends ComponenteModel {
     @Column(name = "marca", nullable = false, length = 128)
     private String marca;
 }
+
