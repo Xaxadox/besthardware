@@ -1,0 +1,89 @@
+package com.omni.besthardware.services;
+
+import com.omni.besthardware.models.MonitorModel;
+import com.omni.besthardware.repositories.MonitorRepository;
+import java.math.BigDecimal;
+import java.util.List;
+import java.util.Optional;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+
+@Service
+public class MonitorService {
+
+    private final MonitorRepository monitorRepository;
+
+    public MonitorService(MonitorRepository monitorRepository) {
+        this.monitorRepository = monitorRepository;
+    }
+
+    @Transactional(readOnly = true)
+    public List<MonitorModel> listarTodos() {
+        return monitorRepository.findAll();
+    }
+
+    @Transactional(readOnly = true)
+    public Optional<MonitorModel> buscarPorId(Integer id) {
+        return monitorRepository.findById(id);
+    }
+
+    @Transactional(readOnly = true)
+    public List<MonitorModel> buscarPorTipo(String tipo) {
+        return monitorRepository.findByTipoIgnoreCase(tipo);
+    }
+
+    @Transactional(readOnly = true)
+    public List<MonitorModel> buscarPorFaixaDePreco(BigDecimal precoMinimo, BigDecimal precoMaximo) {
+        return monitorRepository.findByPrecoBetween(precoMinimo, precoMaximo);
+    }
+
+    @Transactional(readOnly = true)
+    public List<MonitorModel> buscarPorMarca(String marca) {
+        return monitorRepository.findByMarcaContainingIgnoreCase(marca);
+    }
+
+    @Transactional(readOnly = true)
+    public List<MonitorModel> buscarPorTamanho(String tamanho) {
+        return monitorRepository.findByTamanho(tamanho);
+    }
+
+    @Transactional(readOnly = true)
+    public List<MonitorModel> buscarPorResolucao(String resolucao) {
+        return monitorRepository.findByResolucaoIgnoreCase(resolucao);
+    }
+
+    @Transactional(readOnly = true)
+    public List<MonitorModel> buscarPorFrequenciaMinima(Integer frequencia) {
+        return monitorRepository.findByFrequenciaGreaterThanEqual(frequencia);
+    }
+
+    @Transactional(readOnly = true)
+    public List<MonitorModel> buscarPorTecnologia(String tecnologia) {
+        return monitorRepository.findByTecnologiaIgnoreCase(tecnologia);
+    }
+
+    @Transactional
+    public MonitorModel salvar(MonitorModel monitor) {
+        return monitorRepository.save(monitor);
+    }
+
+    @Transactional
+    public Optional<MonitorModel> atualizar(Integer id, MonitorModel monitor) {
+        if (!monitorRepository.existsById(id)) {
+            return Optional.empty();
+        }
+
+        monitor.setId(id);
+        return Optional.of(monitorRepository.save(monitor));
+    }
+
+    @Transactional
+    public boolean excluirPorId(Integer id) {
+        if (!monitorRepository.existsById(id)) {
+            return false;
+        }
+
+        monitorRepository.deleteById(id);
+        return true;
+    }
+}
