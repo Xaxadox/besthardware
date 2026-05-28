@@ -18,7 +18,7 @@ import java.util.Set;
 @NoArgsConstructor
 @AllArgsConstructor
 @Inheritance(strategy = InheritanceType.JOINED)
-public class componenteModel {
+public class ComponenteModel {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -32,7 +32,7 @@ public class componenteModel {
 
     @JsonIgnore
     @ManyToMany(mappedBy = "componentes")
-    private Set<perfilModel> perfis = new HashSet<>();
+    private Set<PerfilModel> perfis = new HashSet<>();
     //Indica que a relacao esta sendo gerenciada pelo PerfilModel
 
     @JsonIgnore
@@ -42,5 +42,5 @@ public class componenteModel {
             joinColumns = @JoinColumn(name = "idComponente"),
             inverseJoinColumns = @JoinColumn(name = "idComponenteCompativel")
     )
-    private Set<componenteModel> componentesCompativeis = new HashSet<>();
+    private Set<ComponenteModel> componentesCompativeis = new HashSet<>();
 }

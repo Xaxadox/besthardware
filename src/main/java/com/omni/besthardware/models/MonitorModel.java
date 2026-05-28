@@ -11,7 +11,7 @@ import lombok.NoArgsConstructor;
 @Getter
 @Setter
 @NoArgsConstructor
-public class monitorModel extends componenteModel {
+public class MonitorModel extends ComponenteModel {
 
     @Column(name = "marca", nullable = false, length = 128)
     private String marca;

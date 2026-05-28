@@ -12,7 +12,7 @@ import java.time.LocalDate;
 @Getter
 @Setter
 @NoArgsConstructor
-public class cpuModel extends componenteModel {
+public class CpuModel extends ComponenteModel {
 
         @Column(name = "modelo", nullable = false, length = 128)
         private String modelo;
@@ -32,3 +32,4 @@ public class cpuModel extends componenteModel {
         @Column(name = "socket", nullable = false, length = 64)
         private String socket;
 }
+

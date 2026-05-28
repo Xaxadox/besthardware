@@ -11,7 +11,7 @@ import lombok.NoArgsConstructor;
 @Getter
 @Setter
 @NoArgsConstructor
-public class armazenamentoModel extends componenteModel {
+public class ArmazenamentoModel extends ComponenteModel {
 
     @Column(name = "tecnologia", nullable = false, length = 64)
     private String tecnologia;

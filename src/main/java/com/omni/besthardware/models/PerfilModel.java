@@ -13,7 +13,7 @@ import java.util.List;
 @Getter
 @Setter
 @NoArgsConstructor
-public class perfilModel {
+public class PerfilModel {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -31,5 +31,6 @@ public class perfilModel {
             // A chave que aponta para o outro lado
     )
     //Acesso a tabela perfilComponente, fiz dessa forma para nao quebrar a compatibilidade com o JPA
-    private List<componenteModel> componentes = new ArrayList<>();
+    private List<ComponenteModel> componentes = new ArrayList<>();
 }
+

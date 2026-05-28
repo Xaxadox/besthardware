@@ -6,22 +6,19 @@ import lombok.Setter;
 import lombok.NoArgsConstructor;
 
 @Entity
-@Table(name = "gpu")
+@Table(name = "fonte")
 @PrimaryKeyJoinColumn(name = "idComponente")
 @Getter
 @Setter
 @NoArgsConstructor
-public class gpuModel extends componenteModel {
-
-    @Column(name = "modelo", nullable = false, length = 128)
-    private String modelo;
-
-    @Column(name = "memoria", nullable = false)
-    private Integer memoria;
-
-    @Column(name = "consumo", nullable = false)
-    private Integer consumo;
+public class FonteModel extends ComponenteModel {
 
     @Column(name = "marca", nullable = false, length = 128)
     private String marca;
+
+    @Column(name = "potencia", nullable = false)
+    private Integer potencia;
+
+    @Column(name = "certificacao", nullable = false, length = 128)
+    private String certificacao;
 }

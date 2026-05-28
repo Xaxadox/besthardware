@@ -14,7 +14,7 @@ import java.math.BigDecimal;
 @Setter
 @NoArgsConstructor
 @AllArgsConstructor
-public class itemOrcamentoModel {
+public class ItemOrcamentoModel {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -29,9 +29,9 @@ public class itemOrcamentoModel {
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "idOrcamento", nullable = false)
     @JsonIgnore
-    private orcamentoModel orcamento;
+    private OrcamentoModel orcamento;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "idComponente", nullable = false)
-    private componenteModel componente;
+    private ComponenteModel componente;
 }

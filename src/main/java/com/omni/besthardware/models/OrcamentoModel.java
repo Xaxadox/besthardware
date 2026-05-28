@@ -14,7 +14,7 @@ import java.util.List;
 @Getter
 @Setter
 @NoArgsConstructor
-public class orcamentoModel {
+public class OrcamentoModel {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -31,13 +31,13 @@ public class orcamentoModel {
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "idUsuario", nullable = false)
-    private usuarioModel usuario;
+    private UsuarioModel usuario;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "idPerfil", nullable = false)
-    private perfilModel perfil;
+    private PerfilModel perfil;
 
     // Relação bidirecional (opcional, dependendo das consultas necessárias)
     @OneToMany(mappedBy = "orcamento", fetch = FetchType.LAZY, cascade = CascadeType.ALL)
-    private List<itemOrcamentoModel> itens = new ArrayList<>();
+    private List<ItemOrcamentoModel> itens = new ArrayList<>();
 }

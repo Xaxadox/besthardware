@@ -13,40 +13,40 @@ import java.time.LocalDateTime;
 import java.util.Arrays;
 
 @Configuration
-public class testeConfig implements CommandLineRunner {
+public class TesteConfig implements CommandLineRunner {
 
     @Autowired
-    private usuarioRepository usuarioRepository;
+    private UsuarioRepository usuarioRepository;
 
     @Autowired
-    private perfilRepository perfilRepository;
+    private PerfilRepository perfilRepository;
 
     @Autowired
-    private cpuRepository cpuRepository;
+    private CpuRepository cpuRepository;
 
     @Autowired
-    private placaMaeRepository placaMaeRepository;
+    private PlacaMaeRepository placaMaeRepository;
 
     @Autowired
-    private gpuRepository gpuRepository;
+    private GpuRepository gpuRepository;
 
     @Autowired
-    private ramRepository ramRepository;
+    private RamRepository ramRepository;
 
     @Autowired
-    private fonteRepository fonteRepository;
+    private FonteRepository fonteRepository;
 
     @Autowired
-    private armazenamentoRepository armazenamentoRepository;
+    private ArmazenamentoRepository armazenamentoRepository;
 
     @Autowired
-    private monitorRepository monitorRepository;
+    private MonitorRepository monitorRepository;
 
     @Autowired
-    private orcamentoRepository orcamentoRepository;
+    private OrcamentoRepository orcamentoRepository;
 
     @Autowired
-    private itemOrcamentoRepository itemOrcamentoRepository;
+    private ItemOrcamentoRepository itemOrcamentoRepository;
 
     @Override
     public void run(String... args) throws Exception {
@@ -59,11 +59,11 @@ public class testeConfig implements CommandLineRunner {
         // =========================
         // USUÁRIOS
         // =========================
-        usuarioModel usuario1 = new usuarioModel();
+        UsuarioModel usuario1 = new UsuarioModel();
         usuario1.setNome("Caio");
         usuario1.setEmail("caio@email.com");
 
-        usuarioModel usuario2 = new usuarioModel();
+        UsuarioModel usuario2 = new UsuarioModel();
         usuario2.setNome("Agnaldo");
         usuario2.setEmail("agnaldo@email.com");
 
@@ -72,10 +72,10 @@ public class testeConfig implements CommandLineRunner {
         // =========================
         // PERFIS
         // =========================
-        perfilModel perfilGamer = new perfilModel();
+        PerfilModel perfilGamer = new PerfilModel();
         perfilGamer.setNome("Gamer");
 
-        perfilModel perfilTrabalho = new perfilModel();
+        PerfilModel perfilTrabalho = new PerfilModel();
         perfilTrabalho.setNome("Trabalho");
 
         perfilRepository.saveAll(Arrays.asList(perfilGamer, perfilTrabalho));
@@ -84,7 +84,7 @@ public class testeConfig implements CommandLineRunner {
         // COMPONENTES
         // =========================
 
-        cpuModel cpu = new cpuModel();
+        CpuModel cpu = new CpuModel();
         cpu.setTipo("CPU");
         cpu.setPreco(new BigDecimal("899.90"));
         cpu.setModelo("Ryzen 5 5600");
@@ -94,7 +94,7 @@ public class testeConfig implements CommandLineRunner {
         cpu.setNucleos(6);
         cpu.setSocket("AM4");
 
-        placaMaeModel placaMae = new placaMaeModel();
+        PlacaMaeModel placaMae = new PlacaMaeModel();
         placaMae.setTipo("PlacaMae");
         placaMae.setPreco(new BigDecimal("699.90"));
         placaMae.setMarca("ASUS");
@@ -102,7 +102,7 @@ public class testeConfig implements CommandLineRunner {
         placaMae.setChipset("B550");
         placaMae.setFormato("ATX");
 
-        gpuModel gpu = new gpuModel();
+        GpuModel gpu = new GpuModel();
         gpu.setTipo("GPU");
         gpu.setPreco(new BigDecimal("1899.90"));
         gpu.setModelo("RTX 3060");
@@ -110,7 +110,7 @@ public class testeConfig implements CommandLineRunner {
         gpu.setConsumo(170);
         gpu.setMarca("NVIDIA");
 
-        ramModel ram = new ramModel();
+        RamModel ram = new RamModel();
         ram.setTipo("ram");
         ram.setGeracao("DDR4");
         ram.setPreco(new BigDecimal("449.90"));
@@ -118,14 +118,14 @@ public class testeConfig implements CommandLineRunner {
         ram.setMarca("Kingston");
         ram.setMemoria(8);
 
-        fonteModel fonte = new fonteModel();
+        FonteModel fonte = new FonteModel();
         fonte.setTipo("Fonte");
         fonte.setPreco(new BigDecimal("399.90"));
         fonte.setMarca("Corsair");
         fonte.setPotencia(650);
         fonte.setCertificacao("80 Plus Bronze");
 
-        armazenamentoModel armazenamento = new armazenamentoModel();
+        ArmazenamentoModel armazenamento = new ArmazenamentoModel();
         armazenamento.setTipo("Armazenamento");
         armazenamento.setTecnologia("SSD");
         armazenamento.setPreco(new BigDecimal("299.90"));
@@ -134,7 +134,7 @@ public class testeConfig implements CommandLineRunner {
         armazenamento.setVelocidadeLeitura(3500);
         armazenamento.setMemoria(256);
 
-        monitorModel monitor = new monitorModel();
+        MonitorModel monitor = new MonitorModel();
         monitor.setTipo("Monitor");
         monitor.setTecnologia("IPS");
         monitor.setPreco(new BigDecimal("899.90"));
@@ -201,7 +201,7 @@ public class testeConfig implements CommandLineRunner {
         // =========================
         // ORÇAMENTO
         // =========================
-        orcamentoModel orcamento = new orcamentoModel();
+        OrcamentoModel orcamento = new OrcamentoModel();
         orcamento.setNome("PC Gamer AM4");
         orcamento.setDataCriacao(LocalDateTime.now());
         orcamento.setUsuario(usuario1);
@@ -213,43 +213,43 @@ public class testeConfig implements CommandLineRunner {
         // =========================
         // ITENS DO ORÇAMENTO
         // =========================
-        itemOrcamentoModel itemCpu = new itemOrcamentoModel();
+        ItemOrcamentoModel itemCpu = new ItemOrcamentoModel();
         itemCpu.setQuantidade(1);
         itemCpu.setPreco(cpu.getPreco());
         itemCpu.setOrcamento(orcamento);
         itemCpu.setComponente(cpu);
 
-        itemOrcamentoModel itemPlacaMae = new itemOrcamentoModel();
+        ItemOrcamentoModel itemPlacaMae = new ItemOrcamentoModel();
         itemPlacaMae.setQuantidade(1);
         itemPlacaMae.setPreco(placaMae.getPreco());
         itemPlacaMae.setOrcamento(orcamento);
         itemPlacaMae.setComponente(placaMae);
 
-        itemOrcamentoModel itemGpu = new itemOrcamentoModel();
+        ItemOrcamentoModel itemGpu = new ItemOrcamentoModel();
         itemGpu.setQuantidade(1);
         itemGpu.setPreco(gpu.getPreco());
         itemGpu.setOrcamento(orcamento);
         itemGpu.setComponente(gpu);
 
-        itemOrcamentoModel itemRam = new itemOrcamentoModel();
+        ItemOrcamentoModel itemRam = new ItemOrcamentoModel();
         itemRam.setQuantidade(2);
         itemRam.setPreco(ram.getPreco());
         itemRam.setOrcamento(orcamento);
         itemRam.setComponente(ram);
 
-        itemOrcamentoModel itemFonte = new itemOrcamentoModel();
+        ItemOrcamentoModel itemFonte = new ItemOrcamentoModel();
         itemFonte.setQuantidade(1);
         itemFonte.setPreco(fonte.getPreco());
         itemFonte.setOrcamento(orcamento);
         itemFonte.setComponente(fonte);
 
-        itemOrcamentoModel itemArmazenamento = new itemOrcamentoModel();
+        ItemOrcamentoModel itemArmazenamento = new ItemOrcamentoModel();
         itemArmazenamento.setQuantidade(1);
         itemArmazenamento.setPreco(armazenamento.getPreco());
         itemArmazenamento.setOrcamento(orcamento);
         itemArmazenamento.setComponente(armazenamento);
 
-        itemOrcamentoModel itemMonitor = new itemOrcamentoModel();
+        ItemOrcamentoModel itemMonitor = new ItemOrcamentoModel();
         itemMonitor.setQuantidade(1);
         itemMonitor.setPreco(monitor.getPreco());
         itemMonitor.setOrcamento(orcamento);
