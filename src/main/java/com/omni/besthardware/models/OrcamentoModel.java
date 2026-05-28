@@ -1,6 +1,8 @@
 package com.omni.besthardware.models;
 
 import jakarta.persistence.*;
+import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.Size;
 import lombok.Getter;
 import lombok.Setter;
 import lombok.NoArgsConstructor;
@@ -20,6 +22,8 @@ public class OrcamentoModel {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Integer id;
 
+    @NotBlank
+    @Size(max = 64)
     @Column(name = "nome", nullable = false, length = 64)
     private String nome;
 

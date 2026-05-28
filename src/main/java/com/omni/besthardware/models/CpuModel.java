@@ -1,6 +1,8 @@
 package com.omni.besthardware.models;
 
 import jakarta.persistence.*;
+import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.Size;
 import lombok.Getter;
 import lombok.Setter;
 import lombok.NoArgsConstructor;
@@ -14,6 +16,8 @@ import java.time.LocalDate;
 @NoArgsConstructor
 public class CpuModel extends ComponenteModel {
 
+        @NotBlank
+        @Size(max = 128)
         @Column(name = "modelo", nullable = false, length = 128)
         private String modelo;
 
@@ -29,7 +33,8 @@ public class CpuModel extends ComponenteModel {
         @Column(name = "nucleos", nullable = false)
         private Integer nucleos;
         
+        @NotBlank
+        @Size(max = 64)
         @Column(name = "socket", nullable = false, length = 64)
         private String socket;
 }
-

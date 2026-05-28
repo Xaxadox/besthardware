@@ -1,6 +1,8 @@
 package com.omni.besthardware.models;
 
 import jakarta.persistence.*;
+import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.Size;
 import lombok.Getter;
 import lombok.Setter;
 import lombok.NoArgsConstructor;
@@ -19,6 +21,8 @@ public class PerfilModel {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Integer id;
 
+    @NotBlank
+    @Size(max = 128)
     @Column(name = "nome", nullable = false, length = 128)
     private String nome;
 
@@ -33,4 +37,3 @@ public class PerfilModel {
     //Acesso a tabela perfilComponente, fiz dessa forma para nao quebrar a compatibilidade com o JPA
     private List<ComponenteModel> componentes = new ArrayList<>();
 }
-
