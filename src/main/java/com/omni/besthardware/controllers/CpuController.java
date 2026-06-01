@@ -1,26 +1,24 @@
 package com.omni.besthardware.controllers;
 
 import com.omni.besthardware.dtos.ComponenteResponse;
+import com.omni.besthardware.dtos.CpuFiltroRequest;
 import com.omni.besthardware.dtos.CpuRequest;
 import com.omni.besthardware.exceptions.RecursoNaoEncontradoException;
 import com.omni.besthardware.mappers.DtoMapper;
 import com.omni.besthardware.models.CpuModel;
 import com.omni.besthardware.services.CpuService;
 import jakarta.validation.Valid;
-import java.math.BigDecimal;
-import java.time.LocalDate;
 import java.util.List;
-import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 @RestController
@@ -34,51 +32,8 @@ public class CpuController {
     }
 
     @GetMapping
-    public List<ComponenteResponse> listar(
-            @RequestParam(required = false) String tipo,
-            @RequestParam(required = false) BigDecimal precoMinimo,
-            @RequestParam(required = false) BigDecimal precoMaximo,
-            @RequestParam(required = false) String modelo,
-            @RequestParam(required = false) String socket,
-            @RequestParam(required = false) Integer frequenciaMinima,
-            @RequestParam(required = false) Integer consumoMaximo,
-            @RequestParam(required = false) Integer nucleosMinimos,
-            @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate dataInicial,
-            @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate dataFinal
-    ) {
-        if (tipo != null) {
-            return toResponseList(cpuService.buscarPorTipo(tipo));
-        }
-
-        if (precoMinimo != null && precoMaximo != null) {
-            return toResponseList(cpuService.buscarPorFaixaDePreco(precoMinimo, precoMaximo));
-        }
-
-        if (modelo != null) {
-            return toResponseList(cpuService.buscarPorModelo(modelo));
-        }
-
-        if (socket != null) {
-            return toResponseList(cpuService.buscarPorSocket(socket));
-        }
-
-        if (frequenciaMinima != null) {
-            return toResponseList(cpuService.buscarPorFrequenciaMinima(frequenciaMinima));
-        }
-
-        if (consumoMaximo != null) {
-            return toResponseList(cpuService.buscarPorConsumoMaximo(consumoMaximo));
-        }
-
-        if (nucleosMinimos != null) {
-            return toResponseList(cpuService.buscarPorNucleosMinimos(nucleosMinimos));
-        }
-
-        if (dataInicial != null && dataFinal != null) {
-            return toResponseList(cpuService.buscarPorPeriodoLancamento(dataInicial, dataFinal));
-        }
-
-        return toResponseList(cpuService.listarTodos());
+    public List<ComponenteResponse> listar(@ModelAttribute CpuFiltroRequest filtro) {
+        return toResponseList(cpuService.buscarComFiltros(filtro));
     }
 
     @GetMapping("/{id}")

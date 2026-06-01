@@ -4,9 +4,10 @@ import com.omni.besthardware.models.CpuModel;
 import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.util.List;
+import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
 import org.springframework.data.jpa.repository.JpaRepository;
 
-public interface CpuRepository extends JpaRepository<CpuModel, Integer> {
+public interface CpuRepository extends JpaRepository<CpuModel, Integer>, JpaSpecificationExecutor<CpuModel> {
     List<CpuModel> findByTipoIgnoreCase(String tipo);
 
     List<CpuModel> findByPrecoBetween(BigDecimal precoMinimo, BigDecimal precoMaximo);

@@ -1,7 +1,9 @@
 package com.omni.besthardware.services;
 
+import com.omni.besthardware.dtos.CpuFiltroRequest;
 import com.omni.besthardware.models.CpuModel;
 import com.omni.besthardware.repositories.CpuRepository;
+import com.omni.besthardware.specifications.CpuSpecification;
 import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.util.List;
@@ -26,6 +28,11 @@ public class CpuService {
     @Transactional(readOnly = true)
     public Optional<CpuModel> buscarPorId(Integer id) {
         return cpuRepository.findById(id);
+    }
+
+    @Transactional(readOnly = true)
+    public List<CpuModel> buscarComFiltros(CpuFiltroRequest filtro) {
+        return cpuRepository.findAll(CpuSpecification.comFiltros(filtro));
     }
 
     @Transactional(readOnly = true)
