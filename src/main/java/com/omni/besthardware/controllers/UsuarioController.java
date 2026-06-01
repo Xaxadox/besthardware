@@ -2,6 +2,7 @@ package com.omni.besthardware.controllers;
 
 import com.omni.besthardware.dtos.UsuarioRequest;
 import com.omni.besthardware.dtos.UsuarioResponse;
+import com.omni.besthardware.exceptions.RecursoNaoEncontradoException;
 import com.omni.besthardware.mappers.DtoMapper;
 import com.omni.besthardware.models.UsuarioModel;
 import com.omni.besthardware.services.UsuarioService;
@@ -44,7 +45,7 @@ public class UsuarioController {
         return usuarioService.buscarPorId(id)
                 .map(DtoMapper::toUsuarioResponse)
                 .map(ResponseEntity::ok)
-                .orElseGet(() -> ResponseEntity.notFound().build());
+                .orElseThrow(() -> new RecursoNaoEncontradoException("Usuario", id));
     }
 
     @GetMapping("/email/{email}")
@@ -52,7 +53,7 @@ public class UsuarioController {
         return usuarioService.buscarPorEmail(email)
                 .map(DtoMapper::toUsuarioResponse)
                 .map(ResponseEntity::ok)
-                .orElseGet(() -> ResponseEntity.notFound().build());
+                .orElseThrow(() -> new RecursoNaoEncontradoException("Usuario nao encontrado para email " + email + "."));
     }
 
     @GetMapping("/existe-email")
@@ -71,13 +72,13 @@ public class UsuarioController {
         return usuarioService.atualizar(id, toModel(request))
                 .map(DtoMapper::toUsuarioResponse)
                 .map(ResponseEntity::ok)
-                .orElseGet(() -> ResponseEntity.notFound().build());
+                .orElseThrow(() -> new RecursoNaoEncontradoException("Usuario", id));
     }
 
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> excluir(@PathVariable Integer id) {
         if (!usuarioService.excluirPorId(id)) {
-            return ResponseEntity.notFound().build();
+            throw new RecursoNaoEncontradoException("Usuario", id);
         }
 
         return ResponseEntity.noContent().build();

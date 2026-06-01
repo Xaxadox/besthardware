@@ -5,6 +5,7 @@ import com.omni.besthardware.dtos.ItemOrcamentoResponse;
 import com.omni.besthardware.dtos.OrcamentoAtualizacaoRequest;
 import com.omni.besthardware.dtos.OrcamentoRequest;
 import com.omni.besthardware.dtos.OrcamentoResponse;
+import com.omni.besthardware.exceptions.RecursoNaoEncontradoException;
 import com.omni.besthardware.models.ComponenteModel;
 import com.omni.besthardware.models.ItemOrcamentoModel;
 import com.omni.besthardware.models.OrcamentoModel;
@@ -20,7 +21,6 @@ import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Optional;
 import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -96,39 +96,32 @@ public class OrcamentoController {
         return orcamentoService.buscarPorId(id)
                 .map(this::toResponse)
                 .map(ResponseEntity::ok)
-                .orElseGet(() -> ResponseEntity.notFound().build());
+                .orElseThrow(() -> new RecursoNaoEncontradoException("Orcamento", id));
     }
 
     @PostMapping
     public ResponseEntity<OrcamentoResponse> criar(@Valid @RequestBody OrcamentoRequest request) {
-        Optional<UsuarioModel> usuario = usuarioService.buscarPorId(request.usuarioId());
-        if (usuario.isEmpty()) {
-            return ResponseEntity.notFound().build();
-        }
-
-        Optional<PerfilModel> perfil = perfilService.buscarPorId(request.perfilId());
-        if (perfil.isEmpty()) {
-            return ResponseEntity.notFound().build();
-        }
+        UsuarioModel usuario = usuarioService.buscarPorId(request.usuarioId())
+                .orElseThrow(() -> new RecursoNaoEncontradoException("Usuario", request.usuarioId()));
+        PerfilModel perfil = perfilService.buscarPorId(request.perfilId())
+                .orElseThrow(() -> new RecursoNaoEncontradoException("Perfil", request.perfilId()));
 
         OrcamentoModel orcamento = new OrcamentoModel();
         orcamento.setNome(request.nome());
         orcamento.setDataCriacao(LocalDateTime.now());
-        orcamento.setUsuario(usuario.get());
-        orcamento.setPerfil(perfil.get());
+        orcamento.setUsuario(usuario);
+        orcamento.setPerfil(perfil);
 
         List<ItemOrcamentoModel> itens = new ArrayList<>();
         for (ItemOrcamentoRequest itemRequest : request.itens()) {
-            Optional<ComponenteModel> componente = componenteService.buscarPorId(itemRequest.componenteId());
-            if (componente.isEmpty()) {
-                return ResponseEntity.notFound().build();
-            }
+            ComponenteModel componente = componenteService.buscarPorId(itemRequest.componenteId())
+                    .orElseThrow(() -> new RecursoNaoEncontradoException("Componente", itemRequest.componenteId()));
 
             ItemOrcamentoModel item = new ItemOrcamentoModel();
             item.setOrcamento(orcamento);
-            item.setComponente(componente.get());
+            item.setComponente(componente);
             item.setQuantidade(itemRequest.quantidade());
-            item.setPreco(componente.get().getPreco());
+            item.setPreco(componente.getPreco());
             itens.add(item);
         }
 
@@ -144,25 +137,16 @@ public class OrcamentoController {
             @PathVariable Integer id,
             @Valid @RequestBody OrcamentoAtualizacaoRequest request
     ) {
-        Optional<OrcamentoModel> orcamento = orcamentoService.buscarPorId(id);
-        if (orcamento.isEmpty()) {
-            return ResponseEntity.notFound().build();
-        }
+        OrcamentoModel atualizado = orcamentoService.buscarPorId(id)
+                .orElseThrow(() -> new RecursoNaoEncontradoException("Orcamento", id));
+        UsuarioModel usuario = usuarioService.buscarPorId(request.usuarioId())
+                .orElseThrow(() -> new RecursoNaoEncontradoException("Usuario", request.usuarioId()));
+        PerfilModel perfil = perfilService.buscarPorId(request.perfilId())
+                .orElseThrow(() -> new RecursoNaoEncontradoException("Perfil", request.perfilId()));
 
-        Optional<UsuarioModel> usuario = usuarioService.buscarPorId(request.usuarioId());
-        if (usuario.isEmpty()) {
-            return ResponseEntity.notFound().build();
-        }
-
-        Optional<PerfilModel> perfil = perfilService.buscarPorId(request.perfilId());
-        if (perfil.isEmpty()) {
-            return ResponseEntity.notFound().build();
-        }
-
-        OrcamentoModel atualizado = orcamento.get();
         atualizado.setNome(request.nome());
-        atualizado.setUsuario(usuario.get());
-        atualizado.setPerfil(perfil.get());
+        atualizado.setUsuario(usuario);
+        atualizado.setPerfil(perfil);
 
         return ResponseEntity.ok(toResponse(orcamentoService.salvar(atualizado)));
     }
@@ -170,7 +154,7 @@ public class OrcamentoController {
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> excluir(@PathVariable Integer id) {
         if (!orcamentoService.excluirPorId(id)) {
-            return ResponseEntity.notFound().build();
+            throw new RecursoNaoEncontradoException("Orcamento", id);
         }
 
         return ResponseEntity.noContent().build();

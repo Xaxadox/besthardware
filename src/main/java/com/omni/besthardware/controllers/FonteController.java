@@ -2,6 +2,7 @@ package com.omni.besthardware.controllers;
 
 import com.omni.besthardware.dtos.ComponenteResponse;
 import com.omni.besthardware.dtos.FonteRequest;
+import com.omni.besthardware.exceptions.RecursoNaoEncontradoException;
 import com.omni.besthardware.mappers.DtoMapper;
 import com.omni.besthardware.models.FonteModel;
 import com.omni.besthardware.services.FonteService;
@@ -67,7 +68,7 @@ public class FonteController {
         return fonteService.buscarPorId(id)
                 .map(DtoMapper::toComponenteResponse)
                 .map(ResponseEntity::ok)
-                .orElseGet(() -> ResponseEntity.notFound().build());
+                .orElseThrow(() -> new RecursoNaoEncontradoException("Fonte", id));
     }
 
     @PostMapping
@@ -81,13 +82,13 @@ public class FonteController {
         return fonteService.atualizar(id, toModel(request))
                 .map(DtoMapper::toComponenteResponse)
                 .map(ResponseEntity::ok)
-                .orElseGet(() -> ResponseEntity.notFound().build());
+                .orElseThrow(() -> new RecursoNaoEncontradoException("Fonte", id));
     }
 
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> excluir(@PathVariable Integer id) {
         if (!fonteService.excluirPorId(id)) {
-            return ResponseEntity.notFound().build();
+            throw new RecursoNaoEncontradoException("Fonte", id);
         }
 
         return ResponseEntity.noContent().build();

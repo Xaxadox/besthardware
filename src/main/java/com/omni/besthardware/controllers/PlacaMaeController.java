@@ -2,6 +2,7 @@ package com.omni.besthardware.controllers;
 
 import com.omni.besthardware.dtos.ComponenteResponse;
 import com.omni.besthardware.dtos.PlacaMaeRequest;
+import com.omni.besthardware.exceptions.RecursoNaoEncontradoException;
 import com.omni.besthardware.mappers.DtoMapper;
 import com.omni.besthardware.models.PlacaMaeModel;
 import com.omni.besthardware.services.PlacaMaeService;
@@ -72,7 +73,7 @@ public class PlacaMaeController {
         return placaMaeService.buscarPorId(id)
                 .map(DtoMapper::toComponenteResponse)
                 .map(ResponseEntity::ok)
-                .orElseGet(() -> ResponseEntity.notFound().build());
+                .orElseThrow(() -> new RecursoNaoEncontradoException("Placa-mae", id));
     }
 
     @PostMapping
@@ -86,13 +87,13 @@ public class PlacaMaeController {
         return placaMaeService.atualizar(id, toModel(request))
                 .map(DtoMapper::toComponenteResponse)
                 .map(ResponseEntity::ok)
-                .orElseGet(() -> ResponseEntity.notFound().build());
+                .orElseThrow(() -> new RecursoNaoEncontradoException("Placa-mae", id));
     }
 
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> excluir(@PathVariable Integer id) {
         if (!placaMaeService.excluirPorId(id)) {
-            return ResponseEntity.notFound().build();
+            throw new RecursoNaoEncontradoException("Placa-mae", id);
         }
 
         return ResponseEntity.noContent().build();

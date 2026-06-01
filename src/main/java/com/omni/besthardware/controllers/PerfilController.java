@@ -3,6 +3,7 @@ package com.omni.besthardware.controllers;
 import com.omni.besthardware.dtos.PerfilRequest;
 import com.omni.besthardware.dtos.PerfilResponse;
 import com.omni.besthardware.dtos.PerfilUsoResponse;
+import com.omni.besthardware.exceptions.RecursoNaoEncontradoException;
 import com.omni.besthardware.mappers.DtoMapper;
 import com.omni.besthardware.models.ComponenteModel;
 import com.omni.besthardware.models.PerfilModel;
@@ -11,7 +12,6 @@ import com.omni.besthardware.services.PerfilService;
 import com.omni.besthardware.services.PerfilUsoService;
 import jakarta.validation.Valid;
 import java.util.List;
-import java.util.Optional;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.DeleteMapping;
@@ -63,7 +63,7 @@ public class PerfilController {
         return perfilService.buscarPorId(id)
                 .map(DtoMapper::toPerfilResponse)
                 .map(ResponseEntity::ok)
-                .orElseGet(() -> ResponseEntity.notFound().build());
+                .orElseThrow(() -> new RecursoNaoEncontradoException("Perfil", id));
     }
 
     @GetMapping("/nome/{nome}")
@@ -71,7 +71,7 @@ public class PerfilController {
         return perfilService.buscarPorNomeExato(nome)
                 .map(DtoMapper::toPerfilResponse)
                 .map(ResponseEntity::ok)
-                .orElseGet(() -> ResponseEntity.notFound().build());
+                .orElseThrow(() -> new RecursoNaoEncontradoException("Perfil nao encontrado para nome " + nome + "."));
     }
 
     @GetMapping("/escopos")
@@ -83,37 +83,27 @@ public class PerfilController {
     public ResponseEntity<PerfilUsoResponse> buscarEscopoPorCodigo(@PathVariable String codigo) {
         return perfilUsoService.buscarPorCodigo(codigo)
                 .map(ResponseEntity::ok)
-                .orElseGet(() -> ResponseEntity.notFound().build());
+                .orElseThrow(() -> new RecursoNaoEncontradoException("Escopo de perfil nao encontrado: " + codigo + "."));
     }
 
     @PostMapping
     public ResponseEntity<PerfilResponse> criar(@Valid @RequestBody PerfilRequest request) {
-        Optional<PerfilModel> perfil = toModel(request);
-        if (perfil.isEmpty()) {
-            return ResponseEntity.notFound().build();
-        }
-
         return ResponseEntity.status(HttpStatus.CREATED)
-                .body(DtoMapper.toPerfilResponse(perfilService.salvar(perfil.get())));
+                .body(DtoMapper.toPerfilResponse(perfilService.salvar(toModel(request))));
     }
 
     @PutMapping("/{id}")
     public ResponseEntity<PerfilResponse> atualizar(@PathVariable Integer id, @Valid @RequestBody PerfilRequest request) {
-        Optional<PerfilModel> perfil = toModel(request);
-        if (perfil.isEmpty()) {
-            return ResponseEntity.notFound().build();
-        }
-
-        return perfilService.atualizar(id, perfil.get())
+        return perfilService.atualizar(id, toModel(request))
                 .map(DtoMapper::toPerfilResponse)
                 .map(ResponseEntity::ok)
-                .orElseGet(() -> ResponseEntity.notFound().build());
+                .orElseThrow(() -> new RecursoNaoEncontradoException("Perfil", id));
     }
 
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> excluir(@PathVariable Integer id) {
         if (!perfilService.excluirPorId(id)) {
-            return ResponseEntity.notFound().build();
+            throw new RecursoNaoEncontradoException("Perfil", id);
         }
 
         return ResponseEntity.noContent().build();
@@ -123,23 +113,20 @@ public class PerfilController {
         return perfis.stream().map(DtoMapper::toPerfilResponse).toList();
     }
 
-    private Optional<PerfilModel> toModel(PerfilRequest request) {
+    private PerfilModel toModel(PerfilRequest request) {
         PerfilModel perfil = new PerfilModel();
         perfil.setNome(request.nome());
 
         if (request.componenteIds() == null) {
-            return Optional.of(perfil);
+            return perfil;
         }
 
         for (Integer componenteId : request.componenteIds()) {
-            Optional<ComponenteModel> componente = componenteService.buscarPorId(componenteId);
-            if (componente.isEmpty()) {
-                return Optional.empty();
-            }
-
-            perfil.getComponentes().add(componente.get());
+            ComponenteModel componente = componenteService.buscarPorId(componenteId)
+                    .orElseThrow(() -> new RecursoNaoEncontradoException("Componente", componenteId));
+            perfil.getComponentes().add(componente);
         }
 
-        return Optional.of(perfil);
+        return perfil;
     }
 }

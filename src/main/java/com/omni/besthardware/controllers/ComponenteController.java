@@ -2,6 +2,7 @@ package com.omni.besthardware.controllers;
 
 import com.omni.besthardware.dtos.ComponenteRequest;
 import com.omni.besthardware.dtos.ComponenteResponse;
+import com.omni.besthardware.exceptions.RecursoNaoEncontradoException;
 import com.omni.besthardware.mappers.DtoMapper;
 import com.omni.besthardware.models.ComponenteModel;
 import com.omni.besthardware.services.ComponenteService;
@@ -62,7 +63,7 @@ public class ComponenteController {
         return componenteService.buscarPorId(id)
                 .map(DtoMapper::toComponenteResponse)
                 .map(ResponseEntity::ok)
-                .orElseGet(() -> ResponseEntity.notFound().build());
+                .orElseThrow(() -> new RecursoNaoEncontradoException("Componente", id));
     }
 
     @PostMapping
@@ -79,13 +80,13 @@ public class ComponenteController {
         return componenteService.atualizar(id, toModel(request))
                 .map(DtoMapper::toComponenteResponse)
                 .map(ResponseEntity::ok)
-                .orElseGet(() -> ResponseEntity.notFound().build());
+                .orElseThrow(() -> new RecursoNaoEncontradoException("Componente", id));
     }
 
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> excluir(@PathVariable Integer id) {
         if (!componenteService.excluirPorId(id)) {
-            return ResponseEntity.notFound().build();
+            throw new RecursoNaoEncontradoException("Componente", id);
         }
 
         return ResponseEntity.noContent().build();

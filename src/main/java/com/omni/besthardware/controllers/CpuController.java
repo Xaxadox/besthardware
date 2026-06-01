@@ -2,6 +2,7 @@ package com.omni.besthardware.controllers;
 
 import com.omni.besthardware.dtos.ComponenteResponse;
 import com.omni.besthardware.dtos.CpuRequest;
+import com.omni.besthardware.exceptions.RecursoNaoEncontradoException;
 import com.omni.besthardware.mappers.DtoMapper;
 import com.omni.besthardware.models.CpuModel;
 import com.omni.besthardware.services.CpuService;
@@ -85,7 +86,7 @@ public class CpuController {
         return cpuService.buscarPorId(id)
                 .map(DtoMapper::toComponenteResponse)
                 .map(ResponseEntity::ok)
-                .orElseGet(() -> ResponseEntity.notFound().build());
+                .orElseThrow(() -> new RecursoNaoEncontradoException("CPU", id));
     }
 
     @PostMapping
@@ -99,13 +100,13 @@ public class CpuController {
         return cpuService.atualizar(id, toModel(request))
                 .map(DtoMapper::toComponenteResponse)
                 .map(ResponseEntity::ok)
-                .orElseGet(() -> ResponseEntity.notFound().build());
+                .orElseThrow(() -> new RecursoNaoEncontradoException("CPU", id));
     }
 
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> excluir(@PathVariable Integer id) {
         if (!cpuService.excluirPorId(id)) {
-            return ResponseEntity.notFound().build();
+            throw new RecursoNaoEncontradoException("CPU", id);
         }
 
         return ResponseEntity.noContent().build();

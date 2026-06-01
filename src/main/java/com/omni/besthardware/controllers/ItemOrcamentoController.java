@@ -2,6 +2,8 @@ package com.omni.besthardware.controllers;
 
 import com.omni.besthardware.dtos.ItemOrcamentoCadastroRequest;
 import com.omni.besthardware.dtos.ItemOrcamentoResponse;
+import com.omni.besthardware.exceptions.ConflitoException;
+import com.omni.besthardware.exceptions.RecursoNaoEncontradoException;
 import com.omni.besthardware.models.ComponenteModel;
 import com.omni.besthardware.models.ItemOrcamentoModel;
 import com.omni.besthardware.models.OrcamentoModel;
@@ -78,26 +80,21 @@ public class ItemOrcamentoController {
         return itemOrcamentoService.buscarPorId(id)
                 .map(this::toResponse)
                 .map(ResponseEntity::ok)
-                .orElseGet(() -> ResponseEntity.notFound().build());
+                .orElseThrow(() -> new RecursoNaoEncontradoException("Item de orcamento", id));
     }
 
     @PostMapping
     public ResponseEntity<ItemOrcamentoResponse> criar(@Valid @RequestBody ItemOrcamentoCadastroRequest request) {
-        Optional<OrcamentoModel> orcamento = orcamentoService.buscarPorId(request.orcamentoId());
-        if (orcamento.isEmpty()) {
-            return ResponseEntity.notFound().build();
-        }
-
-        Optional<ComponenteModel> componente = componenteService.buscarPorId(request.componenteId());
-        if (componente.isEmpty()) {
-            return ResponseEntity.notFound().build();
-        }
+        OrcamentoModel orcamento = orcamentoService.buscarPorId(request.orcamentoId())
+                .orElseThrow(() -> new RecursoNaoEncontradoException("Orcamento", request.orcamentoId()));
+        ComponenteModel componente = componenteService.buscarPorId(request.componenteId())
+                .orElseThrow(() -> new RecursoNaoEncontradoException("Componente", request.componenteId()));
 
         ItemOrcamentoModel itemOrcamento = new ItemOrcamentoModel();
-        itemOrcamento.setOrcamento(orcamento.get());
-        itemOrcamento.setComponente(componente.get());
+        itemOrcamento.setOrcamento(orcamento);
+        itemOrcamento.setComponente(componente);
         itemOrcamento.setQuantidade(request.quantidade());
-        itemOrcamento.setPreco(componente.get().getPreco());
+        itemOrcamento.setPreco(componente.getPreco());
 
         ItemOrcamentoModel salvo = itemOrcamentoService.salvar(itemOrcamento);
         recalcularPrecoOrcamento(request.orcamentoId());
@@ -110,28 +107,19 @@ public class ItemOrcamentoController {
             @PathVariable Integer id,
             @Valid @RequestBody ItemOrcamentoCadastroRequest request
     ) {
-        Optional<ItemOrcamentoModel> itemAtual = itemOrcamentoService.buscarPorId(id);
-        if (itemAtual.isEmpty()) {
-            return ResponseEntity.notFound().build();
-        }
+        ItemOrcamentoModel itemOrcamento = itemOrcamentoService.buscarPorId(id)
+                .orElseThrow(() -> new RecursoNaoEncontradoException("Item de orcamento", id));
+        OrcamentoModel orcamento = orcamentoService.buscarPorId(request.orcamentoId())
+                .orElseThrow(() -> new RecursoNaoEncontradoException("Orcamento", request.orcamentoId()));
+        ComponenteModel componente = componenteService.buscarPorId(request.componenteId())
+                .orElseThrow(() -> new RecursoNaoEncontradoException("Componente", request.componenteId()));
 
-        Optional<OrcamentoModel> orcamento = orcamentoService.buscarPorId(request.orcamentoId());
-        if (orcamento.isEmpty()) {
-            return ResponseEntity.notFound().build();
-        }
+        Integer orcamentoAnteriorId = itemOrcamento.getOrcamento().getId();
 
-        Optional<ComponenteModel> componente = componenteService.buscarPorId(request.componenteId());
-        if (componente.isEmpty()) {
-            return ResponseEntity.notFound().build();
-        }
-
-        Integer orcamentoAnteriorId = itemAtual.get().getOrcamento().getId();
-
-        ItemOrcamentoModel itemOrcamento = itemAtual.get();
-        itemOrcamento.setOrcamento(orcamento.get());
-        itemOrcamento.setComponente(componente.get());
+        itemOrcamento.setOrcamento(orcamento);
+        itemOrcamento.setComponente(componente);
         itemOrcamento.setQuantidade(request.quantidade());
-        itemOrcamento.setPreco(componente.get().getPreco());
+        itemOrcamento.setPreco(componente.getPreco());
 
         ItemOrcamentoModel atualizado = itemOrcamentoService.salvar(itemOrcamento);
         recalcularPrecoOrcamento(orcamentoAnteriorId);
@@ -142,18 +130,16 @@ public class ItemOrcamentoController {
 
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> excluir(@PathVariable Integer id) {
-        Optional<ItemOrcamentoModel> itemOrcamento = itemOrcamentoService.buscarPorId(id);
-        if (itemOrcamento.isEmpty()) {
-            return ResponseEntity.notFound().build();
-        }
+        ItemOrcamentoModel itemOrcamento = itemOrcamentoService.buscarPorId(id)
+                .orElseThrow(() -> new RecursoNaoEncontradoException("Item de orcamento", id));
 
-        Integer orcamentoId = itemOrcamento.get().getOrcamento().getId();
+        Integer orcamentoId = itemOrcamento.getOrcamento().getId();
         if (itemOrcamentoService.buscarPorOrcamento(orcamentoId).size() <= 1) {
-            return ResponseEntity.status(HttpStatus.CONFLICT).build();
+            throw new ConflitoException("Nao e possivel remover o unico item do orcamento.");
         }
 
         if (!itemOrcamentoService.excluirPorId(id)) {
-            return ResponseEntity.notFound().build();
+            throw new RecursoNaoEncontradoException("Item de orcamento", id);
         }
 
         recalcularPrecoOrcamento(orcamentoId);

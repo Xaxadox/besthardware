@@ -3,6 +3,7 @@ package com.omni.besthardware.controllers;
 import com.omni.besthardware.dtos.CompatibilidadeRequest;
 import com.omni.besthardware.dtos.CompatibilidadeResponse;
 import com.omni.besthardware.dtos.RecomendacaoResponse;
+import com.omni.besthardware.exceptions.RecursoNaoEncontradoException;
 import com.omni.besthardware.services.CompatibilidadeService;
 import com.omni.besthardware.services.RecomendacaoService;
 import jakarta.validation.Valid;
@@ -39,7 +40,7 @@ public class RecomendacaoController {
     public ResponseEntity<RecomendacaoResponse> recomendarPorPerfil(@PathVariable String codigoPerfil) {
         return recomendacaoService.recomendar(codigoPerfil)
                 .map(ResponseEntity::ok)
-                .orElseGet(() -> ResponseEntity.notFound().build());
+                .orElseThrow(() -> new RecursoNaoEncontradoException("Perfil de recomendacao nao encontrado: " + codigoPerfil + "."));
     }
 
     @PostMapping("/compatibilidade")
@@ -48,6 +49,6 @@ public class RecomendacaoController {
     ) {
         return compatibilidadeService.verificarPorIds(request.componenteIds())
                 .map(ResponseEntity::ok)
-                .orElseGet(() -> ResponseEntity.notFound().build());
+                .orElseThrow(() -> new RecursoNaoEncontradoException("Um ou mais componentes informados nao foram encontrados."));
     }
 }
