@@ -25,6 +25,7 @@ O sistema atende estes fluxos principais:
 - Spring Web
 - Spring Data JPA
 - Bean Validation
+- Swagger/OpenAPI com springdoc
 - H2 Database em memória
 - Lombok
 - Maven Wrapper
@@ -73,6 +74,18 @@ A aplicação sobe por padrão em:
 
 ```text
 http://localhost:8080
+```
+
+Documentação interativa da API:
+
+```text
+http://localhost:8080/swagger-ui.html
+```
+
+Especificação OpenAPI em JSON:
+
+```text
+http://localhost:8080/v3/api-docs
 ```
 
 ## Estrutura principal
@@ -326,6 +339,96 @@ São tratados casos como:
 - parâmetro com tipo inválido;
 - erro interno inesperado.
 
+## Roteiro de demonstração
+
+Este fluxo mostra a ideia principal do projeto usando os dados carregados em memória pela classe `TesteConfig`.
+
+1. Subir a aplicação:
+
+```powershell
+.\mvnw.cmd spring-boot:run
+```
+
+2. Abrir o Swagger:
+
+```text
+http://localhost:8080/swagger-ui.html
+```
+
+3. Ver componentes disponíveis:
+
+```text
+GET /api/cpus?socket=AM4&nucleosMinimos=6
+GET /api/gpus?memoriaMinima=8
+GET /api/rams?geracao=DDR4
+```
+
+4. Gerar recomendações por perfil:
+
+```text
+GET /api/recomendacoes/perfis
+GET /api/recomendacoes/perfis/jogo-inicial
+```
+
+5. Validar compatibilidade de um conjunto:
+
+```text
+POST /api/recomendacoes/compatibilidade
+```
+
+```json
+{
+  "componenteIds": [1, 2, 3, 4, 5, 6]
+}
+```
+
+6. Criar um orçamento usando IDs:
+
+```text
+POST /api/orcamentos
+```
+
+```json
+{
+  "nome": "PC demonstracao",
+  "usuarioId": 1,
+  "perfilId": 1,
+  "itens": [
+    {
+      "componenteId": 1,
+      "quantidade": 1
+    },
+    {
+      "componenteId": 3,
+      "quantidade": 1
+    }
+  ]
+}
+```
+
+7. Conferir erro padronizado:
+
+```text
+GET /api/cpus/999999
+```
+
+## Testes
+
+Além do teste de contexto da aplicação, existe uma suíte básica de integração em `ApiIntegrationTests`.
+
+Ela cobre:
+
+- geração da documentação OpenAPI;
+- filtro de CPUs por socket e núcleos;
+- criação de orçamento com itens;
+- resposta padronizada para recurso inexistente.
+
+Para executar:
+
+```powershell
+.\mvnw.cmd test
+```
+
 ## Documentação adicional
 
 Guias de mudanças do projeto:
@@ -345,6 +448,8 @@ Implementado:
 - controllers REST;
 - DTOs;
 - filtros dinâmicos com `Specification`;
+- Swagger/OpenAPI;
+- testes de integração básicos;
 - recomendações por perfil;
 - validação de compatibilidade;
 - tratamento centralizado de erros;
@@ -353,5 +458,4 @@ Implementado:
 Ainda não implementado:
 
 - frontend;
-- Swagger/OpenAPI;
 - banco persistente real no lugar do H2 em memória.

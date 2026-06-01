@@ -686,7 +686,7 @@ Tratar erros com mensagens mais claras.
 Ainda ficam pendentes:
 
 ```text
-Criar frontend ou documentacao Swagger/OpenAPI.
+Criar frontend.
 Persistir em banco real, porque H2 em memoria perde os dados ao reiniciar.
 ```
 
@@ -771,7 +771,127 @@ RecomendacaoController
 
 Isso foi proposital, porque esses controllers nao estavam no escopo da refatoracao escolhida.
 
-## 22. Testes executados
+## 22. Controllers mais magros
+
+Depois da refatoracao com `Specification`, os controllers de `Orcamento` e `ItemOrcamento` ainda tinham muita logica interna.
+
+Antes, o `OrcamentoController` fazia tarefas como:
+
+```text
+buscar usuario
+buscar perfil
+buscar componentes
+montar OrcamentoModel
+montar ItemOrcamentoModel
+calcular preco total
+montar OrcamentoResponse
+```
+
+Isso funciona, mas contraria a ideia do controller "magro": o controller deve receber a requisicao, chamar o service e devolver a resposta HTTP.
+
+Depois da mudanca, o controller ficou assim:
+
+```java
+@PostMapping
+public ResponseEntity<OrcamentoResponse> criar(@Valid @RequestBody OrcamentoRequest request) {
+    return ResponseEntity.status(HttpStatus.CREATED).body(orcamentoService.criar(request));
+}
+```
+
+A regra foi para o service:
+
+```text
+OrcamentoService
+ItemOrcamentoService
+```
+
+O que foi movido para os services:
+
+- criacao de orcamento por IDs de usuario, perfil e componentes;
+- atualizacao dos dados principais do orcamento;
+- criacao e atualizacao de item de orcamento;
+- exclusao de item com validacao para nao remover o ultimo item;
+- recalculo do preco total do orcamento;
+- montagem dos DTOs de resposta de orcamento e item.
+
+Essa mudanca deixa os controllers mais alinhados com os slides de Controllers e Injecao de Dependencia.
+
+## 23. Swagger/OpenAPI
+
+Foi adicionada documentacao interativa com springdoc OpenAPI.
+
+Dependencia adicionada ao `pom.xml`:
+
+```xml
+<dependency>
+    <groupId>org.springdoc</groupId>
+    <artifactId>springdoc-openapi-starter-webmvc-ui</artifactId>
+    <version>3.0.3</version>
+</dependency>
+```
+
+Tambem foi criada a classe:
+
+```text
+OpenApiConfig
+```
+
+Ela define os metadados principais da API:
+
+```text
+titulo
+versao
+descricao
+```
+
+Endpoints de documentacao:
+
+```text
+http://localhost:8080/swagger-ui.html
+http://localhost:8080/v3/api-docs
+```
+
+O Swagger ajuda na apresentacao do projeto porque permite testar os endpoints pelo navegador.
+
+## 24. Testes de integracao
+
+Foi criada a classe:
+
+```text
+ApiIntegrationTests
+```
+
+Ela sobe a aplicacao em uma porta aleatoria e faz requisicoes HTTP reais usando `HttpClient`.
+
+Cenarios testados:
+
+- documentacao OpenAPI disponivel em `/v3/api-docs`;
+- filtro de CPUs por socket e quantidade minima de nucleos;
+- criacao de orcamento com itens;
+- retorno de erro padronizado quando uma CPU nao existe.
+
+Esses testes verificam o comportamento da API de fora para dentro, mais perto do uso real do sistema.
+
+## 25. Avaliacao sobre SpecificationUtils
+
+A ideia de criar uma `SpecificationUtils` foi avaliada depois das melhorias principais.
+
+Decisao tomada:
+
+```text
+Nao implementar agora.
+```
+
+Motivo:
+
+- as `Specifications` atuais ainda sao explicitas e boas para aprendizado;
+- a utility reduziria repeticao, mas adicionaria mais uma abstracao;
+- para a disciplina, e mais importante conseguir explicar `Controller`, `Service`, `Repository`, DTO, validacao e DI;
+- a prioridade atual era controller magro, Swagger, testes e documentacao.
+
+Ela continua sendo uma melhoria possivel para uma etapa futura, desde que seja pequena e simples.
+
+## 26. Testes executados
 
 Depois das mudancas, foi executado:
 
@@ -783,10 +903,10 @@ Resultado:
 
 ```text
 BUILD SUCCESS
-Tests run: 1, Failures: 0, Errors: 0, Skipped: 0
+Tests run: 5, Failures: 0, Errors: 0, Skipped: 0
 ```
 
-## 23. Resumo do aprendizado
+## 27. Resumo do aprendizado
 
 O que foi praticado hoje:
 
@@ -803,6 +923,8 @@ O que foi praticado hoje:
 - Validacao de DTOs com Bean Validation.
 - Calculo do total de um orcamento pelos itens.
 - Recalculo do orcamento quando itens sao criados, atualizados ou removidos.
+- Refatoracao para deixar controllers mais magros.
+- Concentracao de regras de orcamento e item de orcamento nos services.
 - Expansao de DTOs para outros controllers.
 - Criacao de mapper para evitar repeticao de conversao.
 - Criacao de recomendacoes automaticas por perfil de uso.
@@ -810,4 +932,7 @@ O que foi praticado hoje:
 - Separacao entre erros e avisos de compatibilidade.
 - Tratamento centralizado de erros com `@RestControllerAdvice`.
 - Padronizacao de respostas de erro com DTO.
+- Documentacao interativa com Swagger/OpenAPI.
+- Criacao de testes de integracao com requisicoes HTTP reais.
+- Avaliacao tecnica de `SpecificationUtils` sem aplicar complexidade extra.
 - Uso de commits pequenos como controle de mudancas.
