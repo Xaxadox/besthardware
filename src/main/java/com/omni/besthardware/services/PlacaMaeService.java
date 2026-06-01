@@ -1,7 +1,9 @@
 package com.omni.besthardware.services;
 
+import com.omni.besthardware.dtos.PlacaMaeFiltroRequest;
 import com.omni.besthardware.models.PlacaMaeModel;
 import com.omni.besthardware.repositories.PlacaMaeRepository;
+import com.omni.besthardware.specifications.PlacaMaeSpecification;
 import java.math.BigDecimal;
 import java.util.List;
 import java.util.Optional;
@@ -25,6 +27,11 @@ public class PlacaMaeService {
     @Transactional(readOnly = true)
     public Optional<PlacaMaeModel> buscarPorId(Integer id) {
         return placaMaeRepository.findById(id);
+    }
+
+    @Transactional(readOnly = true)
+    public List<PlacaMaeModel> buscarComFiltros(PlacaMaeFiltroRequest filtro) {
+        return placaMaeRepository.findAll(PlacaMaeSpecification.comFiltros(filtro));
     }
 
     @Transactional(readOnly = true)

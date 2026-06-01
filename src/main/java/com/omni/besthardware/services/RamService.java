@@ -1,7 +1,9 @@
 package com.omni.besthardware.services;
 
+import com.omni.besthardware.dtos.RamFiltroRequest;
 import com.omni.besthardware.models.RamModel;
 import com.omni.besthardware.repositories.RamRepository;
+import com.omni.besthardware.specifications.RamSpecification;
 import java.math.BigDecimal;
 import java.util.List;
 import java.util.Optional;
@@ -25,6 +27,11 @@ public class RamService {
     @Transactional(readOnly = true)
     public Optional<RamModel> buscarPorId(Integer id) {
         return ramRepository.findById(id);
+    }
+
+    @Transactional(readOnly = true)
+    public List<RamModel> buscarComFiltros(RamFiltroRequest filtro) {
+        return ramRepository.findAll(RamSpecification.comFiltros(filtro));
     }
 
     @Transactional(readOnly = true)

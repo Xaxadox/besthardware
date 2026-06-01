@@ -1,24 +1,24 @@
 package com.omni.besthardware.controllers;
 
 import com.omni.besthardware.dtos.ComponenteResponse;
+import com.omni.besthardware.dtos.GpuFiltroRequest;
 import com.omni.besthardware.dtos.GpuRequest;
 import com.omni.besthardware.exceptions.RecursoNaoEncontradoException;
 import com.omni.besthardware.mappers.DtoMapper;
 import com.omni.besthardware.models.GpuModel;
 import com.omni.besthardware.services.GpuService;
 import jakarta.validation.Valid;
-import java.math.BigDecimal;
 import java.util.List;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 @RestController
@@ -32,40 +32,8 @@ public class GpuController {
     }
 
     @GetMapping
-    public List<ComponenteResponse> listar(
-            @RequestParam(required = false) String tipo,
-            @RequestParam(required = false) BigDecimal precoMinimo,
-            @RequestParam(required = false) BigDecimal precoMaximo,
-            @RequestParam(required = false) String modelo,
-            @RequestParam(required = false) String marca,
-            @RequestParam(required = false) Integer memoriaMinima,
-            @RequestParam(required = false) Integer consumoMaximo
-    ) {
-        if (tipo != null) {
-            return toResponseList(gpuService.buscarPorTipo(tipo));
-        }
-
-        if (precoMinimo != null && precoMaximo != null) {
-            return toResponseList(gpuService.buscarPorFaixaDePreco(precoMinimo, precoMaximo));
-        }
-
-        if (modelo != null) {
-            return toResponseList(gpuService.buscarPorModelo(modelo));
-        }
-
-        if (marca != null) {
-            return toResponseList(gpuService.buscarPorMarca(marca));
-        }
-
-        if (memoriaMinima != null) {
-            return toResponseList(gpuService.buscarPorMemoriaMinima(memoriaMinima));
-        }
-
-        if (consumoMaximo != null) {
-            return toResponseList(gpuService.buscarPorConsumoMaximo(consumoMaximo));
-        }
-
-        return toResponseList(gpuService.listarTodos());
+    public List<ComponenteResponse> listar(@ModelAttribute GpuFiltroRequest filtro) {
+        return toResponseList(gpuService.buscarComFiltros(filtro));
     }
 
     @GetMapping("/{id}")

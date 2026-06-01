@@ -1,24 +1,24 @@
 package com.omni.besthardware.controllers;
 
 import com.omni.besthardware.dtos.ComponenteResponse;
+import com.omni.besthardware.dtos.MonitorFiltroRequest;
 import com.omni.besthardware.dtos.MonitorRequest;
 import com.omni.besthardware.exceptions.RecursoNaoEncontradoException;
 import com.omni.besthardware.mappers.DtoMapper;
 import com.omni.besthardware.models.MonitorModel;
 import com.omni.besthardware.services.MonitorService;
 import jakarta.validation.Valid;
-import java.math.BigDecimal;
 import java.util.List;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 @RestController
@@ -32,45 +32,8 @@ public class MonitorController {
     }
 
     @GetMapping
-    public List<ComponenteResponse> listar(
-            @RequestParam(required = false) String tipo,
-            @RequestParam(required = false) BigDecimal precoMinimo,
-            @RequestParam(required = false) BigDecimal precoMaximo,
-            @RequestParam(required = false) String marca,
-            @RequestParam(required = false) String tamanho,
-            @RequestParam(required = false) String resolucao,
-            @RequestParam(required = false) Integer frequenciaMinima,
-            @RequestParam(required = false) String tecnologia
-    ) {
-        if (tipo != null) {
-            return toResponseList(monitorService.buscarPorTipo(tipo));
-        }
-
-        if (precoMinimo != null && precoMaximo != null) {
-            return toResponseList(monitorService.buscarPorFaixaDePreco(precoMinimo, precoMaximo));
-        }
-
-        if (marca != null) {
-            return toResponseList(monitorService.buscarPorMarca(marca));
-        }
-
-        if (tamanho != null) {
-            return toResponseList(monitorService.buscarPorTamanho(tamanho));
-        }
-
-        if (resolucao != null) {
-            return toResponseList(monitorService.buscarPorResolucao(resolucao));
-        }
-
-        if (frequenciaMinima != null) {
-            return toResponseList(monitorService.buscarPorFrequenciaMinima(frequenciaMinima));
-        }
-
-        if (tecnologia != null) {
-            return toResponseList(monitorService.buscarPorTecnologia(tecnologia));
-        }
-
-        return toResponseList(monitorService.listarTodos());
+    public List<ComponenteResponse> listar(@ModelAttribute MonitorFiltroRequest filtro) {
+        return toResponseList(monitorService.buscarComFiltros(filtro));
     }
 
     @GetMapping("/{id}")

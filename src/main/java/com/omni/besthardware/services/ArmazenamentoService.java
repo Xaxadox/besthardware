@@ -1,7 +1,9 @@
 package com.omni.besthardware.services;
 
+import com.omni.besthardware.dtos.ArmazenamentoFiltroRequest;
 import com.omni.besthardware.models.ArmazenamentoModel;
 import com.omni.besthardware.repositories.ArmazenamentoRepository;
+import com.omni.besthardware.specifications.ArmazenamentoSpecification;
 import java.math.BigDecimal;
 import java.util.List;
 import java.util.Optional;
@@ -25,6 +27,11 @@ public class ArmazenamentoService {
     @Transactional(readOnly = true)
     public Optional<ArmazenamentoModel> buscarPorId(Integer id) {
         return armazenamentoRepository.findById(id);
+    }
+
+    @Transactional(readOnly = true)
+    public List<ArmazenamentoModel> buscarComFiltros(ArmazenamentoFiltroRequest filtro) {
+        return armazenamentoRepository.findAll(ArmazenamentoSpecification.comFiltros(filtro));
     }
 
     @Transactional(readOnly = true)

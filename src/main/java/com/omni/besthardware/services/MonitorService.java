@@ -1,7 +1,9 @@
 package com.omni.besthardware.services;
 
+import com.omni.besthardware.dtos.MonitorFiltroRequest;
 import com.omni.besthardware.models.MonitorModel;
 import com.omni.besthardware.repositories.MonitorRepository;
+import com.omni.besthardware.specifications.MonitorSpecification;
 import java.math.BigDecimal;
 import java.util.List;
 import java.util.Optional;
@@ -25,6 +27,11 @@ public class MonitorService {
     @Transactional(readOnly = true)
     public Optional<MonitorModel> buscarPorId(Integer id) {
         return monitorRepository.findById(id);
+    }
+
+    @Transactional(readOnly = true)
+    public List<MonitorModel> buscarComFiltros(MonitorFiltroRequest filtro) {
+        return monitorRepository.findAll(MonitorSpecification.comFiltros(filtro));
     }
 
     @Transactional(readOnly = true)

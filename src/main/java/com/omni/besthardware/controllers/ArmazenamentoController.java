@@ -1,5 +1,6 @@
 package com.omni.besthardware.controllers;
 
+import com.omni.besthardware.dtos.ArmazenamentoFiltroRequest;
 import com.omni.besthardware.dtos.ArmazenamentoRequest;
 import com.omni.besthardware.dtos.ComponenteResponse;
 import com.omni.besthardware.exceptions.RecursoNaoEncontradoException;
@@ -7,18 +8,17 @@ import com.omni.besthardware.mappers.DtoMapper;
 import com.omni.besthardware.models.ArmazenamentoModel;
 import com.omni.besthardware.services.ArmazenamentoService;
 import jakarta.validation.Valid;
-import java.math.BigDecimal;
 import java.util.List;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 @RestController
@@ -32,45 +32,8 @@ public class ArmazenamentoController {
     }
 
     @GetMapping
-    public List<ComponenteResponse> listar(
-            @RequestParam(required = false) String tipo,
-            @RequestParam(required = false) BigDecimal precoMinimo,
-            @RequestParam(required = false) BigDecimal precoMaximo,
-            @RequestParam(required = false) String tecnologia,
-            @RequestParam(required = false) String padrao,
-            @RequestParam(required = false) Integer memoriaMinima,
-            @RequestParam(required = false) Integer velocidadeLeituraMinima,
-            @RequestParam(required = false) Integer velocidadeEscritaMinima
-    ) {
-        if (tipo != null) {
-            return toResponseList(armazenamentoService.buscarPorTipo(tipo));
-        }
-
-        if (precoMinimo != null && precoMaximo != null) {
-            return toResponseList(armazenamentoService.buscarPorFaixaDePreco(precoMinimo, precoMaximo));
-        }
-
-        if (tecnologia != null) {
-            return toResponseList(armazenamentoService.buscarPorTecnologia(tecnologia));
-        }
-
-        if (padrao != null) {
-            return toResponseList(armazenamentoService.buscarPorPadrao(padrao));
-        }
-
-        if (memoriaMinima != null) {
-            return toResponseList(armazenamentoService.buscarPorMemoriaMinima(memoriaMinima));
-        }
-
-        if (velocidadeLeituraMinima != null) {
-            return toResponseList(armazenamentoService.buscarPorVelocidadeLeituraMinima(velocidadeLeituraMinima));
-        }
-
-        if (velocidadeEscritaMinima != null) {
-            return toResponseList(armazenamentoService.buscarPorVelocidadeEscritaMinima(velocidadeEscritaMinima));
-        }
-
-        return toResponseList(armazenamentoService.listarTodos());
+    public List<ComponenteResponse> listar(@ModelAttribute ArmazenamentoFiltroRequest filtro) {
+        return toResponseList(armazenamentoService.buscarComFiltros(filtro));
     }
 
     @GetMapping("/{id}")

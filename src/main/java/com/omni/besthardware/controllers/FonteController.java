@@ -1,24 +1,24 @@
 package com.omni.besthardware.controllers;
 
 import com.omni.besthardware.dtos.ComponenteResponse;
+import com.omni.besthardware.dtos.FonteFiltroRequest;
 import com.omni.besthardware.dtos.FonteRequest;
 import com.omni.besthardware.exceptions.RecursoNaoEncontradoException;
 import com.omni.besthardware.mappers.DtoMapper;
 import com.omni.besthardware.models.FonteModel;
 import com.omni.besthardware.services.FonteService;
 import jakarta.validation.Valid;
-import java.math.BigDecimal;
 import java.util.List;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 @RestController
@@ -32,35 +32,8 @@ public class FonteController {
     }
 
     @GetMapping
-    public List<ComponenteResponse> listar(
-            @RequestParam(required = false) String tipo,
-            @RequestParam(required = false) BigDecimal precoMinimo,
-            @RequestParam(required = false) BigDecimal precoMaximo,
-            @RequestParam(required = false) String marca,
-            @RequestParam(required = false) Integer potenciaMinima,
-            @RequestParam(required = false) String certificacao
-    ) {
-        if (tipo != null) {
-            return toResponseList(fonteService.buscarPorTipo(tipo));
-        }
-
-        if (precoMinimo != null && precoMaximo != null) {
-            return toResponseList(fonteService.buscarPorFaixaDePreco(precoMinimo, precoMaximo));
-        }
-
-        if (marca != null) {
-            return toResponseList(fonteService.buscarPorMarca(marca));
-        }
-
-        if (potenciaMinima != null) {
-            return toResponseList(fonteService.buscarPorPotenciaMinima(potenciaMinima));
-        }
-
-        if (certificacao != null) {
-            return toResponseList(fonteService.buscarPorCertificacao(certificacao));
-        }
-
-        return toResponseList(fonteService.listarTodos());
+    public List<ComponenteResponse> listar(@ModelAttribute FonteFiltroRequest filtro) {
+        return toResponseList(fonteService.buscarComFiltros(filtro));
     }
 
     @GetMapping("/{id}")

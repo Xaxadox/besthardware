@@ -1,7 +1,9 @@
 package com.omni.besthardware.services;
 
+import com.omni.besthardware.dtos.GpuFiltroRequest;
 import com.omni.besthardware.models.GpuModel;
 import com.omni.besthardware.repositories.GpuRepository;
+import com.omni.besthardware.specifications.GpuSpecification;
 import java.math.BigDecimal;
 import java.util.List;
 import java.util.Optional;
@@ -25,6 +27,11 @@ public class GpuService {
     @Transactional(readOnly = true)
     public Optional<GpuModel> buscarPorId(Integer id) {
         return gpuRepository.findById(id);
+    }
+
+    @Transactional(readOnly = true)
+    public List<GpuModel> buscarComFiltros(GpuFiltroRequest filtro) {
+        return gpuRepository.findAll(GpuSpecification.comFiltros(filtro));
     }
 
     @Transactional(readOnly = true)

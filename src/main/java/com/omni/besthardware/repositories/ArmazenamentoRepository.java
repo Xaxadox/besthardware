@@ -4,8 +4,9 @@ import com.omni.besthardware.models.ArmazenamentoModel;
 import java.math.BigDecimal;
 import java.util.List;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
 
-public interface ArmazenamentoRepository extends JpaRepository<ArmazenamentoModel, Integer> {
+public interface ArmazenamentoRepository extends JpaRepository<ArmazenamentoModel, Integer>, JpaSpecificationExecutor<ArmazenamentoModel> {
     List<ArmazenamentoModel> findByTipoIgnoreCase(String tipo);
 
     List<ArmazenamentoModel> findByPrecoBetween(BigDecimal precoMinimo, BigDecimal precoMaximo);

@@ -1,7 +1,9 @@
 package com.omni.besthardware.services;
 
+import com.omni.besthardware.dtos.FonteFiltroRequest;
 import com.omni.besthardware.models.FonteModel;
 import com.omni.besthardware.repositories.FonteRepository;
+import com.omni.besthardware.specifications.FonteSpecification;
 import java.math.BigDecimal;
 import java.util.List;
 import java.util.Optional;
@@ -25,6 +27,11 @@ public class FonteService {
     @Transactional(readOnly = true)
     public Optional<FonteModel> buscarPorId(Integer id) {
         return fonteRepository.findById(id);
+    }
+
+    @Transactional(readOnly = true)
+    public List<FonteModel> buscarComFiltros(FonteFiltroRequest filtro) {
+        return fonteRepository.findAll(FonteSpecification.comFiltros(filtro));
     }
 
     @Transactional(readOnly = true)
