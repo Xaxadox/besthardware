@@ -114,11 +114,11 @@ Perfis definidos:
 - `jogos-pesados`: altos FPS em 2K e jogos em 4K.
 - `profissional`: SolidWorks, AutoCAD, renderizacao e apps de alto desempenho.
 
-Esses endpoints ainda nao montam automaticamente o PC, mas deixam documentado no backend quais sao os escopos oficiais do sistema.
+Inicialmente esses endpoints apenas documentavam os escopos oficiais do sistema. Depois, a API tambem passou a gerar recomendacoes automaticas de PC por perfil usando esses mesmos codigos.
 
 ## 5. Por que criar DTOs
 
-Depois dos controllers, foi criada uma camada de DTOs para `Orcamento` e `ItemOrcamento`.
+Depois dos controllers, foi criada uma camada de DTOs. Primeiro ela foi aplicada em `Orcamento` e `ItemOrcamento`; depois foi expandida para os outros controllers.
 
 DTO significa `Data Transfer Object`. Ele define o formato dos dados que entram e saem da API.
 
@@ -434,7 +434,263 @@ Um `OrcamentoResponse` retorna algo neste formato:
 }
 ```
 
-## 14. Testes executados
+## 14. DTOs nos outros controllers
+
+Depois dos DTOs de orcamento, a mesma ideia foi aplicada nos outros controllers.
+
+Foram criados DTOs de entrada para:
+
+```text
+ArmazenamentoRequest
+ComponenteRequest
+CpuRequest
+FonteRequest
+GpuRequest
+MonitorRequest
+PerfilRequest
+PlacaMaeRequest
+RamRequest
+UsuarioRequest
+```
+
+Tambem foram criados DTOs de saida para:
+
+```text
+ComponenteResponse
+PerfilResponse
+UsuarioResponse
+PerfilUsoResponse
+```
+
+O que isso mudou na pratica:
+
+- O JSON enviado para a API ficou separado das entidades JPA.
+- Os controllers deixaram de expor diretamente os models em varios endpoints.
+- As validacoes ficaram mais claras nos DTOs de request.
+- As respostas ficaram mais controladas, principalmente para componentes de hardware.
+
+Exemplo: uma CPU agora e criada usando `CpuRequest`, e a resposta volta como `ComponenteResponse`.
+
+## 15. Mapper de DTOs
+
+Foi criada a classe `DtoMapper`.
+
+Ela centraliza a conversao de models para DTOs de resposta.
+
+Exemplo de responsabilidade:
+
+```text
+CpuModel -> ComponenteResponse
+GpuModel -> ComponenteResponse
+UsuarioModel -> UsuarioResponse
+PerfilModel -> PerfilResponse
+```
+
+Isso evita repetir a mesma logica de conversao em varios controllers.
+
+Tambem facilita manter um formato unico de resposta para componentes, mesmo tendo varios tipos diferentes:
+
+```text
+CPU
+GPU
+RAM
+Fonte
+Armazenamento
+Monitor
+PlacaMae
+```
+
+## 16. Recomendacoes automaticas por perfil
+
+Foi criado o controller:
+
+```text
+RecomendacaoController
+```
+
+Endpoint para listar recomendacoes de todos os perfis:
+
+```text
+GET /api/recomendacoes/perfis
+```
+
+Endpoint para gerar recomendacao de um perfil especifico:
+
+```text
+GET /api/recomendacoes/perfis/{codigoPerfil}
+```
+
+Exemplos:
+
+```text
+GET /api/recomendacoes/perfis/trabalho
+GET /api/recomendacoes/perfis/jogo-inicial
+GET /api/recomendacoes/perfis/jogo-intermediario
+GET /api/recomendacoes/perfis/jogos-pesados
+GET /api/recomendacoes/perfis/profissional
+```
+
+O `RecomendacaoService` escolhe componentes conforme o perfil:
+
+- `trabalho`: CPU com video integrado, uso leve, sem GPU dedicada.
+- `jogo-inicial`: GPU dedicada de entrada para Full HD.
+- `jogo-intermediario`: GPU melhor para 2K.
+- `jogos-pesados`: foco em 2K com altos FPS e 4K.
+- `profissional`: mais nucleos, mais RAM e GPU forte para apps pesados.
+
+A resposta inclui:
+
+```text
+perfil
+precoTotal
+componentes
+compatibilidade
+observacoes
+```
+
+Assim, a API nao apenas cadastra pecas: ela ja consegue sugerir um projeto de computador coerente com o uso.
+
+## 17. Compatibilidade automatica
+
+Foi criado o `CompatibilidadeService`.
+
+Ele verifica se uma lista de componentes faz sentido para montar um PC.
+
+Endpoint:
+
+```text
+POST /api/recomendacoes/compatibilidade
+```
+
+Exemplo de request:
+
+```json
+{
+  "componenteIds": [1, 2, 3, 4, 5]
+}
+```
+
+Regras implementadas:
+
+- CPU e placa-mae precisam ter o mesmo socket.
+- A geracao de RAM precisa combinar com o chipset da placa-mae.
+- A fonte precisa ter potencia suficiente para CPU, GPU e margem de seguranca.
+- A API avisa quando faltam pecas importantes, como RAM, armazenamento, CPU, placa-mae ou fonte.
+- A API avisa quando ha SSD NVME sem placa-mae para validar slot M.2.
+- A API avisa quando nao ha GPU dedicada e a CPU nao parece ter video integrado.
+- A API considera erro quando ha mais de uma CPU, placa-mae ou fonte no mesmo conjunto.
+
+A resposta separa:
+
+```text
+compativel
+erros
+avisos
+componentes
+```
+
+Isso e importante porque nem todo problema deve bloquear a montagem. Alguns casos sao erros; outros sao apenas avisos.
+
+## 18. Dados iniciais mais completos
+
+O arquivo `TesteConfig` recebeu mais componentes de exemplo.
+
+Foram adicionados novos dados para:
+
+```text
+CPUs
+placas-mae
+GPUs
+RAM
+fontes
+armazenamentos
+monitores
+```
+
+Motivo da mudanca:
+
+- As recomendacoes por perfil precisam ter opcoes reais para escolher.
+- O H2 em memoria nasce vazio toda vez que a aplicacao reinicia.
+- Com mais dados iniciais, fica mais facil testar os endpoints sem cadastrar tudo manualmente.
+
+Exemplos de componentes adicionados:
+
+```text
+Ryzen 5 5600G
+Ryzen 9 7900
+RTX 4060 Ti
+RTX 4080 Super
+RAM DDR5 32GB
+Fonte 850W Gold
+SSD NVME 2TB
+Monitor 4K 144Hz
+```
+
+## 19. Tratamento centralizado de erros
+
+Antes, varios controllers retornavam apenas:
+
+```java
+ResponseEntity.notFound().build()
+```
+
+Isso gerava um `404` sem mensagem no corpo da resposta.
+
+Agora foi criado um tratamento centralizado com:
+
+```text
+ApiExceptionHandler
+ErroResponse
+RecursoNaoEncontradoException
+ConflitoException
+ValidacaoNegocioException
+```
+
+Com isso, a API retorna erros em JSON padronizado.
+
+Exemplo:
+
+```json
+{
+  "timestamp": "2026-06-01T16:00:00",
+  "status": 404,
+  "erro": "Not Found",
+  "mensagem": "CPU nao encontrado para identificador 99.",
+  "caminho": "/api/cpus/99",
+  "detalhes": []
+}
+```
+
+O handler tambem trata:
+
+- erros de validacao com `@Valid`;
+- JSON mal formatado;
+- parametro com tipo invalido;
+- parametro obrigatorio ausente;
+- conflito de banco;
+- erro interno inesperado.
+
+Essa mudanca melhora bastante o uso da API, porque o cliente passa a saber por que a requisicao falhou.
+
+## 20. Recomendacoes ja concluidas e pendentes
+
+Da lista de proximas etapas, foram concluidas:
+
+```text
+Melhorar DTOs dos outros controllers.
+Criar regras reais de compatibilidade automatica.
+Gerar recomendacoes de PC por perfil.
+Tratar erros com mensagens mais claras.
+```
+
+Ainda ficam pendentes:
+
+```text
+Criar frontend ou documentacao Swagger/OpenAPI.
+Persistir em banco real, porque H2 em memoria perde os dados ao reiniciar.
+```
+
+## 21. Testes executados
 
 Depois das mudancas, foi executado:
 
@@ -449,7 +705,7 @@ BUILD SUCCESS
 Tests run: 1, Failures: 0, Errors: 0, Skipped: 0
 ```
 
-## 15. Resumo do aprendizado
+## 22. Resumo do aprendizado
 
 O que foi praticado hoje:
 
@@ -464,4 +720,11 @@ O que foi praticado hoje:
 - Validacao de DTOs com Bean Validation.
 - Calculo do total de um orcamento pelos itens.
 - Recalculo do orcamento quando itens sao criados, atualizados ou removidos.
+- Expansao de DTOs para outros controllers.
+- Criacao de mapper para evitar repeticao de conversao.
+- Criacao de recomendacoes automaticas por perfil de uso.
+- Criacao de regras de compatibilidade entre componentes.
+- Separacao entre erros e avisos de compatibilidade.
+- Tratamento centralizado de erros com `@RestControllerAdvice`.
+- Padronizacao de respostas de erro com DTO.
 - Uso de commits pequenos como controle de mudancas.
