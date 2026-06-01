@@ -1,6 +1,7 @@
 package com.omni.besthardware.controllers;
 
 import com.omni.besthardware.dtos.ItemOrcamentoCadastroRequest;
+import com.omni.besthardware.dtos.ItemOrcamentoFiltroRequest;
 import com.omni.besthardware.dtos.ItemOrcamentoResponse;
 import com.omni.besthardware.exceptions.ConflitoException;
 import com.omni.besthardware.exceptions.RecursoNaoEncontradoException;
@@ -18,12 +19,12 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 @RestController
@@ -45,34 +46,8 @@ public class ItemOrcamentoController {
     }
 
     @GetMapping
-    public List<ItemOrcamentoResponse> listar(
-            @RequestParam(required = false) Integer orcamentoId,
-            @RequestParam(required = false) Integer componenteId,
-            @RequestParam(required = false) Integer quantidadeMinima,
-            @RequestParam(required = false) BigDecimal precoMinimo,
-            @RequestParam(required = false) BigDecimal precoMaximo
-    ) {
-        if (orcamentoId != null && componenteId != null) {
-            return toResponseList(itemOrcamentoService.buscarPorOrcamentoEComponente(orcamentoId, componenteId));
-        }
-
-        if (orcamentoId != null) {
-            return toResponseList(itemOrcamentoService.buscarPorOrcamento(orcamentoId));
-        }
-
-        if (componenteId != null) {
-            return toResponseList(itemOrcamentoService.buscarPorComponente(componenteId));
-        }
-
-        if (quantidadeMinima != null) {
-            return toResponseList(itemOrcamentoService.buscarPorQuantidadeMinima(quantidadeMinima));
-        }
-
-        if (precoMinimo != null && precoMaximo != null) {
-            return toResponseList(itemOrcamentoService.buscarPorFaixaDePreco(precoMinimo, precoMaximo));
-        }
-
-        return toResponseList(itemOrcamentoService.listarTodos());
+    public List<ItemOrcamentoResponse> listar(@ModelAttribute ItemOrcamentoFiltroRequest filtro) {
+        return toResponseList(itemOrcamentoService.buscarComFiltros(filtro));
     }
 
     @GetMapping("/{id}")

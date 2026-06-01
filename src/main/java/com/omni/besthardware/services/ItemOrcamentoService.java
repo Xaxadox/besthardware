@@ -1,7 +1,9 @@
 package com.omni.besthardware.services;
 
+import com.omni.besthardware.dtos.ItemOrcamentoFiltroRequest;
 import com.omni.besthardware.models.ItemOrcamentoModel;
 import com.omni.besthardware.repositories.ItemOrcamentoRepository;
+import com.omni.besthardware.specifications.ItemOrcamentoSpecification;
 import java.math.BigDecimal;
 import java.util.List;
 import java.util.Optional;
@@ -25,6 +27,11 @@ public class ItemOrcamentoService {
     @Transactional(readOnly = true)
     public Optional<ItemOrcamentoModel> buscarPorId(Integer id) {
         return itemOrcamentoRepository.findById(id);
+    }
+
+    @Transactional(readOnly = true)
+    public List<ItemOrcamentoModel> buscarComFiltros(ItemOrcamentoFiltroRequest filtro) {
+        return itemOrcamentoRepository.findAll(ItemOrcamentoSpecification.comFiltros(filtro));
     }
 
     @Transactional(readOnly = true)

@@ -4,8 +4,9 @@ import com.omni.besthardware.models.ItemOrcamentoModel;
 import java.math.BigDecimal;
 import java.util.List;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
 
-public interface ItemOrcamentoRepository extends JpaRepository<ItemOrcamentoModel, Integer> {
+public interface ItemOrcamentoRepository extends JpaRepository<ItemOrcamentoModel, Integer>, JpaSpecificationExecutor<ItemOrcamentoModel> {
     List<ItemOrcamentoModel> findByOrcamentoId(Integer orcamentoId);
 
     List<ItemOrcamentoModel> findByComponenteId(Integer componenteId);
