@@ -1,8 +1,15 @@
 package com.omni.besthardware.services;
 
+import com.omni.besthardware.dtos.ItemOrcamentoCadastroRequest;
 import com.omni.besthardware.dtos.ItemOrcamentoFiltroRequest;
+import com.omni.besthardware.dtos.ItemOrcamentoResponse;
+import com.omni.besthardware.exceptions.ConflitoException;
+import com.omni.besthardware.exceptions.RecursoNaoEncontradoException;
+import com.omni.besthardware.models.ComponenteModel;
 import com.omni.besthardware.models.ItemOrcamentoModel;
+import com.omni.besthardware.models.OrcamentoModel;
 import com.omni.besthardware.repositories.ItemOrcamentoRepository;
+import com.omni.besthardware.repositories.OrcamentoRepository;
 import com.omni.besthardware.specifications.ItemOrcamentoSpecification;
 import java.math.BigDecimal;
 import java.util.List;
@@ -14,9 +21,17 @@ import org.springframework.transaction.annotation.Transactional;
 public class ItemOrcamentoService {
 
     private final ItemOrcamentoRepository itemOrcamentoRepository;
+    private final OrcamentoRepository orcamentoRepository;
+    private final ComponenteService componenteService;
 
-    public ItemOrcamentoService(ItemOrcamentoRepository itemOrcamentoRepository) {
+    public ItemOrcamentoService(
+            ItemOrcamentoRepository itemOrcamentoRepository,
+            OrcamentoRepository orcamentoRepository,
+            ComponenteService componenteService
+    ) {
         this.itemOrcamentoRepository = itemOrcamentoRepository;
+        this.orcamentoRepository = orcamentoRepository;
+        this.componenteService = componenteService;
     }
 
     @Transactional(readOnly = true)
@@ -32,6 +47,20 @@ public class ItemOrcamentoService {
     @Transactional(readOnly = true)
     public List<ItemOrcamentoModel> buscarComFiltros(ItemOrcamentoFiltroRequest filtro) {
         return itemOrcamentoRepository.findAll(ItemOrcamentoSpecification.comFiltros(filtro));
+    }
+
+    @Transactional(readOnly = true)
+    public List<ItemOrcamentoResponse> listarRespostas(ItemOrcamentoFiltroRequest filtro) {
+        return buscarComFiltros(filtro).stream()
+                .map(this::toResponse)
+                .toList();
+    }
+
+    @Transactional(readOnly = true)
+    public ItemOrcamentoResponse buscarRespostaPorId(Integer id) {
+        return buscarPorId(id)
+                .map(this::toResponse)
+                .orElseThrow(() -> new RecursoNaoEncontradoException("Item de orcamento", id));
     }
 
     @Transactional(readOnly = true)
@@ -65,6 +94,44 @@ public class ItemOrcamentoService {
     }
 
     @Transactional
+    public ItemOrcamentoResponse criar(ItemOrcamentoCadastroRequest request) {
+        OrcamentoModel orcamento = buscarOrcamentoObrigatorio(request.orcamentoId());
+        ComponenteModel componente = componenteService.buscarPorId(request.componenteId())
+                .orElseThrow(() -> new RecursoNaoEncontradoException("Componente", request.componenteId()));
+
+        ItemOrcamentoModel itemOrcamento = new ItemOrcamentoModel();
+        itemOrcamento.setOrcamento(orcamento);
+        itemOrcamento.setComponente(componente);
+        itemOrcamento.setQuantidade(request.quantidade());
+        itemOrcamento.setPreco(componente.getPreco());
+
+        ItemOrcamentoModel salvo = itemOrcamentoRepository.save(itemOrcamento);
+        recalcularPrecoOrcamento(request.orcamentoId());
+        return toResponse(salvo);
+    }
+
+    @Transactional
+    public ItemOrcamentoResponse atualizar(Integer id, ItemOrcamentoCadastroRequest request) {
+        ItemOrcamentoModel itemOrcamento = buscarPorId(id)
+                .orElseThrow(() -> new RecursoNaoEncontradoException("Item de orcamento", id));
+        OrcamentoModel orcamento = buscarOrcamentoObrigatorio(request.orcamentoId());
+        ComponenteModel componente = componenteService.buscarPorId(request.componenteId())
+                .orElseThrow(() -> new RecursoNaoEncontradoException("Componente", request.componenteId()));
+
+        Integer orcamentoAnteriorId = itemOrcamento.getOrcamento().getId();
+
+        itemOrcamento.setOrcamento(orcamento);
+        itemOrcamento.setComponente(componente);
+        itemOrcamento.setQuantidade(request.quantidade());
+        itemOrcamento.setPreco(componente.getPreco());
+
+        ItemOrcamentoModel atualizado = itemOrcamentoRepository.save(itemOrcamento);
+        recalcularPrecoOrcamento(orcamentoAnteriorId);
+        recalcularPrecoOrcamento(request.orcamentoId());
+        return toResponse(atualizado);
+    }
+
+    @Transactional
     public Optional<ItemOrcamentoModel> atualizar(Integer id, ItemOrcamentoModel itemOrcamento) {
         if (!itemOrcamentoRepository.existsById(id)) {
             return Optional.empty();
@@ -82,5 +149,61 @@ public class ItemOrcamentoService {
 
         itemOrcamentoRepository.deleteById(id);
         return true;
+    }
+
+    @Transactional
+    public void excluirObrigatorio(Integer id) {
+        ItemOrcamentoModel itemOrcamento = buscarPorId(id)
+                .orElseThrow(() -> new RecursoNaoEncontradoException("Item de orcamento", id));
+
+        Integer orcamentoId = itemOrcamento.getOrcamento().getId();
+        if (buscarPorOrcamento(orcamentoId).size() <= 1) {
+            throw new ConflitoException("Nao e possivel remover o unico item do orcamento.");
+        }
+
+        itemOrcamentoRepository.deleteById(id);
+        recalcularPrecoOrcamento(orcamentoId);
+    }
+
+    private OrcamentoModel buscarOrcamentoObrigatorio(Integer orcamentoId) {
+        return orcamentoRepository.findById(orcamentoId)
+                .orElseThrow(() -> new RecursoNaoEncontradoException("Orcamento", orcamentoId));
+    }
+
+    private void recalcularPrecoOrcamento(Integer orcamentoId) {
+        Optional<OrcamentoModel> orcamento = orcamentoRepository.findById(orcamentoId);
+        if (orcamento.isEmpty()) {
+            return;
+        }
+
+        List<ItemOrcamentoModel> itens = itemOrcamentoRepository.findByOrcamentoId(orcamentoId);
+        if (itens.isEmpty()) {
+            return;
+        }
+
+        OrcamentoModel atualizado = orcamento.get();
+        atualizado.setPreco(calcularTotal(itens));
+        orcamentoRepository.save(atualizado);
+    }
+
+    private ItemOrcamentoResponse toResponse(ItemOrcamentoModel item) {
+        return new ItemOrcamentoResponse(
+                item.getId(),
+                item.getOrcamento().getId(),
+                item.getComponente().getId(),
+                item.getQuantidade(),
+                item.getPreco(),
+                calcularSubtotal(item)
+        );
+    }
+
+    private BigDecimal calcularTotal(List<ItemOrcamentoModel> itens) {
+        return itens.stream()
+                .map(this::calcularSubtotal)
+                .reduce(BigDecimal.ZERO, BigDecimal::add);
+    }
+
+    private BigDecimal calcularSubtotal(ItemOrcamentoModel item) {
+        return item.getPreco().multiply(BigDecimal.valueOf(item.getQuantidade()));
     }
 }
