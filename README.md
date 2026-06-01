@@ -87,6 +87,7 @@ src/main/java/com/omni/besthardware
 ├── mappers
 ├── models
 ├── repositories
+├── specifications
 └── services
 ```
 
@@ -100,6 +101,7 @@ Responsabilidades:
 - `mappers`: conversão entre models e DTOs.
 - `handlers`: tratamento centralizado de erros.
 - `exceptions`: exceções específicas da API.
+- `specifications`: filtros dinâmicos para consultas JPA com vários parâmetros opcionais.
 
 ## Entidades principais
 
@@ -192,6 +194,8 @@ GET /api/fontes?potenciaMinima=650
 GET /api/monitores?resolucao=3840x2160
 GET /api/orcamentos?usuarioId=1
 ```
+
+Nos endpoints de hardware, orçamento e itens de orçamento, esses filtros são organizados com DTOs de filtro e `Specification`. Com isso, o controller apenas recebe os parâmetros e delega a busca para o service, enquanto a montagem das condições de consulta fica na pasta `specifications`.
 
 ## DTOs
 
@@ -340,6 +344,7 @@ Implementado:
 - services;
 - controllers REST;
 - DTOs;
+- filtros dinâmicos com `Specification`;
 - recomendações por perfil;
 - validação de compatibilidade;
 - tratamento centralizado de erros;

@@ -690,7 +690,88 @@ Criar frontend ou documentacao Swagger/OpenAPI.
 Persistir em banco real, porque H2 em memoria perde os dados ao reiniciar.
 ```
 
-## 21. Testes executados
+## 21. Filtros com Specification
+
+Os filtros de listagem dos controllers de hardware, orcamento e item de orcamento foram refatorados para usar `Specification`.
+
+Antes, o controller decidia qual filtro aplicar com varios `if`s:
+
+```java
+if (socket != null) {
+    return cpuService.buscarPorSocket(socket);
+}
+
+if (nucleosMinimos != null) {
+    return cpuService.buscarPorNucleosMinimos(nucleosMinimos);
+}
+```
+
+Esse modelo funciona quando existe apenas um filtro por vez, mas fica limitado quando a API precisa combinar parametros, por exemplo:
+
+```text
+GET /api/cpus?socket=AM4&nucleosMinimos=6&precoMaximo=1200
+```
+
+Com `Specification`, os filtros viram condicoes dinamicas de consulta. O controller recebe um DTO de filtro:
+
+```java
+public List<ComponenteResponse> listar(@ModelAttribute CpuFiltroRequest filtro) {
+    return toResponseList(cpuService.buscarComFiltros(filtro));
+}
+```
+
+O service delega para o repository:
+
+```java
+return cpuRepository.findAll(CpuSpecification.comFiltros(filtro));
+```
+
+E a classe `CpuSpecification` monta a consulta de acordo com os campos preenchidos.
+
+O que foi criado:
+
+```text
+dtos/*FiltroRequest
+specifications/*Specification
+repositories com JpaSpecificationExecutor
+services com buscarComFiltros(...)
+controllers usando @ModelAttribute
+```
+
+Controllers refatorados:
+
+```text
+CpuController
+GpuController
+RamController
+FonteController
+ArmazenamentoController
+MonitorController
+PlacaMaeController
+OrcamentoController
+ItemOrcamentoController
+```
+
+Vantagens:
+
+- Permite combinar varios filtros na mesma requisicao.
+- Remove os `if`s de filtro dos controllers.
+- Mantem controller focado em HTTP.
+- Mantem service focado em coordenar regra e persistencia.
+- Centraliza a construcao da consulta na pasta `specifications`.
+- Facilita adicionar novos filtros depois sem aumentar a complexidade do controller.
+
+Nao foram alterados nesta etapa:
+
+```text
+UsuarioController
+PerfilController
+RecomendacaoController
+```
+
+Isso foi proposital, porque esses controllers nao estavam no escopo da refatoracao escolhida.
+
+## 22. Testes executados
 
 Depois das mudancas, foi executado:
 
@@ -705,14 +786,16 @@ BUILD SUCCESS
 Tests run: 1, Failures: 0, Errors: 0, Skipped: 0
 ```
 
-## 22. Resumo do aprendizado
+## 23. Resumo do aprendizado
 
 O que foi praticado hoje:
 
 - Criacao de controllers REST com Spring Boot.
 - Uso de `@RestController`, `@RequestMapping`, `@GetMapping`, `@PostMapping`, `@PutMapping` e `@DeleteMapping`.
 - Criacao de endpoints por recurso.
-- Uso de filtros via `@RequestParam`.
+- Uso de filtros via query params.
+- Uso de DTOs de filtro com `@ModelAttribute`.
+- Uso de `Specification` e `JpaSpecificationExecutor` para filtros dinamicos.
 - Definicao dos escopos de PC por perfil de uso.
 - Criacao de DTOs com Java records.
 - Diferenca entre model e DTO.
