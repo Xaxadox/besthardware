@@ -1,5 +1,8 @@
 package com.omni.besthardware.controllers;
 
+import com.omni.besthardware.dtos.ComponenteResponse;
+import com.omni.besthardware.dtos.FonteRequest;
+import com.omni.besthardware.mappers.DtoMapper;
 import com.omni.besthardware.models.FonteModel;
 import com.omni.besthardware.services.FonteService;
 import jakarta.validation.Valid;
@@ -28,7 +31,7 @@ public class FonteController {
     }
 
     @GetMapping
-    public List<FonteModel> listar(
+    public List<ComponenteResponse> listar(
             @RequestParam(required = false) String tipo,
             @RequestParam(required = false) BigDecimal precoMinimo,
             @RequestParam(required = false) BigDecimal precoMaximo,
@@ -37,43 +40,46 @@ public class FonteController {
             @RequestParam(required = false) String certificacao
     ) {
         if (tipo != null) {
-            return fonteService.buscarPorTipo(tipo);
+            return toResponseList(fonteService.buscarPorTipo(tipo));
         }
 
         if (precoMinimo != null && precoMaximo != null) {
-            return fonteService.buscarPorFaixaDePreco(precoMinimo, precoMaximo);
+            return toResponseList(fonteService.buscarPorFaixaDePreco(precoMinimo, precoMaximo));
         }
 
         if (marca != null) {
-            return fonteService.buscarPorMarca(marca);
+            return toResponseList(fonteService.buscarPorMarca(marca));
         }
 
         if (potenciaMinima != null) {
-            return fonteService.buscarPorPotenciaMinima(potenciaMinima);
+            return toResponseList(fonteService.buscarPorPotenciaMinima(potenciaMinima));
         }
 
         if (certificacao != null) {
-            return fonteService.buscarPorCertificacao(certificacao);
+            return toResponseList(fonteService.buscarPorCertificacao(certificacao));
         }
 
-        return fonteService.listarTodos();
+        return toResponseList(fonteService.listarTodos());
     }
 
     @GetMapping("/{id}")
-    public ResponseEntity<FonteModel> buscarPorId(@PathVariable Integer id) {
+    public ResponseEntity<ComponenteResponse> buscarPorId(@PathVariable Integer id) {
         return fonteService.buscarPorId(id)
+                .map(DtoMapper::toComponenteResponse)
                 .map(ResponseEntity::ok)
                 .orElseGet(() -> ResponseEntity.notFound().build());
     }
 
     @PostMapping
-    public ResponseEntity<FonteModel> criar(@Valid @RequestBody FonteModel fonte) {
-        return ResponseEntity.status(HttpStatus.CREATED).body(fonteService.salvar(fonte));
+    public ResponseEntity<ComponenteResponse> criar(@Valid @RequestBody FonteRequest request) {
+        return ResponseEntity.status(HttpStatus.CREATED)
+                .body(DtoMapper.toComponenteResponse(fonteService.salvar(toModel(request))));
     }
 
     @PutMapping("/{id}")
-    public ResponseEntity<FonteModel> atualizar(@PathVariable Integer id, @Valid @RequestBody FonteModel fonte) {
-        return fonteService.atualizar(id, fonte)
+    public ResponseEntity<ComponenteResponse> atualizar(@PathVariable Integer id, @Valid @RequestBody FonteRequest request) {
+        return fonteService.atualizar(id, toModel(request))
+                .map(DtoMapper::toComponenteResponse)
                 .map(ResponseEntity::ok)
                 .orElseGet(() -> ResponseEntity.notFound().build());
     }
@@ -86,5 +92,18 @@ public class FonteController {
 
         return ResponseEntity.noContent().build();
     }
-}
 
+    private List<ComponenteResponse> toResponseList(List<FonteModel> fontes) {
+        return fontes.stream().map(DtoMapper::toComponenteResponse).toList();
+    }
+
+    private FonteModel toModel(FonteRequest request) {
+        FonteModel fonte = new FonteModel();
+        fonte.setTipo(request.tipo());
+        fonte.setPreco(request.preco());
+        fonte.setMarca(request.marca());
+        fonte.setPotencia(request.potencia());
+        fonte.setCertificacao(request.certificacao());
+        return fonte;
+    }
+}

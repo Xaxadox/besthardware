@@ -1,9 +1,17 @@
 package com.omni.besthardware.controllers;
 
+import com.omni.besthardware.dtos.PerfilRequest;
+import com.omni.besthardware.dtos.PerfilResponse;
+import com.omni.besthardware.dtos.PerfilUsoResponse;
+import com.omni.besthardware.mappers.DtoMapper;
+import com.omni.besthardware.models.ComponenteModel;
 import com.omni.besthardware.models.PerfilModel;
+import com.omni.besthardware.services.ComponenteService;
 import com.omni.besthardware.services.PerfilService;
+import com.omni.besthardware.services.PerfilUsoService;
 import jakarta.validation.Valid;
 import java.util.List;
+import java.util.Optional;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.DeleteMapping;
@@ -20,132 +28,84 @@ import org.springframework.web.bind.annotation.RestController;
 @RequestMapping("/api/perfis")
 public class PerfilController {
 
-    private static final List<PerfilUsoResponse> PERFIS_DE_USO = List.of(
-            new PerfilUsoResponse(
-                    "trabalho",
-                    "Trabalho",
-                    "Navegador, pacote office, estudos, reunioes e tarefas leves.",
-                    false,
-                    "CPU economica com GPU integrada.",
-                    "GPU dedicada nao obrigatoria.",
-                    "8 GB a 16 GB.",
-                    "SSD SATA ou NVME a partir de 256 GB.",
-                    "Fonte 400 W a 500 W com certificacao basica.",
-                    "Full HD, 60 Hz ou 75 Hz.",
-                    List.of("navegador", "office", "aulas", "reunioes")
-            ),
-            new PerfilUsoResponse(
-                    "jogo-inicial",
-                    "Jogo inicial",
-                    "Jogos em Full HD com GPU dedicada de entrada.",
-                    true,
-                    "CPU de 4 a 6 nucleos.",
-                    "GPU dedicada de entrada com pelo menos 4 GB de VRAM.",
-                    "16 GB.",
-                    "SSD NVME a partir de 512 GB.",
-                    "Fonte 500 W a 650 W.",
-                    "Full HD, 75 Hz a 144 Hz.",
-                    List.of("full hd", "esports", "jogos leves", "jogos medios")
-            ),
-            new PerfilUsoResponse(
-                    "jogo-intermediario",
-                    "Jogo intermediario",
-                    "Jogos em 2K com boa qualidade grafica.",
-                    true,
-                    "CPU de 6 a 8 nucleos.",
-                    "GPU dedicada intermediaria com 8 GB a 12 GB de VRAM.",
-                    "16 GB a 32 GB.",
-                    "SSD NVME a partir de 1 TB.",
-                    "Fonte 650 W a 750 W.",
-                    "2K, 144 Hz.",
-                    List.of("2k", "qualidade alta", "jogos atuais")
-            ),
-            new PerfilUsoResponse(
-                    "jogos-pesados",
-                    "Jogos pesados",
-                    "Altos FPS em 2K e jogos em 4K.",
-                    true,
-                    "CPU de 8 nucleos ou mais.",
-                    "GPU dedicada forte com 12 GB ou mais de VRAM.",
-                    "32 GB ou mais.",
-                    "SSD NVME rapido a partir de 1 TB.",
-                    "Fonte 750 W ou mais.",
-                    "2K alto refresh ou 4K.",
-                    List.of("alto fps", "2k ultra", "4k", "ray tracing")
-            ),
-            new PerfilUsoResponse(
-                    "profissional",
-                    "Profissional",
-                    "SolidWorks, AutoCAD, renderizacao e aplicativos de alto desempenho.",
-                    true,
-                    "CPU de 8 nucleos ou mais, com alta frequencia.",
-                    "GPU dedicada profissional ou gamer com bastante VRAM.",
-                    "32 GB a 64 GB.",
-                    "SSD NVME rapido a partir de 1 TB.",
-                    "Fonte 750 W ou mais, conforme GPU escolhida.",
-                    "2K ou 4K com boa fidelidade de imagem.",
-                    List.of("solidworks", "autocad", "renderizacao", "modelagem 3d")
-            )
-    );
-
     private final PerfilService perfilService;
+    private final ComponenteService componenteService;
+    private final PerfilUsoService perfilUsoService;
 
-    public PerfilController(PerfilService perfilService) {
+    public PerfilController(
+            PerfilService perfilService,
+            ComponenteService componenteService,
+            PerfilUsoService perfilUsoService
+    ) {
         this.perfilService = perfilService;
+        this.componenteService = componenteService;
+        this.perfilUsoService = perfilUsoService;
     }
 
     @GetMapping
-    public List<PerfilModel> listar(
+    public List<PerfilResponse> listar(
             @RequestParam(required = false) String nome,
             @RequestParam(required = false) Integer componenteId
     ) {
         if (nome != null) {
-            return perfilService.buscarPorNome(nome);
+            return toResponseList(perfilService.buscarPorNome(nome));
         }
 
         if (componenteId != null) {
-            return perfilService.buscarPorComponente(componenteId);
+            return toResponseList(perfilService.buscarPorComponente(componenteId));
         }
 
-        return perfilService.listarTodos();
+        return toResponseList(perfilService.listarTodos());
     }
 
     @GetMapping("/{id}")
-    public ResponseEntity<PerfilModel> buscarPorId(@PathVariable Integer id) {
+    public ResponseEntity<PerfilResponse> buscarPorId(@PathVariable Integer id) {
         return perfilService.buscarPorId(id)
+                .map(DtoMapper::toPerfilResponse)
                 .map(ResponseEntity::ok)
                 .orElseGet(() -> ResponseEntity.notFound().build());
     }
 
     @GetMapping("/nome/{nome}")
-    public ResponseEntity<PerfilModel> buscarPorNomeExato(@PathVariable String nome) {
+    public ResponseEntity<PerfilResponse> buscarPorNomeExato(@PathVariable String nome) {
         return perfilService.buscarPorNomeExato(nome)
+                .map(DtoMapper::toPerfilResponse)
                 .map(ResponseEntity::ok)
                 .orElseGet(() -> ResponseEntity.notFound().build());
     }
 
     @GetMapping("/escopos")
     public List<PerfilUsoResponse> listarEscopos() {
-        return PERFIS_DE_USO;
+        return perfilUsoService.listarTodos();
     }
 
     @GetMapping("/escopos/{codigo}")
     public ResponseEntity<PerfilUsoResponse> buscarEscopoPorCodigo(@PathVariable String codigo) {
-        return PERFIS_DE_USO.stream()
-                .filter(perfil -> perfil.codigo().equalsIgnoreCase(codigo))
-                .findFirst()
+        return perfilUsoService.buscarPorCodigo(codigo)
                 .map(ResponseEntity::ok)
                 .orElseGet(() -> ResponseEntity.notFound().build());
     }
 
     @PostMapping
-    public ResponseEntity<PerfilModel> criar(@Valid @RequestBody PerfilModel perfil) {
-        return ResponseEntity.status(HttpStatus.CREATED).body(perfilService.salvar(perfil));
+    public ResponseEntity<PerfilResponse> criar(@Valid @RequestBody PerfilRequest request) {
+        Optional<PerfilModel> perfil = toModel(request);
+        if (perfil.isEmpty()) {
+            return ResponseEntity.notFound().build();
+        }
+
+        return ResponseEntity.status(HttpStatus.CREATED)
+                .body(DtoMapper.toPerfilResponse(perfilService.salvar(perfil.get())));
     }
 
     @PutMapping("/{id}")
-    public ResponseEntity<PerfilModel> atualizar(@PathVariable Integer id, @Valid @RequestBody PerfilModel perfil) {
-        return perfilService.atualizar(id, perfil)
+    public ResponseEntity<PerfilResponse> atualizar(@PathVariable Integer id, @Valid @RequestBody PerfilRequest request) {
+        Optional<PerfilModel> perfil = toModel(request);
+        if (perfil.isEmpty()) {
+            return ResponseEntity.notFound().build();
+        }
+
+        return perfilService.atualizar(id, perfil.get())
+                .map(DtoMapper::toPerfilResponse)
                 .map(ResponseEntity::ok)
                 .orElseGet(() -> ResponseEntity.notFound().build());
     }
@@ -159,19 +119,27 @@ public class PerfilController {
         return ResponseEntity.noContent().build();
     }
 
-    public record PerfilUsoResponse(
-            String codigo,
-            String nome,
-            String objetivo,
-            boolean exigeGpuDedicada,
-            String processador,
-            String gpu,
-            String memoriaRam,
-            String armazenamento,
-            String fonte,
-            String monitor,
-            List<String> usosIndicados
-    ) {
+    private List<PerfilResponse> toResponseList(List<PerfilModel> perfis) {
+        return perfis.stream().map(DtoMapper::toPerfilResponse).toList();
+    }
+
+    private Optional<PerfilModel> toModel(PerfilRequest request) {
+        PerfilModel perfil = new PerfilModel();
+        perfil.setNome(request.nome());
+
+        if (request.componenteIds() == null) {
+            return Optional.of(perfil);
+        }
+
+        for (Integer componenteId : request.componenteIds()) {
+            Optional<ComponenteModel> componente = componenteService.buscarPorId(componenteId);
+            if (componente.isEmpty()) {
+                return Optional.empty();
+            }
+
+            perfil.getComponentes().add(componente.get());
+        }
+
+        return Optional.of(perfil);
     }
 }
-

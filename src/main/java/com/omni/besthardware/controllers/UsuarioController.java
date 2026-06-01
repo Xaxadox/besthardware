@@ -1,5 +1,8 @@
 package com.omni.besthardware.controllers;
 
+import com.omni.besthardware.dtos.UsuarioRequest;
+import com.omni.besthardware.dtos.UsuarioResponse;
+import com.omni.besthardware.mappers.DtoMapper;
 import com.omni.besthardware.models.UsuarioModel;
 import com.omni.besthardware.services.UsuarioService;
 import jakarta.validation.Valid;
@@ -28,24 +31,26 @@ public class UsuarioController {
     }
 
     @GetMapping
-    public List<UsuarioModel> listar(@RequestParam(required = false) String nome) {
+    public List<UsuarioResponse> listar(@RequestParam(required = false) String nome) {
         if (nome != null) {
-            return usuarioService.buscarPorNome(nome);
+            return toResponseList(usuarioService.buscarPorNome(nome));
         }
 
-        return usuarioService.listarTodos();
+        return toResponseList(usuarioService.listarTodos());
     }
 
     @GetMapping("/{id}")
-    public ResponseEntity<UsuarioModel> buscarPorId(@PathVariable Integer id) {
+    public ResponseEntity<UsuarioResponse> buscarPorId(@PathVariable Integer id) {
         return usuarioService.buscarPorId(id)
+                .map(DtoMapper::toUsuarioResponse)
                 .map(ResponseEntity::ok)
                 .orElseGet(() -> ResponseEntity.notFound().build());
     }
 
     @GetMapping("/email/{email}")
-    public ResponseEntity<UsuarioModel> buscarPorEmail(@PathVariable String email) {
+    public ResponseEntity<UsuarioResponse> buscarPorEmail(@PathVariable String email) {
         return usuarioService.buscarPorEmail(email)
+                .map(DtoMapper::toUsuarioResponse)
                 .map(ResponseEntity::ok)
                 .orElseGet(() -> ResponseEntity.notFound().build());
     }
@@ -56,13 +61,15 @@ public class UsuarioController {
     }
 
     @PostMapping
-    public ResponseEntity<UsuarioModel> criar(@Valid @RequestBody UsuarioModel usuario) {
-        return ResponseEntity.status(HttpStatus.CREATED).body(usuarioService.salvar(usuario));
+    public ResponseEntity<UsuarioResponse> criar(@Valid @RequestBody UsuarioRequest request) {
+        return ResponseEntity.status(HttpStatus.CREATED)
+                .body(DtoMapper.toUsuarioResponse(usuarioService.salvar(toModel(request))));
     }
 
     @PutMapping("/{id}")
-    public ResponseEntity<UsuarioModel> atualizar(@PathVariable Integer id, @Valid @RequestBody UsuarioModel usuario) {
-        return usuarioService.atualizar(id, usuario)
+    public ResponseEntity<UsuarioResponse> atualizar(@PathVariable Integer id, @Valid @RequestBody UsuarioRequest request) {
+        return usuarioService.atualizar(id, toModel(request))
+                .map(DtoMapper::toUsuarioResponse)
                 .map(ResponseEntity::ok)
                 .orElseGet(() -> ResponseEntity.notFound().build());
     }
@@ -75,5 +82,15 @@ public class UsuarioController {
 
         return ResponseEntity.noContent().build();
     }
-}
 
+    private List<UsuarioResponse> toResponseList(List<UsuarioModel> usuarios) {
+        return usuarios.stream().map(DtoMapper::toUsuarioResponse).toList();
+    }
+
+    private UsuarioModel toModel(UsuarioRequest request) {
+        UsuarioModel usuario = new UsuarioModel();
+        usuario.setNome(request.nome());
+        usuario.setEmail(request.email());
+        return usuario;
+    }
+}

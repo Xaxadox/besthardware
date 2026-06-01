@@ -151,6 +151,225 @@ public class TesteConfig implements CommandLineRunner {
         armazenamentoRepository.save(armazenamento);
         monitorRepository.save(monitor);
 
+        CpuModel cpuTrabalho = new CpuModel();
+        cpuTrabalho.setTipo("CPU");
+        cpuTrabalho.setPreco(new BigDecimal("799.90"));
+        cpuTrabalho.setModelo("Ryzen 5 5600G");
+        cpuTrabalho.setFrequencia(3900);
+        cpuTrabalho.setConsumo(65);
+        cpuTrabalho.setAnoLancamento(LocalDate.of(2021, 4, 13));
+        cpuTrabalho.setNucleos(6);
+        cpuTrabalho.setSocket("AM4");
+
+        CpuModel cpuIntermediaria = new CpuModel();
+        cpuIntermediaria.setTipo("CPU");
+        cpuIntermediaria.setPreco(new BigDecimal("1399.90"));
+        cpuIntermediaria.setModelo("Ryzen 5 7600");
+        cpuIntermediaria.setFrequencia(3800);
+        cpuIntermediaria.setConsumo(65);
+        cpuIntermediaria.setAnoLancamento(LocalDate.of(2023, 1, 10));
+        cpuIntermediaria.setNucleos(6);
+        cpuIntermediaria.setSocket("AM5");
+
+        CpuModel cpuPesada = new CpuModel();
+        cpuPesada.setTipo("CPU");
+        cpuPesada.setPreco(new BigDecimal("2499.90"));
+        cpuPesada.setModelo("Ryzen 7 7800X3D");
+        cpuPesada.setFrequencia(4200);
+        cpuPesada.setConsumo(120);
+        cpuPesada.setAnoLancamento(LocalDate.of(2023, 4, 6));
+        cpuPesada.setNucleos(8);
+        cpuPesada.setSocket("AM5");
+
+        CpuModel cpuProfissional = new CpuModel();
+        cpuProfissional.setTipo("CPU");
+        cpuProfissional.setPreco(new BigDecimal("3299.90"));
+        cpuProfissional.setModelo("Ryzen 9 7900");
+        cpuProfissional.setFrequencia(3700);
+        cpuProfissional.setConsumo(65);
+        cpuProfissional.setAnoLancamento(LocalDate.of(2023, 1, 10));
+        cpuProfissional.setNucleos(12);
+        cpuProfissional.setSocket("AM5");
+
+        PlacaMaeModel placaA520 = new PlacaMaeModel();
+        placaA520.setTipo("PlacaMae");
+        placaA520.setPreco(new BigDecimal("449.90"));
+        placaA520.setMarca("Gigabyte");
+        placaA520.setSocket("AM4");
+        placaA520.setChipset("A520");
+        placaA520.setFormato("mATX");
+
+        PlacaMaeModel placaB650 = new PlacaMaeModel();
+        placaB650.setTipo("PlacaMae");
+        placaB650.setPreco(new BigDecimal("1199.90"));
+        placaB650.setMarca("MSI");
+        placaB650.setSocket("AM5");
+        placaB650.setChipset("B650");
+        placaB650.setFormato("ATX");
+
+        PlacaMaeModel placaX670 = new PlacaMaeModel();
+        placaX670.setTipo("PlacaMae");
+        placaX670.setPreco(new BigDecimal("2199.90"));
+        placaX670.setMarca("ASUS");
+        placaX670.setSocket("AM5");
+        placaX670.setChipset("X670");
+        placaX670.setFormato("ATX");
+
+        GpuModel gpuEntrada = new GpuModel();
+        gpuEntrada.setTipo("GPU");
+        gpuEntrada.setPreco(new BigDecimal("899.90"));
+        gpuEntrada.setModelo("GTX 1650");
+        gpuEntrada.setMemoria(4);
+        gpuEntrada.setConsumo(75);
+        gpuEntrada.setMarca("NVIDIA");
+
+        GpuModel gpuIntermediaria = new GpuModel();
+        gpuIntermediaria.setTipo("GPU");
+        gpuIntermediaria.setPreco(new BigDecimal("2499.90"));
+        gpuIntermediaria.setModelo("RTX 4060 Ti");
+        gpuIntermediaria.setMemoria(8);
+        gpuIntermediaria.setConsumo(160);
+        gpuIntermediaria.setMarca("NVIDIA");
+
+        GpuModel gpuPesada = new GpuModel();
+        gpuPesada.setTipo("GPU");
+        gpuPesada.setPreco(new BigDecimal("5499.90"));
+        gpuPesada.setModelo("RTX 4070 Ti Super");
+        gpuPesada.setMemoria(16);
+        gpuPesada.setConsumo(285);
+        gpuPesada.setMarca("NVIDIA");
+
+        GpuModel gpuProfissional = new GpuModel();
+        gpuProfissional.setTipo("GPU");
+        gpuProfissional.setPreco(new BigDecimal("7999.90"));
+        gpuProfissional.setModelo("RTX 4080 Super");
+        gpuProfissional.setMemoria(16);
+        gpuProfissional.setConsumo(320);
+        gpuProfissional.setMarca("NVIDIA");
+
+        RamModel ramDdr4_16 = new RamModel();
+        ramDdr4_16.setTipo("RAM");
+        ramDdr4_16.setGeracao("DDR4");
+        ramDdr4_16.setPreco(new BigDecimal("329.90"));
+        ramDdr4_16.setFrequencia(3200);
+        ramDdr4_16.setMarca("Kingston");
+        ramDdr4_16.setMemoria(16);
+
+        RamModel ramDdr5_16 = new RamModel();
+        ramDdr5_16.setTipo("RAM");
+        ramDdr5_16.setGeracao("DDR5");
+        ramDdr5_16.setPreco(new BigDecimal("499.90"));
+        ramDdr5_16.setFrequencia(5600);
+        ramDdr5_16.setMarca("Corsair");
+        ramDdr5_16.setMemoria(16);
+
+        RamModel ramDdr5_32 = new RamModel();
+        ramDdr5_32.setTipo("RAM");
+        ramDdr5_32.setGeracao("DDR5");
+        ramDdr5_32.setPreco(new BigDecimal("899.90"));
+        ramDdr5_32.setFrequencia(6000);
+        ramDdr5_32.setMarca("Corsair");
+        ramDdr5_32.setMemoria(32);
+
+        FonteModel fonte450 = new FonteModel();
+        fonte450.setTipo("Fonte");
+        fonte450.setPreco(new BigDecimal("249.90"));
+        fonte450.setMarca("Corsair");
+        fonte450.setPotencia(450);
+        fonte450.setCertificacao("80 Plus Bronze");
+
+        FonteModel fonte550 = new FonteModel();
+        fonte550.setTipo("Fonte");
+        fonte550.setPreco(new BigDecimal("329.90"));
+        fonte550.setMarca("Cooler Master");
+        fonte550.setPotencia(550);
+        fonte550.setCertificacao("80 Plus Bronze");
+
+        FonteModel fonte750 = new FonteModel();
+        fonte750.setTipo("Fonte");
+        fonte750.setPreco(new BigDecimal("699.90"));
+        fonte750.setMarca("XPG");
+        fonte750.setPotencia(750);
+        fonte750.setCertificacao("80 Plus Gold");
+
+        FonteModel fonte850 = new FonteModel();
+        fonte850.setTipo("Fonte");
+        fonte850.setPreco(new BigDecimal("899.90"));
+        fonte850.setMarca("Corsair");
+        fonte850.setPotencia(850);
+        fonte850.setCertificacao("80 Plus Gold");
+
+        ArmazenamentoModel ssd512 = new ArmazenamentoModel();
+        ssd512.setTipo("Armazenamento");
+        ssd512.setTecnologia("SSD");
+        ssd512.setPreco(new BigDecimal("349.90"));
+        ssd512.setPadrao("NVME");
+        ssd512.setVelocidadeEscrita(2500);
+        ssd512.setVelocidadeLeitura(3500);
+        ssd512.setMemoria(512);
+
+        ArmazenamentoModel ssd1Tb = new ArmazenamentoModel();
+        ssd1Tb.setTipo("Armazenamento");
+        ssd1Tb.setTecnologia("SSD");
+        ssd1Tb.setPreco(new BigDecimal("549.90"));
+        ssd1Tb.setPadrao("NVME");
+        ssd1Tb.setVelocidadeEscrita(5000);
+        ssd1Tb.setVelocidadeLeitura(7000);
+        ssd1Tb.setMemoria(1000);
+
+        ArmazenamentoModel ssd2Tb = new ArmazenamentoModel();
+        ssd2Tb.setTipo("Armazenamento");
+        ssd2Tb.setTecnologia("SSD");
+        ssd2Tb.setPreco(new BigDecimal("999.90"));
+        ssd2Tb.setPadrao("NVME");
+        ssd2Tb.setVelocidadeEscrita(6000);
+        ssd2Tb.setVelocidadeLeitura(7300);
+        ssd2Tb.setMemoria(2000);
+
+        MonitorModel monitorFhd75 = new MonitorModel();
+        monitorFhd75.setTipo("Monitor");
+        monitorFhd75.setTecnologia("IPS");
+        monitorFhd75.setPreco(new BigDecimal("599.90"));
+        monitorFhd75.setMarca("LG");
+        monitorFhd75.setTamanho("24");
+        monitorFhd75.setResolucao("1920x1080");
+        monitorFhd75.setFrequencia(75);
+
+        MonitorModel monitor2k144 = new MonitorModel();
+        monitor2k144.setTipo("Monitor");
+        monitor2k144.setTecnologia("IPS");
+        monitor2k144.setPreco(new BigDecimal("1699.90"));
+        monitor2k144.setMarca("AOC");
+        monitor2k144.setTamanho("27");
+        monitor2k144.setResolucao("2560x1440");
+        monitor2k144.setFrequencia(144);
+
+        MonitorModel monitor4k144 = new MonitorModel();
+        monitor4k144.setTipo("Monitor");
+        monitor4k144.setTecnologia("IPS");
+        monitor4k144.setPreco(new BigDecimal("3999.90"));
+        monitor4k144.setMarca("Gigabyte");
+        monitor4k144.setTamanho("28");
+        monitor4k144.setResolucao("3840x2160");
+        monitor4k144.setFrequencia(144);
+
+        MonitorModel monitor4k60 = new MonitorModel();
+        monitor4k60.setTipo("Monitor");
+        monitor4k60.setTecnologia("IPS");
+        monitor4k60.setPreco(new BigDecimal("2199.90"));
+        monitor4k60.setMarca("Dell");
+        monitor4k60.setTamanho("27");
+        monitor4k60.setResolucao("3840x2160");
+        monitor4k60.setFrequencia(60);
+
+        cpuRepository.saveAll(Arrays.asList(cpuTrabalho, cpuIntermediaria, cpuPesada, cpuProfissional));
+        placaMaeRepository.saveAll(Arrays.asList(placaA520, placaB650, placaX670));
+        gpuRepository.saveAll(Arrays.asList(gpuEntrada, gpuIntermediaria, gpuPesada, gpuProfissional));
+        ramRepository.saveAll(Arrays.asList(ramDdr4_16, ramDdr5_16, ramDdr5_32));
+        fonteRepository.saveAll(Arrays.asList(fonte450, fonte550, fonte750, fonte850));
+        armazenamentoRepository.saveAll(Arrays.asList(ssd512, ssd1Tb, ssd2Tb));
+        monitorRepository.saveAll(Arrays.asList(monitorFhd75, monitor2k144, monitor4k144, monitor4k60));
+
         // =========================
         // N:N 1 - PERFIL ↔ COMPONENTE
         // =========================

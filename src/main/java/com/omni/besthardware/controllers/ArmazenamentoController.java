@@ -1,5 +1,8 @@
 package com.omni.besthardware.controllers;
 
+import com.omni.besthardware.dtos.ArmazenamentoRequest;
+import com.omni.besthardware.dtos.ComponenteResponse;
+import com.omni.besthardware.mappers.DtoMapper;
 import com.omni.besthardware.models.ArmazenamentoModel;
 import com.omni.besthardware.services.ArmazenamentoService;
 import jakarta.validation.Valid;
@@ -28,7 +31,7 @@ public class ArmazenamentoController {
     }
 
     @GetMapping
-    public List<ArmazenamentoModel> listar(
+    public List<ComponenteResponse> listar(
             @RequestParam(required = false) String tipo,
             @RequestParam(required = false) BigDecimal precoMinimo,
             @RequestParam(required = false) BigDecimal precoMaximo,
@@ -39,54 +42,58 @@ public class ArmazenamentoController {
             @RequestParam(required = false) Integer velocidadeEscritaMinima
     ) {
         if (tipo != null) {
-            return armazenamentoService.buscarPorTipo(tipo);
+            return toResponseList(armazenamentoService.buscarPorTipo(tipo));
         }
 
         if (precoMinimo != null && precoMaximo != null) {
-            return armazenamentoService.buscarPorFaixaDePreco(precoMinimo, precoMaximo);
+            return toResponseList(armazenamentoService.buscarPorFaixaDePreco(precoMinimo, precoMaximo));
         }
 
         if (tecnologia != null) {
-            return armazenamentoService.buscarPorTecnologia(tecnologia);
+            return toResponseList(armazenamentoService.buscarPorTecnologia(tecnologia));
         }
 
         if (padrao != null) {
-            return armazenamentoService.buscarPorPadrao(padrao);
+            return toResponseList(armazenamentoService.buscarPorPadrao(padrao));
         }
 
         if (memoriaMinima != null) {
-            return armazenamentoService.buscarPorMemoriaMinima(memoriaMinima);
+            return toResponseList(armazenamentoService.buscarPorMemoriaMinima(memoriaMinima));
         }
 
         if (velocidadeLeituraMinima != null) {
-            return armazenamentoService.buscarPorVelocidadeLeituraMinima(velocidadeLeituraMinima);
+            return toResponseList(armazenamentoService.buscarPorVelocidadeLeituraMinima(velocidadeLeituraMinima));
         }
 
         if (velocidadeEscritaMinima != null) {
-            return armazenamentoService.buscarPorVelocidadeEscritaMinima(velocidadeEscritaMinima);
+            return toResponseList(armazenamentoService.buscarPorVelocidadeEscritaMinima(velocidadeEscritaMinima));
         }
 
-        return armazenamentoService.listarTodos();
+        return toResponseList(armazenamentoService.listarTodos());
     }
 
     @GetMapping("/{id}")
-    public ResponseEntity<ArmazenamentoModel> buscarPorId(@PathVariable Integer id) {
+    public ResponseEntity<ComponenteResponse> buscarPorId(@PathVariable Integer id) {
         return armazenamentoService.buscarPorId(id)
+                .map(DtoMapper::toComponenteResponse)
                 .map(ResponseEntity::ok)
                 .orElseGet(() -> ResponseEntity.notFound().build());
     }
 
     @PostMapping
-    public ResponseEntity<ArmazenamentoModel> criar(@Valid @RequestBody ArmazenamentoModel armazenamento) {
-        return ResponseEntity.status(HttpStatus.CREATED).body(armazenamentoService.salvar(armazenamento));
+    public ResponseEntity<ComponenteResponse> criar(@Valid @RequestBody ArmazenamentoRequest request) {
+        ArmazenamentoModel armazenamento = toModel(request);
+        return ResponseEntity.status(HttpStatus.CREATED)
+                .body(DtoMapper.toComponenteResponse(armazenamentoService.salvar(armazenamento)));
     }
 
     @PutMapping("/{id}")
-    public ResponseEntity<ArmazenamentoModel> atualizar(
+    public ResponseEntity<ComponenteResponse> atualizar(
             @PathVariable Integer id,
-            @Valid @RequestBody ArmazenamentoModel armazenamento
+            @Valid @RequestBody ArmazenamentoRequest request
     ) {
-        return armazenamentoService.atualizar(id, armazenamento)
+        return armazenamentoService.atualizar(id, toModel(request))
+                .map(DtoMapper::toComponenteResponse)
                 .map(ResponseEntity::ok)
                 .orElseGet(() -> ResponseEntity.notFound().build());
     }
@@ -99,5 +106,20 @@ public class ArmazenamentoController {
 
         return ResponseEntity.noContent().build();
     }
-}
 
+    private List<ComponenteResponse> toResponseList(List<ArmazenamentoModel> armazenamentos) {
+        return armazenamentos.stream().map(DtoMapper::toComponenteResponse).toList();
+    }
+
+    private ArmazenamentoModel toModel(ArmazenamentoRequest request) {
+        ArmazenamentoModel armazenamento = new ArmazenamentoModel();
+        armazenamento.setTipo(request.tipo());
+        armazenamento.setPreco(request.preco());
+        armazenamento.setTecnologia(request.tecnologia());
+        armazenamento.setPadrao(request.padrao());
+        armazenamento.setVelocidadeEscrita(request.velocidadeEscrita());
+        armazenamento.setVelocidadeLeitura(request.velocidadeLeitura());
+        armazenamento.setMemoria(request.memoria());
+        return armazenamento;
+    }
+}

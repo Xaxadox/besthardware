@@ -1,5 +1,8 @@
 package com.omni.besthardware.controllers;
 
+import com.omni.besthardware.dtos.ComponenteResponse;
+import com.omni.besthardware.dtos.GpuRequest;
+import com.omni.besthardware.mappers.DtoMapper;
 import com.omni.besthardware.models.GpuModel;
 import com.omni.besthardware.services.GpuService;
 import jakarta.validation.Valid;
@@ -28,7 +31,7 @@ public class GpuController {
     }
 
     @GetMapping
-    public List<GpuModel> listar(
+    public List<ComponenteResponse> listar(
             @RequestParam(required = false) String tipo,
             @RequestParam(required = false) BigDecimal precoMinimo,
             @RequestParam(required = false) BigDecimal precoMaximo,
@@ -38,47 +41,50 @@ public class GpuController {
             @RequestParam(required = false) Integer consumoMaximo
     ) {
         if (tipo != null) {
-            return gpuService.buscarPorTipo(tipo);
+            return toResponseList(gpuService.buscarPorTipo(tipo));
         }
 
         if (precoMinimo != null && precoMaximo != null) {
-            return gpuService.buscarPorFaixaDePreco(precoMinimo, precoMaximo);
+            return toResponseList(gpuService.buscarPorFaixaDePreco(precoMinimo, precoMaximo));
         }
 
         if (modelo != null) {
-            return gpuService.buscarPorModelo(modelo);
+            return toResponseList(gpuService.buscarPorModelo(modelo));
         }
 
         if (marca != null) {
-            return gpuService.buscarPorMarca(marca);
+            return toResponseList(gpuService.buscarPorMarca(marca));
         }
 
         if (memoriaMinima != null) {
-            return gpuService.buscarPorMemoriaMinima(memoriaMinima);
+            return toResponseList(gpuService.buscarPorMemoriaMinima(memoriaMinima));
         }
 
         if (consumoMaximo != null) {
-            return gpuService.buscarPorConsumoMaximo(consumoMaximo);
+            return toResponseList(gpuService.buscarPorConsumoMaximo(consumoMaximo));
         }
 
-        return gpuService.listarTodos();
+        return toResponseList(gpuService.listarTodos());
     }
 
     @GetMapping("/{id}")
-    public ResponseEntity<GpuModel> buscarPorId(@PathVariable Integer id) {
+    public ResponseEntity<ComponenteResponse> buscarPorId(@PathVariable Integer id) {
         return gpuService.buscarPorId(id)
+                .map(DtoMapper::toComponenteResponse)
                 .map(ResponseEntity::ok)
                 .orElseGet(() -> ResponseEntity.notFound().build());
     }
 
     @PostMapping
-    public ResponseEntity<GpuModel> criar(@Valid @RequestBody GpuModel gpu) {
-        return ResponseEntity.status(HttpStatus.CREATED).body(gpuService.salvar(gpu));
+    public ResponseEntity<ComponenteResponse> criar(@Valid @RequestBody GpuRequest request) {
+        return ResponseEntity.status(HttpStatus.CREATED)
+                .body(DtoMapper.toComponenteResponse(gpuService.salvar(toModel(request))));
     }
 
     @PutMapping("/{id}")
-    public ResponseEntity<GpuModel> atualizar(@PathVariable Integer id, @Valid @RequestBody GpuModel gpu) {
-        return gpuService.atualizar(id, gpu)
+    public ResponseEntity<ComponenteResponse> atualizar(@PathVariable Integer id, @Valid @RequestBody GpuRequest request) {
+        return gpuService.atualizar(id, toModel(request))
+                .map(DtoMapper::toComponenteResponse)
                 .map(ResponseEntity::ok)
                 .orElseGet(() -> ResponseEntity.notFound().build());
     }
@@ -91,5 +97,19 @@ public class GpuController {
 
         return ResponseEntity.noContent().build();
     }
-}
 
+    private List<ComponenteResponse> toResponseList(List<GpuModel> gpus) {
+        return gpus.stream().map(DtoMapper::toComponenteResponse).toList();
+    }
+
+    private GpuModel toModel(GpuRequest request) {
+        GpuModel gpu = new GpuModel();
+        gpu.setTipo(request.tipo());
+        gpu.setPreco(request.preco());
+        gpu.setModelo(request.modelo());
+        gpu.setMemoria(request.memoria());
+        gpu.setConsumo(request.consumo());
+        gpu.setMarca(request.marca());
+        return gpu;
+    }
+}

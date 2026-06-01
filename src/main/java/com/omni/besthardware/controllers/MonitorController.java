@@ -1,5 +1,8 @@
 package com.omni.besthardware.controllers;
 
+import com.omni.besthardware.dtos.ComponenteResponse;
+import com.omni.besthardware.dtos.MonitorRequest;
+import com.omni.besthardware.mappers.DtoMapper;
 import com.omni.besthardware.models.MonitorModel;
 import com.omni.besthardware.services.MonitorService;
 import jakarta.validation.Valid;
@@ -28,7 +31,7 @@ public class MonitorController {
     }
 
     @GetMapping
-    public List<MonitorModel> listar(
+    public List<ComponenteResponse> listar(
             @RequestParam(required = false) String tipo,
             @RequestParam(required = false) BigDecimal precoMinimo,
             @RequestParam(required = false) BigDecimal precoMaximo,
@@ -39,51 +42,54 @@ public class MonitorController {
             @RequestParam(required = false) String tecnologia
     ) {
         if (tipo != null) {
-            return monitorService.buscarPorTipo(tipo);
+            return toResponseList(monitorService.buscarPorTipo(tipo));
         }
 
         if (precoMinimo != null && precoMaximo != null) {
-            return monitorService.buscarPorFaixaDePreco(precoMinimo, precoMaximo);
+            return toResponseList(monitorService.buscarPorFaixaDePreco(precoMinimo, precoMaximo));
         }
 
         if (marca != null) {
-            return monitorService.buscarPorMarca(marca);
+            return toResponseList(monitorService.buscarPorMarca(marca));
         }
 
         if (tamanho != null) {
-            return monitorService.buscarPorTamanho(tamanho);
+            return toResponseList(monitorService.buscarPorTamanho(tamanho));
         }
 
         if (resolucao != null) {
-            return monitorService.buscarPorResolucao(resolucao);
+            return toResponseList(monitorService.buscarPorResolucao(resolucao));
         }
 
         if (frequenciaMinima != null) {
-            return monitorService.buscarPorFrequenciaMinima(frequenciaMinima);
+            return toResponseList(monitorService.buscarPorFrequenciaMinima(frequenciaMinima));
         }
 
         if (tecnologia != null) {
-            return monitorService.buscarPorTecnologia(tecnologia);
+            return toResponseList(monitorService.buscarPorTecnologia(tecnologia));
         }
 
-        return monitorService.listarTodos();
+        return toResponseList(monitorService.listarTodos());
     }
 
     @GetMapping("/{id}")
-    public ResponseEntity<MonitorModel> buscarPorId(@PathVariable Integer id) {
+    public ResponseEntity<ComponenteResponse> buscarPorId(@PathVariable Integer id) {
         return monitorService.buscarPorId(id)
+                .map(DtoMapper::toComponenteResponse)
                 .map(ResponseEntity::ok)
                 .orElseGet(() -> ResponseEntity.notFound().build());
     }
 
     @PostMapping
-    public ResponseEntity<MonitorModel> criar(@Valid @RequestBody MonitorModel monitor) {
-        return ResponseEntity.status(HttpStatus.CREATED).body(monitorService.salvar(monitor));
+    public ResponseEntity<ComponenteResponse> criar(@Valid @RequestBody MonitorRequest request) {
+        return ResponseEntity.status(HttpStatus.CREATED)
+                .body(DtoMapper.toComponenteResponse(monitorService.salvar(toModel(request))));
     }
 
     @PutMapping("/{id}")
-    public ResponseEntity<MonitorModel> atualizar(@PathVariable Integer id, @Valid @RequestBody MonitorModel monitor) {
-        return monitorService.atualizar(id, monitor)
+    public ResponseEntity<ComponenteResponse> atualizar(@PathVariable Integer id, @Valid @RequestBody MonitorRequest request) {
+        return monitorService.atualizar(id, toModel(request))
+                .map(DtoMapper::toComponenteResponse)
                 .map(ResponseEntity::ok)
                 .orElseGet(() -> ResponseEntity.notFound().build());
     }
@@ -96,5 +102,20 @@ public class MonitorController {
 
         return ResponseEntity.noContent().build();
     }
-}
 
+    private List<ComponenteResponse> toResponseList(List<MonitorModel> monitores) {
+        return monitores.stream().map(DtoMapper::toComponenteResponse).toList();
+    }
+
+    private MonitorModel toModel(MonitorRequest request) {
+        MonitorModel monitor = new MonitorModel();
+        monitor.setTipo(request.tipo());
+        monitor.setPreco(request.preco());
+        monitor.setMarca(request.marca());
+        monitor.setTamanho(request.tamanho());
+        monitor.setResolucao(request.resolucao());
+        monitor.setFrequencia(request.frequencia());
+        monitor.setTecnologia(request.tecnologia());
+        return monitor;
+    }
+}

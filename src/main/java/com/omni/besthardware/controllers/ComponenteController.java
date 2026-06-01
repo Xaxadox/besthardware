@@ -1,5 +1,8 @@
 package com.omni.besthardware.controllers;
 
+import com.omni.besthardware.dtos.ComponenteRequest;
+import com.omni.besthardware.dtos.ComponenteResponse;
+import com.omni.besthardware.mappers.DtoMapper;
 import com.omni.besthardware.models.ComponenteModel;
 import com.omni.besthardware.services.ComponenteService;
 import jakarta.validation.Valid;
@@ -28,7 +31,7 @@ public class ComponenteController {
     }
 
     @GetMapping
-    public List<ComponenteModel> listar(
+    public List<ComponenteResponse> listar(
             @RequestParam(required = false) String tipo,
             @RequestParam(required = false) BigDecimal precoMinimo,
             @RequestParam(required = false) BigDecimal precoMaximo,
@@ -36,42 +39,45 @@ public class ComponenteController {
             @RequestParam(required = false) Integer componenteCompativelId
     ) {
         if (tipo != null) {
-            return componenteService.buscarPorTipo(tipo);
+            return toResponseList(componenteService.buscarPorTipo(tipo));
         }
 
         if (precoMinimo != null && precoMaximo != null) {
-            return componenteService.buscarPorFaixaDePreco(precoMinimo, precoMaximo);
+            return toResponseList(componenteService.buscarPorFaixaDePreco(precoMinimo, precoMaximo));
         }
 
         if (perfilId != null) {
-            return componenteService.buscarPorPerfil(perfilId);
+            return toResponseList(componenteService.buscarPorPerfil(perfilId));
         }
 
         if (componenteCompativelId != null) {
-            return componenteService.buscarCompativeisCom(componenteCompativelId);
+            return toResponseList(componenteService.buscarCompativeisCom(componenteCompativelId));
         }
 
-        return componenteService.listarTodos();
+        return toResponseList(componenteService.listarTodos());
     }
 
     @GetMapping("/{id}")
-    public ResponseEntity<ComponenteModel> buscarPorId(@PathVariable Integer id) {
+    public ResponseEntity<ComponenteResponse> buscarPorId(@PathVariable Integer id) {
         return componenteService.buscarPorId(id)
+                .map(DtoMapper::toComponenteResponse)
                 .map(ResponseEntity::ok)
                 .orElseGet(() -> ResponseEntity.notFound().build());
     }
 
     @PostMapping
-    public ResponseEntity<ComponenteModel> criar(@Valid @RequestBody ComponenteModel componente) {
-        return ResponseEntity.status(HttpStatus.CREATED).body(componenteService.salvar(componente));
+    public ResponseEntity<ComponenteResponse> criar(@Valid @RequestBody ComponenteRequest request) {
+        return ResponseEntity.status(HttpStatus.CREATED)
+                .body(DtoMapper.toComponenteResponse(componenteService.salvar(toModel(request))));
     }
 
     @PutMapping("/{id}")
-    public ResponseEntity<ComponenteModel> atualizar(
+    public ResponseEntity<ComponenteResponse> atualizar(
             @PathVariable Integer id,
-            @Valid @RequestBody ComponenteModel componente
+            @Valid @RequestBody ComponenteRequest request
     ) {
-        return componenteService.atualizar(id, componente)
+        return componenteService.atualizar(id, toModel(request))
+                .map(DtoMapper::toComponenteResponse)
                 .map(ResponseEntity::ok)
                 .orElseGet(() -> ResponseEntity.notFound().build());
     }
@@ -84,5 +90,15 @@ public class ComponenteController {
 
         return ResponseEntity.noContent().build();
     }
-}
 
+    private List<ComponenteResponse> toResponseList(List<ComponenteModel> componentes) {
+        return componentes.stream().map(DtoMapper::toComponenteResponse).toList();
+    }
+
+    private ComponenteModel toModel(ComponenteRequest request) {
+        ComponenteModel componente = new ComponenteModel();
+        componente.setTipo(request.tipo());
+        componente.setPreco(request.preco());
+        return componente;
+    }
+}

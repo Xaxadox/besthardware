@@ -1,5 +1,8 @@
 package com.omni.besthardware.controllers;
 
+import com.omni.besthardware.dtos.ComponenteResponse;
+import com.omni.besthardware.dtos.RamRequest;
+import com.omni.besthardware.mappers.DtoMapper;
 import com.omni.besthardware.models.RamModel;
 import com.omni.besthardware.services.RamService;
 import jakarta.validation.Valid;
@@ -28,7 +31,7 @@ public class RamController {
     }
 
     @GetMapping
-    public List<RamModel> listar(
+    public List<ComponenteResponse> listar(
             @RequestParam(required = false) String tipo,
             @RequestParam(required = false) BigDecimal precoMinimo,
             @RequestParam(required = false) BigDecimal precoMaximo,
@@ -38,47 +41,50 @@ public class RamController {
             @RequestParam(required = false) Integer memoriaMinima
     ) {
         if (tipo != null) {
-            return ramService.buscarPorTipo(tipo);
+            return toResponseList(ramService.buscarPorTipo(tipo));
         }
 
         if (precoMinimo != null && precoMaximo != null) {
-            return ramService.buscarPorFaixaDePreco(precoMinimo, precoMaximo);
+            return toResponseList(ramService.buscarPorFaixaDePreco(precoMinimo, precoMaximo));
         }
 
         if (geracao != null) {
-            return ramService.buscarPorGeracao(geracao);
+            return toResponseList(ramService.buscarPorGeracao(geracao));
         }
 
         if (frequenciaMinima != null) {
-            return ramService.buscarPorFrequenciaMinima(frequenciaMinima);
+            return toResponseList(ramService.buscarPorFrequenciaMinima(frequenciaMinima));
         }
 
         if (marca != null) {
-            return ramService.buscarPorMarca(marca);
+            return toResponseList(ramService.buscarPorMarca(marca));
         }
 
         if (memoriaMinima != null) {
-            return ramService.buscarPorMemoriaMinima(memoriaMinima);
+            return toResponseList(ramService.buscarPorMemoriaMinima(memoriaMinima));
         }
 
-        return ramService.listarTodos();
+        return toResponseList(ramService.listarTodos());
     }
 
     @GetMapping("/{id}")
-    public ResponseEntity<RamModel> buscarPorId(@PathVariable Integer id) {
+    public ResponseEntity<ComponenteResponse> buscarPorId(@PathVariable Integer id) {
         return ramService.buscarPorId(id)
+                .map(DtoMapper::toComponenteResponse)
                 .map(ResponseEntity::ok)
                 .orElseGet(() -> ResponseEntity.notFound().build());
     }
 
     @PostMapping
-    public ResponseEntity<RamModel> criar(@Valid @RequestBody RamModel ram) {
-        return ResponseEntity.status(HttpStatus.CREATED).body(ramService.salvar(ram));
+    public ResponseEntity<ComponenteResponse> criar(@Valid @RequestBody RamRequest request) {
+        return ResponseEntity.status(HttpStatus.CREATED)
+                .body(DtoMapper.toComponenteResponse(ramService.salvar(toModel(request))));
     }
 
     @PutMapping("/{id}")
-    public ResponseEntity<RamModel> atualizar(@PathVariable Integer id, @Valid @RequestBody RamModel ram) {
-        return ramService.atualizar(id, ram)
+    public ResponseEntity<ComponenteResponse> atualizar(@PathVariable Integer id, @Valid @RequestBody RamRequest request) {
+        return ramService.atualizar(id, toModel(request))
+                .map(DtoMapper::toComponenteResponse)
                 .map(ResponseEntity::ok)
                 .orElseGet(() -> ResponseEntity.notFound().build());
     }
@@ -91,5 +97,19 @@ public class RamController {
 
         return ResponseEntity.noContent().build();
     }
-}
 
+    private List<ComponenteResponse> toResponseList(List<RamModel> rams) {
+        return rams.stream().map(DtoMapper::toComponenteResponse).toList();
+    }
+
+    private RamModel toModel(RamRequest request) {
+        RamModel ram = new RamModel();
+        ram.setTipo(request.tipo());
+        ram.setPreco(request.preco());
+        ram.setGeracao(request.geracao());
+        ram.setFrequencia(request.frequencia());
+        ram.setMarca(request.marca());
+        ram.setMemoria(request.memoria());
+        return ram;
+    }
+}

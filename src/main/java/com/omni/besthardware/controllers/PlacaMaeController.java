@@ -1,5 +1,8 @@
 package com.omni.besthardware.controllers;
 
+import com.omni.besthardware.dtos.ComponenteResponse;
+import com.omni.besthardware.dtos.PlacaMaeRequest;
+import com.omni.besthardware.mappers.DtoMapper;
 import com.omni.besthardware.models.PlacaMaeModel;
 import com.omni.besthardware.services.PlacaMaeService;
 import jakarta.validation.Valid;
@@ -28,7 +31,7 @@ public class PlacaMaeController {
     }
 
     @GetMapping
-    public List<PlacaMaeModel> listar(
+    public List<ComponenteResponse> listar(
             @RequestParam(required = false) String tipo,
             @RequestParam(required = false) BigDecimal precoMinimo,
             @RequestParam(required = false) BigDecimal precoMaximo,
@@ -38,50 +41,50 @@ public class PlacaMaeController {
             @RequestParam(required = false) String formato
     ) {
         if (tipo != null) {
-            return placaMaeService.buscarPorTipo(tipo);
+            return toResponseList(placaMaeService.buscarPorTipo(tipo));
         }
 
         if (precoMinimo != null && precoMaximo != null) {
-            return placaMaeService.buscarPorFaixaDePreco(precoMinimo, precoMaximo);
+            return toResponseList(placaMaeService.buscarPorFaixaDePreco(precoMinimo, precoMaximo));
         }
 
         if (marca != null) {
-            return placaMaeService.buscarPorMarca(marca);
+            return toResponseList(placaMaeService.buscarPorMarca(marca));
         }
 
         if (socket != null) {
-            return placaMaeService.buscarPorSocket(socket);
+            return toResponseList(placaMaeService.buscarPorSocket(socket));
         }
 
         if (chipset != null) {
-            return placaMaeService.buscarPorChipset(chipset);
+            return toResponseList(placaMaeService.buscarPorChipset(chipset));
         }
 
         if (formato != null) {
-            return placaMaeService.buscarPorFormato(formato);
+            return toResponseList(placaMaeService.buscarPorFormato(formato));
         }
 
-        return placaMaeService.listarTodos();
+        return toResponseList(placaMaeService.listarTodos());
     }
 
     @GetMapping("/{id}")
-    public ResponseEntity<PlacaMaeModel> buscarPorId(@PathVariable Integer id) {
+    public ResponseEntity<ComponenteResponse> buscarPorId(@PathVariable Integer id) {
         return placaMaeService.buscarPorId(id)
+                .map(DtoMapper::toComponenteResponse)
                 .map(ResponseEntity::ok)
                 .orElseGet(() -> ResponseEntity.notFound().build());
     }
 
     @PostMapping
-    public ResponseEntity<PlacaMaeModel> criar(@Valid @RequestBody PlacaMaeModel placaMae) {
-        return ResponseEntity.status(HttpStatus.CREATED).body(placaMaeService.salvar(placaMae));
+    public ResponseEntity<ComponenteResponse> criar(@Valid @RequestBody PlacaMaeRequest request) {
+        return ResponseEntity.status(HttpStatus.CREATED)
+                .body(DtoMapper.toComponenteResponse(placaMaeService.salvar(toModel(request))));
     }
 
     @PutMapping("/{id}")
-    public ResponseEntity<PlacaMaeModel> atualizar(
-            @PathVariable Integer id,
-            @Valid @RequestBody PlacaMaeModel placaMae
-    ) {
-        return placaMaeService.atualizar(id, placaMae)
+    public ResponseEntity<ComponenteResponse> atualizar(@PathVariable Integer id, @Valid @RequestBody PlacaMaeRequest request) {
+        return placaMaeService.atualizar(id, toModel(request))
+                .map(DtoMapper::toComponenteResponse)
                 .map(ResponseEntity::ok)
                 .orElseGet(() -> ResponseEntity.notFound().build());
     }
@@ -94,5 +97,19 @@ public class PlacaMaeController {
 
         return ResponseEntity.noContent().build();
     }
-}
 
+    private List<ComponenteResponse> toResponseList(List<PlacaMaeModel> placasMae) {
+        return placasMae.stream().map(DtoMapper::toComponenteResponse).toList();
+    }
+
+    private PlacaMaeModel toModel(PlacaMaeRequest request) {
+        PlacaMaeModel placaMae = new PlacaMaeModel();
+        placaMae.setTipo(request.tipo());
+        placaMae.setPreco(request.preco());
+        placaMae.setMarca(request.marca());
+        placaMae.setSocket(request.socket());
+        placaMae.setChipset(request.chipset());
+        placaMae.setFormato(request.formato());
+        return placaMae;
+    }
+}

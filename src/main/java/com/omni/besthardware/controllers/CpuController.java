@@ -1,5 +1,8 @@
 package com.omni.besthardware.controllers;
 
+import com.omni.besthardware.dtos.ComponenteResponse;
+import com.omni.besthardware.dtos.CpuRequest;
+import com.omni.besthardware.mappers.DtoMapper;
 import com.omni.besthardware.models.CpuModel;
 import com.omni.besthardware.services.CpuService;
 import jakarta.validation.Valid;
@@ -30,7 +33,7 @@ public class CpuController {
     }
 
     @GetMapping
-    public List<CpuModel> listar(
+    public List<ComponenteResponse> listar(
             @RequestParam(required = false) String tipo,
             @RequestParam(required = false) BigDecimal precoMinimo,
             @RequestParam(required = false) BigDecimal precoMaximo,
@@ -43,55 +46,58 @@ public class CpuController {
             @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate dataFinal
     ) {
         if (tipo != null) {
-            return cpuService.buscarPorTipo(tipo);
+            return toResponseList(cpuService.buscarPorTipo(tipo));
         }
 
         if (precoMinimo != null && precoMaximo != null) {
-            return cpuService.buscarPorFaixaDePreco(precoMinimo, precoMaximo);
+            return toResponseList(cpuService.buscarPorFaixaDePreco(precoMinimo, precoMaximo));
         }
 
         if (modelo != null) {
-            return cpuService.buscarPorModelo(modelo);
+            return toResponseList(cpuService.buscarPorModelo(modelo));
         }
 
         if (socket != null) {
-            return cpuService.buscarPorSocket(socket);
+            return toResponseList(cpuService.buscarPorSocket(socket));
         }
 
         if (frequenciaMinima != null) {
-            return cpuService.buscarPorFrequenciaMinima(frequenciaMinima);
+            return toResponseList(cpuService.buscarPorFrequenciaMinima(frequenciaMinima));
         }
 
         if (consumoMaximo != null) {
-            return cpuService.buscarPorConsumoMaximo(consumoMaximo);
+            return toResponseList(cpuService.buscarPorConsumoMaximo(consumoMaximo));
         }
 
         if (nucleosMinimos != null) {
-            return cpuService.buscarPorNucleosMinimos(nucleosMinimos);
+            return toResponseList(cpuService.buscarPorNucleosMinimos(nucleosMinimos));
         }
 
         if (dataInicial != null && dataFinal != null) {
-            return cpuService.buscarPorPeriodoLancamento(dataInicial, dataFinal);
+            return toResponseList(cpuService.buscarPorPeriodoLancamento(dataInicial, dataFinal));
         }
 
-        return cpuService.listarTodos();
+        return toResponseList(cpuService.listarTodos());
     }
 
     @GetMapping("/{id}")
-    public ResponseEntity<CpuModel> buscarPorId(@PathVariable Integer id) {
+    public ResponseEntity<ComponenteResponse> buscarPorId(@PathVariable Integer id) {
         return cpuService.buscarPorId(id)
+                .map(DtoMapper::toComponenteResponse)
                 .map(ResponseEntity::ok)
                 .orElseGet(() -> ResponseEntity.notFound().build());
     }
 
     @PostMapping
-    public ResponseEntity<CpuModel> criar(@Valid @RequestBody CpuModel cpu) {
-        return ResponseEntity.status(HttpStatus.CREATED).body(cpuService.salvar(cpu));
+    public ResponseEntity<ComponenteResponse> criar(@Valid @RequestBody CpuRequest request) {
+        return ResponseEntity.status(HttpStatus.CREATED)
+                .body(DtoMapper.toComponenteResponse(cpuService.salvar(toModel(request))));
     }
 
     @PutMapping("/{id}")
-    public ResponseEntity<CpuModel> atualizar(@PathVariable Integer id, @Valid @RequestBody CpuModel cpu) {
-        return cpuService.atualizar(id, cpu)
+    public ResponseEntity<ComponenteResponse> atualizar(@PathVariable Integer id, @Valid @RequestBody CpuRequest request) {
+        return cpuService.atualizar(id, toModel(request))
+                .map(DtoMapper::toComponenteResponse)
                 .map(ResponseEntity::ok)
                 .orElseGet(() -> ResponseEntity.notFound().build());
     }
@@ -104,5 +110,21 @@ public class CpuController {
 
         return ResponseEntity.noContent().build();
     }
-}
 
+    private List<ComponenteResponse> toResponseList(List<CpuModel> cpus) {
+        return cpus.stream().map(DtoMapper::toComponenteResponse).toList();
+    }
+
+    private CpuModel toModel(CpuRequest request) {
+        CpuModel cpu = new CpuModel();
+        cpu.setTipo(request.tipo());
+        cpu.setPreco(request.preco());
+        cpu.setModelo(request.modelo());
+        cpu.setFrequencia(request.frequencia());
+        cpu.setConsumo(request.consumo());
+        cpu.setAnoLancamento(request.anoLancamento());
+        cpu.setNucleos(request.nucleos());
+        cpu.setSocket(request.socket());
+        return cpu;
+    }
+}
