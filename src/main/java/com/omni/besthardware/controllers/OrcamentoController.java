@@ -1,11 +1,26 @@
 package com.omni.besthardware.controllers;
 
+import com.omni.besthardware.dtos.ItemOrcamentoRequest;
+import com.omni.besthardware.dtos.ItemOrcamentoResponse;
+import com.omni.besthardware.dtos.OrcamentoAtualizacaoRequest;
+import com.omni.besthardware.dtos.OrcamentoRequest;
+import com.omni.besthardware.dtos.OrcamentoResponse;
+import com.omni.besthardware.models.ComponenteModel;
+import com.omni.besthardware.models.ItemOrcamentoModel;
 import com.omni.besthardware.models.OrcamentoModel;
+import com.omni.besthardware.models.PerfilModel;
+import com.omni.besthardware.models.UsuarioModel;
+import com.omni.besthardware.services.ComponenteService;
+import com.omni.besthardware.services.ItemOrcamentoService;
 import com.omni.besthardware.services.OrcamentoService;
+import com.omni.besthardware.services.PerfilService;
+import com.omni.besthardware.services.UsuarioService;
 import jakarta.validation.Valid;
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -24,13 +39,27 @@ import org.springframework.web.bind.annotation.RestController;
 public class OrcamentoController {
 
     private final OrcamentoService orcamentoService;
+    private final UsuarioService usuarioService;
+    private final PerfilService perfilService;
+    private final ComponenteService componenteService;
+    private final ItemOrcamentoService itemOrcamentoService;
 
-    public OrcamentoController(OrcamentoService orcamentoService) {
+    public OrcamentoController(
+            OrcamentoService orcamentoService,
+            UsuarioService usuarioService,
+            PerfilService perfilService,
+            ComponenteService componenteService,
+            ItemOrcamentoService itemOrcamentoService
+    ) {
         this.orcamentoService = orcamentoService;
+        this.usuarioService = usuarioService;
+        this.perfilService = perfilService;
+        this.componenteService = componenteService;
+        this.itemOrcamentoService = itemOrcamentoService;
     }
 
     @GetMapping
-    public List<OrcamentoModel> listar(
+    public List<OrcamentoResponse> listar(
             @RequestParam(required = false) String nome,
             @RequestParam(required = false) Integer usuarioId,
             @RequestParam(required = false) Integer perfilId,
@@ -40,52 +69,102 @@ public class OrcamentoController {
             @RequestParam(required = false) BigDecimal precoMaximo
     ) {
         if (nome != null) {
-            return orcamentoService.buscarPorNome(nome);
+            return toResponseList(orcamentoService.buscarPorNome(nome));
         }
 
         if (usuarioId != null) {
-            return orcamentoService.buscarPorUsuario(usuarioId);
+            return toResponseList(orcamentoService.buscarPorUsuario(usuarioId));
         }
 
         if (perfilId != null) {
-            return orcamentoService.buscarPorPerfil(perfilId);
+            return toResponseList(orcamentoService.buscarPorPerfil(perfilId));
         }
 
         if (dataInicial != null && dataFinal != null) {
-            return orcamentoService.buscarPorPeriodoCriacao(dataInicial, dataFinal);
+            return toResponseList(orcamentoService.buscarPorPeriodoCriacao(dataInicial, dataFinal));
         }
 
         if (precoMinimo != null && precoMaximo != null) {
-            return orcamentoService.buscarPorFaixaDePreco(precoMinimo, precoMaximo);
+            return toResponseList(orcamentoService.buscarPorFaixaDePreco(precoMinimo, precoMaximo));
         }
 
-        return orcamentoService.listarTodos();
+        return toResponseList(orcamentoService.listarTodos());
     }
 
     @GetMapping("/{id}")
-    public ResponseEntity<OrcamentoModel> buscarPorId(@PathVariable Integer id) {
+    public ResponseEntity<OrcamentoResponse> buscarPorId(@PathVariable Integer id) {
         return orcamentoService.buscarPorId(id)
+                .map(this::toResponse)
                 .map(ResponseEntity::ok)
                 .orElseGet(() -> ResponseEntity.notFound().build());
     }
 
     @PostMapping
-    public ResponseEntity<OrcamentoModel> criar(@Valid @RequestBody OrcamentoModel orcamento) {
-        if (orcamento.getDataCriacao() == null) {
-            orcamento.setDataCriacao(LocalDateTime.now());
+    public ResponseEntity<OrcamentoResponse> criar(@Valid @RequestBody OrcamentoRequest request) {
+        Optional<UsuarioModel> usuario = usuarioService.buscarPorId(request.usuarioId());
+        if (usuario.isEmpty()) {
+            return ResponseEntity.notFound().build();
         }
 
-        return ResponseEntity.status(HttpStatus.CREATED).body(orcamentoService.salvar(orcamento));
+        Optional<PerfilModel> perfil = perfilService.buscarPorId(request.perfilId());
+        if (perfil.isEmpty()) {
+            return ResponseEntity.notFound().build();
+        }
+
+        OrcamentoModel orcamento = new OrcamentoModel();
+        orcamento.setNome(request.nome());
+        orcamento.setDataCriacao(LocalDateTime.now());
+        orcamento.setUsuario(usuario.get());
+        orcamento.setPerfil(perfil.get());
+
+        List<ItemOrcamentoModel> itens = new ArrayList<>();
+        for (ItemOrcamentoRequest itemRequest : request.itens()) {
+            Optional<ComponenteModel> componente = componenteService.buscarPorId(itemRequest.componenteId());
+            if (componente.isEmpty()) {
+                return ResponseEntity.notFound().build();
+            }
+
+            ItemOrcamentoModel item = new ItemOrcamentoModel();
+            item.setOrcamento(orcamento);
+            item.setComponente(componente.get());
+            item.setQuantidade(itemRequest.quantidade());
+            item.setPreco(componente.get().getPreco());
+            itens.add(item);
+        }
+
+        orcamento.getItens().addAll(itens);
+        orcamento.setPreco(calcularTotal(itens));
+
+        OrcamentoModel salvo = orcamentoService.salvar(orcamento);
+        return ResponseEntity.status(HttpStatus.CREATED).body(toResponse(salvo));
     }
 
     @PutMapping("/{id}")
-    public ResponseEntity<OrcamentoModel> atualizar(
+    public ResponseEntity<OrcamentoResponse> atualizar(
             @PathVariable Integer id,
-            @Valid @RequestBody OrcamentoModel orcamento
+            @Valid @RequestBody OrcamentoAtualizacaoRequest request
     ) {
-        return orcamentoService.atualizar(id, orcamento)
-                .map(ResponseEntity::ok)
-                .orElseGet(() -> ResponseEntity.notFound().build());
+        Optional<OrcamentoModel> orcamento = orcamentoService.buscarPorId(id);
+        if (orcamento.isEmpty()) {
+            return ResponseEntity.notFound().build();
+        }
+
+        Optional<UsuarioModel> usuario = usuarioService.buscarPorId(request.usuarioId());
+        if (usuario.isEmpty()) {
+            return ResponseEntity.notFound().build();
+        }
+
+        Optional<PerfilModel> perfil = perfilService.buscarPorId(request.perfilId());
+        if (perfil.isEmpty()) {
+            return ResponseEntity.notFound().build();
+        }
+
+        OrcamentoModel atualizado = orcamento.get();
+        atualizado.setNome(request.nome());
+        atualizado.setUsuario(usuario.get());
+        atualizado.setPerfil(perfil.get());
+
+        return ResponseEntity.ok(toResponse(orcamentoService.salvar(atualizado)));
     }
 
     @DeleteMapping("/{id}")
@@ -95,6 +174,49 @@ public class OrcamentoController {
         }
 
         return ResponseEntity.noContent().build();
+    }
+
+    private List<OrcamentoResponse> toResponseList(List<OrcamentoModel> orcamentos) {
+        return orcamentos.stream()
+                .map(this::toResponse)
+                .toList();
+    }
+
+    private OrcamentoResponse toResponse(OrcamentoModel orcamento) {
+        List<ItemOrcamentoResponse> itens = itemOrcamentoService.buscarPorOrcamento(orcamento.getId()).stream()
+                .map(this::toItemResponse)
+                .toList();
+
+        return new OrcamentoResponse(
+                orcamento.getId(),
+                orcamento.getNome(),
+                orcamento.getDataCriacao(),
+                orcamento.getPreco(),
+                orcamento.getUsuario().getId(),
+                orcamento.getPerfil().getId(),
+                itens
+        );
+    }
+
+    private ItemOrcamentoResponse toItemResponse(ItemOrcamentoModel item) {
+        return new ItemOrcamentoResponse(
+                item.getId(),
+                item.getOrcamento().getId(),
+                item.getComponente().getId(),
+                item.getQuantidade(),
+                item.getPreco(),
+                calcularSubtotal(item)
+        );
+    }
+
+    private BigDecimal calcularTotal(List<ItemOrcamentoModel> itens) {
+        return itens.stream()
+                .map(this::calcularSubtotal)
+                .reduce(BigDecimal.ZERO, BigDecimal::add);
+    }
+
+    private BigDecimal calcularSubtotal(ItemOrcamentoModel item) {
+        return item.getPreco().multiply(BigDecimal.valueOf(item.getQuantidade()));
     }
 }
 
