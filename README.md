@@ -157,9 +157,3 @@ Implementado:
 - tratamento centralizado de erros;
 - testes de integracao basicos;
 - dados iniciais para testes com H2.
-
-Ainda nao implementado:
-
-- frontend;
-- importacao automatica da planilha CSV;
-- banco persistente real no lugar do H2 em memoria.
