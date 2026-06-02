@@ -48,6 +48,9 @@ public class TesteConfig implements CommandLineRunner {
     @Autowired
     private ItemOrcamentoRepository itemOrcamentoRepository;
 
+    @Autowired
+    private OfertaPrecoRepository ofertaPrecoRepository;
+
     @Override
     public void run(String... args) throws Exception {
 
@@ -370,6 +373,20 @@ public class TesteConfig implements CommandLineRunner {
         armazenamentoRepository.saveAll(Arrays.asList(ssd512, ssd1Tb, ssd2Tb));
         monitorRepository.saveAll(Arrays.asList(monitorFhd75, monitor2k144, monitor4k144, monitor4k60));
 
+        LocalDate dataColeta = LocalDate.now();
+        ofertaPrecoRepository.saveAll(Arrays.asList(
+                oferta(cpu, "KaBuM", "849.90", "899.90", 10, null, "https://exemplo.com/ryzen-5-5600-kabum", "Pesquisa manual", dataColeta, "Preco a vista sem frete"),
+                oferta(cpu, "Pichau", "829.90", "879.90", 10, null, "https://exemplo.com/ryzen-5-5600-pichau", "PC Build Wizard", dataColeta, "Menor oferta inicial para teste"),
+                oferta(gpu, "Terabyte", "1799.90", "1899.90", 10, null, "https://exemplo.com/rtx-3060-terabyte", "Pesquisa manual", dataColeta, "GPU Full HD"),
+                oferta(cpuTrabalho, "KaBuM", "749.90", "799.90", 10, null, "https://exemplo.com/ryzen-5-5600g-kabum", "PC Build Wizard", dataColeta, "CPU com video integrado"),
+                oferta(gpuIntermediaria, "Pichau", "2399.90", "2499.90", 10, null, "https://exemplo.com/rtx-4060-ti-pichau", "PC Build Wizard", dataColeta, "Oferta para perfil 2K"),
+                oferta(gpuPesada, "Terabyte", "5299.90", "5499.90", 10, null, "https://exemplo.com/rtx-4070-ti-super-terabyte", "Pesquisa manual", dataColeta, "Oferta para jogos pesados"),
+                oferta(ramDdr5_32, "KaBuM", "849.90", "899.90", 10, null, "https://exemplo.com/ddr5-32gb-kabum", "Pesquisa manual", dataColeta, "Memoria para jogos pesados e profissional"),
+                oferta(fonte850, "Pichau", "849.90", "899.90", 10, null, "https://exemplo.com/fonte-850w-pichau", "Pesquisa manual", dataColeta, "Fonte para configuracao profissional"),
+                oferta(ssd1Tb, "KaBuM", "499.90", "549.90", 10, null, "https://exemplo.com/ssd-1tb-kabum", "PC Build Wizard", dataColeta, "SSD NVME para jogos atuais"),
+                oferta(monitor2k144, "Terabyte", "1599.90", "1699.90", 10, null, "https://exemplo.com/monitor-2k-144-terabyte", "Pesquisa manual", dataColeta, "Monitor 2K")
+        ));
+
         // =========================
         // N:N 1 - PERFIL ↔ COMPONENTE
         // =========================
@@ -483,5 +500,31 @@ public class TesteConfig implements CommandLineRunner {
                 itemArmazenamento,
                 itemMonitor
         ));
+    }
+
+    private OfertaPrecoModel oferta(
+            ComponenteModel componente,
+            String loja,
+            String precoAvista,
+            String precoParcelado,
+            Integer parcelas,
+            String cupom,
+            String urlProduto,
+            String fonte,
+            LocalDate dataColeta,
+            String observacoes
+    ) {
+        OfertaPrecoModel oferta = new OfertaPrecoModel();
+        oferta.setComponente(componente);
+        oferta.setLoja(loja);
+        oferta.setPrecoAvista(new BigDecimal(precoAvista));
+        oferta.setPrecoParcelado(new BigDecimal(precoParcelado));
+        oferta.setParcelas(parcelas);
+        oferta.setCupom(cupom);
+        oferta.setUrlProduto(urlProduto);
+        oferta.setFonte(fonte);
+        oferta.setDataColeta(dataColeta);
+        oferta.setObservacoes(observacoes);
+        return oferta;
     }
 }

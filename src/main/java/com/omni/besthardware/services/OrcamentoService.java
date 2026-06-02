@@ -30,19 +30,22 @@ public class OrcamentoService {
     private final UsuarioService usuarioService;
     private final PerfilService perfilService;
     private final ComponenteService componenteService;
+    private final OfertaPrecoService ofertaPrecoService;
 
     public OrcamentoService(
             OrcamentoRepository orcamentoRepository,
             ItemOrcamentoRepository itemOrcamentoRepository,
             UsuarioService usuarioService,
             PerfilService perfilService,
-            ComponenteService componenteService
+            ComponenteService componenteService,
+            OfertaPrecoService ofertaPrecoService
     ) {
         this.orcamentoRepository = orcamentoRepository;
         this.itemOrcamentoRepository = itemOrcamentoRepository;
         this.usuarioService = usuarioService;
         this.perfilService = perfilService;
         this.componenteService = componenteService;
+        this.ofertaPrecoService = ofertaPrecoService;
     }
 
     @Transactional(readOnly = true)
@@ -178,7 +181,7 @@ public class OrcamentoService {
         item.setOrcamento(orcamento);
         item.setComponente(componente);
         item.setQuantidade(itemRequest.quantidade());
-        item.setPreco(componente.getPreco());
+        item.setPreco(ofertaPrecoService.calcularPrecoPreferencial(componente));
         return item;
     }
 

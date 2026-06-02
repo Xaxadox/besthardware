@@ -13,6 +13,7 @@ import com.omni.besthardware.models.PerfilModel;
 import com.omni.besthardware.models.PlacaMaeModel;
 import com.omni.besthardware.models.RamModel;
 import com.omni.besthardware.models.UsuarioModel;
+import java.math.BigDecimal;
 import java.util.List;
 
 public final class DtoMapper {
@@ -33,12 +34,16 @@ public final class DtoMapper {
     }
 
     public static ComponenteResponse toComponenteResponse(ComponenteModel componente) {
+        return toComponenteResponse(componente, componente.getPreco());
+    }
+
+    public static ComponenteResponse toComponenteResponse(ComponenteModel componente, BigDecimal preco) {
         if (componente instanceof CpuModel cpu) {
             return new ComponenteResponse(
                     cpu.getId(),
                     "CPU",
                     cpu.getTipo(),
-                    cpu.getPreco(),
+                    preco,
                     cpu.getModelo(),
                     null,
                     cpu.getSocket(),
@@ -66,7 +71,7 @@ public final class DtoMapper {
                     gpu.getId(),
                     "GPU",
                     gpu.getTipo(),
-                    gpu.getPreco(),
+                    preco,
                     gpu.getModelo(),
                     gpu.getMarca(),
                     null,
@@ -94,7 +99,7 @@ public final class DtoMapper {
                     ram.getId(),
                     "RAM",
                     ram.getTipo(),
-                    ram.getPreco(),
+                    preco,
                     null,
                     ram.getMarca(),
                     null,
@@ -122,7 +127,7 @@ public final class DtoMapper {
                     fonte.getId(),
                     "Fonte",
                     fonte.getTipo(),
-                    fonte.getPreco(),
+                    preco,
                     null,
                     fonte.getMarca(),
                     null,
@@ -150,7 +155,7 @@ public final class DtoMapper {
                     armazenamento.getId(),
                     "Armazenamento",
                     armazenamento.getTipo(),
-                    armazenamento.getPreco(),
+                    preco,
                     null,
                     null,
                     null,
@@ -178,7 +183,7 @@ public final class DtoMapper {
                     monitor.getId(),
                     "Monitor",
                     monitor.getTipo(),
-                    monitor.getPreco(),
+                    preco,
                     null,
                     monitor.getMarca(),
                     null,
@@ -206,7 +211,7 @@ public final class DtoMapper {
                     placaMae.getId(),
                     "PlacaMae",
                     placaMae.getTipo(),
-                    placaMae.getPreco(),
+                    preco,
                     null,
                     placaMae.getMarca(),
                     placaMae.getSocket(),
@@ -233,7 +238,7 @@ public final class DtoMapper {
                 componente.getId(),
                 "Componente",
                 componente.getTipo(),
-                componente.getPreco(),
+                preco,
                 null,
                 null,
                 null,

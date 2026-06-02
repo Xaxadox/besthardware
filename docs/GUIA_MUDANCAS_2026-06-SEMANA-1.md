@@ -1,6 +1,6 @@
-# Guia das mudancas de 2026-06-01
+# Guia das mudancas de 2026-06 - semana 1
 
-Este guia registra as mudancas feitas no projeto BestHardware em 2026-06-01. Ele serve como controle de mudancas e tambem como material de estudo para entender a evolucao da API REST.
+Este guia registra as mudancas feitas no projeto BestHardware na semana 1 de 2026-06. Ele serve como controle de mudancas e tambem como material de estudo para entender a evolucao da API REST.
 
 ## 1. Controllers REST
 
@@ -927,7 +927,94 @@ Motivo da decisao:
 - registrar `fonte`, `url_produto` e `data_coleta` deixa a pesquisa mais rastreavel;
 - evitar scraping automatico sem autorizacao reduz risco tecnico e juridico.
 
-## 27. Testes executados
+## 27. Tabela de ofertas de preco
+
+Foi adicionada a entidade:
+
+```text
+OfertaPrecoModel
+```
+
+Ela representa uma oferta de preco de um componente em uma loja ou fonte especifica.
+
+Campos principais:
+
+```text
+id
+loja
+precoAvista
+precoParcelado
+parcelas
+cupom
+urlProduto
+fonte
+observacoes
+dataColeta
+componente
+```
+
+Cardinalidade no DER:
+
+```text
+Componente 1 ---- N OfertaPreco
+```
+
+Isso significa que um componente pode ter varias ofertas, mas cada oferta pertence a um unico componente.
+
+Foram criados:
+
+```text
+OfertaPrecoModel
+OfertaPrecoRepository
+OfertaPrecoService
+OfertaPrecoController
+OfertaPrecoRequest
+OfertaPrecoResponse
+OfertaPrecoFiltroRequest
+OfertaPrecoSpecification
+```
+
+Endpoint principal:
+
+```text
+/api/ofertas-preco
+```
+
+Endpoints especificos:
+
+```text
+GET /api/ofertas-preco?componenteId=1
+GET /api/ofertas-preco/componentes/1/menor-preco
+```
+
+Regra de preco preferencial:
+
+```text
+1. Se o componente tiver ofertas, usa a menor precoAvista.
+2. Se nao tiver ofertas, usa ComponenteModel.preco como fallback.
+3. ItemOrcamentoModel.preco continua congelando o preco usado no momento da criacao do orcamento.
+```
+
+Essa regra foi aplicada em:
+
+```text
+OrcamentoService
+ItemOrcamentoService
+RecomendacaoService
+```
+
+O `ComponenteModel.preco` foi mantido como preco base, porque remover esse campo agora quebraria filtros, DTOs, recomendacoes, dados iniciais e orcamentos existentes.
+
+Tambem foram adicionados o novo DER em:
+
+```text
+docs/DER_oferta.png
+docs/DER_oferta.pdf
+```
+
+O DER antigo foi mantido para registrar a evolucao do projeto.
+
+## 28. Testes executados
 
 Depois das mudancas, foi executado:
 
@@ -939,12 +1026,12 @@ Resultado:
 
 ```text
 BUILD SUCCESS
-Tests run: 5, Failures: 0, Errors: 0, Skipped: 0
+Tests run: 7, Failures: 0, Errors: 0, Skipped: 0
 ```
 
-## 28. Resumo do aprendizado
+## 29. Resumo do aprendizado
 
-O que foi praticado hoje:
+O que foi praticado nesta semana:
 
 - Criacao de controllers REST com Spring Boot.
 - Uso de `@RestController`, `@RequestMapping`, `@GetMapping`, `@PostMapping`, `@PutMapping` e `@DeleteMapping`.
@@ -972,4 +1059,6 @@ O que foi praticado hoje:
 - Criacao de testes de integracao com requisicoes HTTP reais.
 - Avaliacao tecnica de `SpecificationUtils` sem aplicar complexidade extra.
 - Criacao de uma planilha CSV para organizar pesquisas de preco.
+- Criacao de uma tabela de ofertas de preco por componente.
+- Uso de preco preferencial em orcamentos e recomendacoes.
 - Uso de commits pequenos como controle de mudancas.

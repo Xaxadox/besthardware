@@ -16,7 +16,13 @@ O sistema atende estes fluxos principais:
 
 ## Diagrama ER
 
+DER base:
+
 ![Diagrama ER](docs/DER.png)
+
+DER com ofertas de preço:
+
+![Diagrama ER com ofertas](docs/DER_oferta.png)
 
 ## Tecnologias
 
@@ -67,6 +73,37 @@ docs/ofertas_precos_exemplo.csv
 Ela usa os componentes cadastrados em `TesteConfig` como base e possui campos para loja, preço à vista, preço parcelado, cupom, URL do produto, fonte da pesquisa e data de coleta. No estado atual, essa planilha é material de apoio: a API ainda não importa o CSV automaticamente.
 
 Ao usar sites de terceiros como referência de preço, preencha a fonte e a data da coleta. Evite scraping automático sem autorização; para o projeto, o caminho mais seguro é pesquisa manual com registro da URL consultada.
+
+## Ofertas de preço
+
+A tabela `ofertaPreco` registra preços encontrados para componentes em lojas ou fontes diferentes.
+
+Campos principais:
+
+```text
+loja
+precoAvista
+precoParcelado
+parcelas
+cupom
+urlProduto
+fonte
+observacoes
+dataColeta
+idComponente
+```
+
+Cardinalidade:
+
+```text
+Componente 1 ---- N OfertaPreco
+```
+
+Regra usada pela API:
+
+- se o componente tiver ofertas cadastradas, orçamento e recomendação usam a menor `precoAvista`;
+- se o componente não tiver oferta, a API usa `ComponenteModel.preco` como fallback;
+- `ItemOrcamentoModel.preco` continua guardando o preço congelado no momento da criação do orçamento.
 
 ## Como executar
 
@@ -150,6 +187,7 @@ UsuarioModel
 PerfilModel
 OrcamentoModel
 ItemOrcamentoModel
+OfertaPrecoModel
 ```
 
 Relacionamentos principais:
@@ -159,6 +197,7 @@ Relacionamentos principais:
 - `OrcamentoModel` pertence a um usuário e a um perfil.
 - `OrcamentoModel` possui vários itens.
 - `ItemOrcamentoModel` referencia um orçamento e um componente.
+- `OfertaPrecoModel` referencia um componente.
 
 ## Endpoints principais
 
@@ -187,6 +226,7 @@ Recursos disponíveis:
 /api/placas-mae
 /api/orcamentos
 /api/itens-orcamento
+/api/ofertas-preco
 ```
 
 Também existem endpoints específicos:
@@ -202,6 +242,8 @@ GET  /api/perfis/escopos/{codigo}
 GET  /api/recomendacoes/perfis
 GET  /api/recomendacoes/perfis/{codigoPerfil}
 POST /api/recomendacoes/compatibilidade
+
+GET  /api/ofertas-preco/componentes/{componenteId}/menor-preco
 ```
 
 ## Filtros de consulta
@@ -218,6 +260,8 @@ GET /api/rams?geracao=DDR5
 GET /api/fontes?potenciaMinima=650
 GET /api/monitores?resolucao=3840x2160
 GET /api/orcamentos?usuarioId=1
+GET /api/ofertas-preco?componenteId=1
+GET /api/ofertas-preco?loja=KaBuM&precoAvistaMaximo=1000
 ```
 
 Nos endpoints de hardware, orçamento e itens de orçamento, esses filtros são organizados com DTOs de filtro e `Specification`. Com isso, o controller apenas recebe os parâmetros e delega a busca para o service, enquanto a montagem das condições de consulta fica na pasta `specifications`.
@@ -246,7 +290,7 @@ Exemplo de criação de orçamento:
 }
 ```
 
-O total do orçamento é calculado pela API:
+O total do orçamento é calculado pela API. O preço unitário de cada item usa a menor oferta à vista disponível para o componente; se não houver oferta, usa o preço base do componente.
 
 ```text
 subtotal = preço unitário * quantidade
@@ -296,6 +340,8 @@ componentes
 compatibilidade
 observacoes
 ```
+
+O `precoTotal` das recomendações também usa a menor oferta à vista quando ela existe.
 
 ## Compatibilidade
 
@@ -375,14 +421,21 @@ GET /api/gpus?memoriaMinima=8
 GET /api/rams?geracao=DDR4
 ```
 
-4. Gerar recomendações por perfil:
+4. Ver ofertas de preço:
+
+```text
+GET /api/ofertas-preco?componenteId=1
+GET /api/ofertas-preco/componentes/1/menor-preco
+```
+
+5. Gerar recomendações por perfil:
 
 ```text
 GET /api/recomendacoes/perfis
 GET /api/recomendacoes/perfis/jogo-inicial
 ```
 
-5. Validar compatibilidade de um conjunto:
+6. Validar compatibilidade de um conjunto:
 
 ```text
 POST /api/recomendacoes/compatibilidade
@@ -394,7 +447,7 @@ POST /api/recomendacoes/compatibilidade
 }
 ```
 
-6. Criar um orçamento usando IDs:
+7. Criar um orçamento usando IDs:
 
 ```text
 POST /api/orcamentos
@@ -418,7 +471,7 @@ POST /api/orcamentos
 }
 ```
 
-7. Conferir erro padronizado:
+8. Conferir erro padronizado:
 
 ```text
 GET /api/cpus/999999
@@ -433,6 +486,8 @@ Ela cobre:
 - geração da documentação OpenAPI;
 - filtro de CPUs por socket e núcleos;
 - criação de orçamento com itens;
+- listagem de ofertas de preço por componente;
+- busca da menor oferta de um componente;
 - resposta padronizada para recurso inexistente.
 
 Para executar:
@@ -446,8 +501,8 @@ Para executar:
 Guias de mudanças do projeto:
 
 ```text
-docs/GUIA_MUDANCAS_2026-05-28.md
-docs/GUIA_MUDANCAS_2026-06-01.md
+docs/GUIA_MUDANCAS_2026-05-SEMANA-5.md
+docs/GUIA_MUDANCAS_2026-06-SEMANA-1.md
 ```
 
 ## Estado atual
@@ -462,6 +517,8 @@ Implementado:
 - filtros dinâmicos com `Specification`;
 - Swagger/OpenAPI;
 - testes de integração básicos;
+- ofertas de preço por componente;
+- uso da menor oferta em orçamentos e recomendações;
 - recomendações por perfil;
 - validação de compatibilidade;
 - tratamento centralizado de erros;
@@ -470,4 +527,5 @@ Implementado:
 Ainda não implementado:
 
 - frontend;
+- importação automática da planilha CSV;
 - banco persistente real no lugar do H2 em memória.

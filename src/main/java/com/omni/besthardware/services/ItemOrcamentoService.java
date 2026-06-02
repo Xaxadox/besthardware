@@ -23,15 +23,18 @@ public class ItemOrcamentoService {
     private final ItemOrcamentoRepository itemOrcamentoRepository;
     private final OrcamentoRepository orcamentoRepository;
     private final ComponenteService componenteService;
+    private final OfertaPrecoService ofertaPrecoService;
 
     public ItemOrcamentoService(
             ItemOrcamentoRepository itemOrcamentoRepository,
             OrcamentoRepository orcamentoRepository,
-            ComponenteService componenteService
+            ComponenteService componenteService,
+            OfertaPrecoService ofertaPrecoService
     ) {
         this.itemOrcamentoRepository = itemOrcamentoRepository;
         this.orcamentoRepository = orcamentoRepository;
         this.componenteService = componenteService;
+        this.ofertaPrecoService = ofertaPrecoService;
     }
 
     @Transactional(readOnly = true)
@@ -103,7 +106,7 @@ public class ItemOrcamentoService {
         itemOrcamento.setOrcamento(orcamento);
         itemOrcamento.setComponente(componente);
         itemOrcamento.setQuantidade(request.quantidade());
-        itemOrcamento.setPreco(componente.getPreco());
+        itemOrcamento.setPreco(ofertaPrecoService.calcularPrecoPreferencial(componente));
 
         ItemOrcamentoModel salvo = itemOrcamentoRepository.save(itemOrcamento);
         recalcularPrecoOrcamento(request.orcamentoId());
@@ -123,7 +126,7 @@ public class ItemOrcamentoService {
         itemOrcamento.setOrcamento(orcamento);
         itemOrcamento.setComponente(componente);
         itemOrcamento.setQuantidade(request.quantidade());
-        itemOrcamento.setPreco(componente.getPreco());
+        itemOrcamento.setPreco(ofertaPrecoService.calcularPrecoPreferencial(componente));
 
         ItemOrcamentoModel atualizado = itemOrcamentoRepository.save(itemOrcamento);
         recalcularPrecoOrcamento(orcamentoAnteriorId);

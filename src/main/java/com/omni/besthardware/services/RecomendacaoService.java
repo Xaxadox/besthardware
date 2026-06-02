@@ -31,6 +31,7 @@ public class RecomendacaoService {
     private final FonteService fonteService;
     private final ArmazenamentoService armazenamentoService;
     private final MonitorService monitorService;
+    private final OfertaPrecoService ofertaPrecoService;
 
     public RecomendacaoService(
             PerfilUsoService perfilUsoService,
@@ -41,7 +42,8 @@ public class RecomendacaoService {
             RamService ramService,
             FonteService fonteService,
             ArmazenamentoService armazenamentoService,
-            MonitorService monitorService
+            MonitorService monitorService,
+            OfertaPrecoService ofertaPrecoService
     ) {
         this.perfilUsoService = perfilUsoService;
         this.compatibilidadeService = compatibilidadeService;
@@ -52,6 +54,7 @@ public class RecomendacaoService {
         this.fonteService = fonteService;
         this.armazenamentoService = armazenamentoService;
         this.monitorService = monitorService;
+        this.ofertaPrecoService = ofertaPrecoService;
     }
 
     public List<RecomendacaoResponse> listarTodas() {
@@ -99,13 +102,18 @@ public class RecomendacaoService {
 
         CompatibilidadeResponse compatibilidade = compatibilidadeService.verificar(componentes);
         BigDecimal precoTotal = componentes.stream()
-                .map(ComponenteModel::getPreco)
+                .map(ofertaPrecoService::calcularPrecoPreferencial)
                 .reduce(BigDecimal.ZERO, BigDecimal::add);
 
         return Optional.of(new RecomendacaoResponse(
                 perfil.get(),
                 precoTotal,
-                componentes.stream().map(DtoMapper::toComponenteResponse).toList(),
+                componentes.stream()
+                        .map(componente -> DtoMapper.toComponenteResponse(
+                                componente,
+                                ofertaPrecoService.calcularPrecoPreferencial(componente)
+                        ))
+                        .toList(),
                 compatibilidade,
                 observacoes
         ));
@@ -114,7 +122,7 @@ public class RecomendacaoService {
     private Optional<CpuModel> selecionarCpu(CriterioRecomendacao criterio) {
         Comparator<CpuModel> comparador = Comparator
                 .comparing((CpuModel cpu) -> criterio.prefereGpuIntegrada() && !compatibilidadeService.temGpuIntegrada(cpu))
-                .thenComparing(CpuModel::getPreco);
+                .thenComparing(ofertaPrecoService::calcularPrecoPreferencial);
 
         return cpuService.listarTodos().stream()
                 .filter(cpu -> cpu.getNucleos() >= criterio.nucleosCpuMinimos())
@@ -125,7 +133,7 @@ public class RecomendacaoService {
     private Optional<PlacaMaeModel> selecionarPlacaMae(CpuModel cpu) {
         return placaMaeService.listarTodos().stream()
                 .filter(placaMae -> placaMae.getSocket().equalsIgnoreCase(cpu.getSocket()))
-                .min(Comparator.comparing(PlacaMaeModel::getPreco));
+                .min(Comparator.comparing(ofertaPrecoService::calcularPrecoPreferencial));
     }
 
     private Optional<RamModel> selecionarRam(CriterioRecomendacao criterio, PlacaMaeModel placaMae) {
@@ -134,13 +142,13 @@ public class RecomendacaoService {
         return ramService.listarTodos().stream()
                 .filter(ram -> ram.getMemoria() >= criterio.memoriaRamMinima())
                 .filter(ram -> geracao == null || ram.getGeracao().equalsIgnoreCase(geracao))
-                .min(Comparator.comparing(RamModel::getPreco));
+                .min(Comparator.comparing(ofertaPrecoService::calcularPrecoPreferencial));
     }
 
     private Optional<GpuModel> selecionarGpu(CriterioRecomendacao criterio) {
         return gpuService.listarTodos().stream()
                 .filter(gpu -> gpu.getMemoria() >= criterio.memoriaGpuMinima())
-                .min(Comparator.comparing(GpuModel::getPreco));
+                .min(Comparator.comparing(ofertaPrecoService::calcularPrecoPreferencial));
     }
 
     private Optional<ArmazenamentoModel> selecionarArmazenamento(CriterioRecomendacao criterio) {
@@ -148,7 +156,7 @@ public class RecomendacaoService {
                 .filter(armazenamento -> armazenamento.getMemoria() >= criterio.armazenamentoMinimo())
                 .sorted(Comparator
                         .comparing((ArmazenamentoModel armazenamento) -> !"NVME".equalsIgnoreCase(armazenamento.getPadrao()))
-                        .thenComparing(ArmazenamentoModel::getPreco))
+                        .thenComparing(ofertaPrecoService::calcularPrecoPreferencial))
                 .findFirst();
     }
 
@@ -166,15 +174,15 @@ public class RecomendacaoService {
         int potenciaNecessaria = potenciaMinima;
         return fonteService.listarTodos().stream()
                 .filter(fonte -> fonte.getPotencia() >= potenciaNecessaria)
-                .min(Comparator.comparing(FonteModel::getPreco));
+                .min(Comparator.comparing(ofertaPrecoService::calcularPrecoPreferencial));
     }
 
     private Optional<MonitorModel> selecionarMonitor(CriterioRecomendacao criterio) {
         return monitorService.listarTodos().stream()
                 .filter(monitor -> monitor.getFrequencia() >= criterio.frequenciaMonitorMinima())
                 .filter(monitor -> criterio.resolucaoMonitor() == null || monitor.getResolucao().equalsIgnoreCase(criterio.resolucaoMonitor()))
-                .min(Comparator.comparing(MonitorModel::getPreco))
-                .or(() -> monitorService.listarTodos().stream().min(Comparator.comparing(MonitorModel::getPreco)));
+                .min(Comparator.comparing(ofertaPrecoService::calcularPrecoPreferencial))
+                .or(() -> monitorService.listarTodos().stream().min(Comparator.comparing(ofertaPrecoService::calcularPrecoPreferencial)));
     }
 
     private CriterioRecomendacao criterio(String codigoPerfil) {

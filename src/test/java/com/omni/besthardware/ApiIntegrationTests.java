@@ -8,6 +8,7 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import java.io.IOException;
+import java.math.BigDecimal;
 import java.net.URI;
 import java.net.http.HttpClient;
 import java.net.http.HttpRequest;
@@ -84,6 +85,37 @@ class ApiIntegrationTests {
         assertEquals(1, orcamento.path("perfilId").asInt());
         assertEquals(2, orcamento.path("itens").size());
         assertTrue(orcamento.path("precoTotal").decimalValue().signum() > 0);
+
+        JsonNode itemCpu = buscarItemPorComponente(orcamento.path("itens"), 1);
+        assertNotNull(itemCpu);
+        assertEquals(0, itemCpu.path("precoUnitario").decimalValue().compareTo(new BigDecimal("829.90")));
+    }
+
+    @Test
+    void deveListarOfertasDePrecoPorComponente() throws Exception {
+        HttpResponse<String> response = get("/api/ofertas-preco?componenteId=1");
+
+        assertEquals(200, response.statusCode());
+
+        JsonNode ofertas = objectMapper.readTree(response.body());
+        assertTrue(ofertas.isArray());
+        assertFalse(ofertas.isEmpty());
+
+        for (JsonNode oferta : ofertas) {
+            assertEquals(1, oferta.path("componenteId").asInt());
+            assertTrue(oferta.path("precoAvista").decimalValue().signum() > 0);
+        }
+    }
+
+    @Test
+    void deveRetornarMenorOfertaPorComponente() throws Exception {
+        HttpResponse<String> response = get("/api/ofertas-preco/componentes/1/menor-preco");
+
+        assertEquals(200, response.statusCode());
+
+        JsonNode oferta = objectMapper.readTree(response.body());
+        assertEquals(1, oferta.path("componenteId").asInt());
+        assertEquals(0, oferta.path("precoAvista").decimalValue().compareTo(new BigDecimal("829.90")));
     }
 
     @Test
@@ -115,5 +147,15 @@ class ApiIntegrationTests {
 
     private URI uri(String path) {
         return URI.create("http://localhost:" + port + path);
+    }
+
+    private JsonNode buscarItemPorComponente(JsonNode itens, int componenteId) {
+        for (JsonNode item : itens) {
+            if (item.path("componenteId").asInt() == componenteId) {
+                return item;
+            }
+        }
+
+        return null;
     }
 }

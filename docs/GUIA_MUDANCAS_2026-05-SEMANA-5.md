@@ -1,6 +1,6 @@
-# Guia das mudancas de 2026-05-28
+# Guia das mudancas de 2026-05 - semana 5
 
-Este guia resume as mudancas feitas hoje no projeto BestHardware e explica o motivo tecnico de cada uma. A ideia e servir como material de estudo para entender a evolucao das camadas `models`, `repositories`, `services` e `controllers`.
+Este guia resume as mudancas feitas na semana 5 de 2026-05 no projeto BestHardware e explica o motivo tecnico de cada uma. A ideia e servir como material de estudo para entender a evolucao das camadas `models`, `repositories`, `services` e `controllers`.
 
 ## 1. Padronizacao dos nomes das classes
 
@@ -233,7 +233,7 @@ Leitura:
 - `+52,4`: no arquivo novo, o trecho comeca na linha 52 e tem 4 linhas.
 - `public class ComponenteModel {`: contexto para mostrar em qual parte do arquivo esta a mudanca.
 
-## 10. Ordem dos commits feitos hoje
+## 10. Ordem dos commits feitos nesta semana
 
 Commits criados em 2026-05-28:
 
@@ -285,7 +285,7 @@ O `@Valid` e importante porque aciona as anotacoes colocadas nos models, como `@
 
 ## 12. Resumo do aprendizado
 
-O que foi praticado hoje:
+O que foi praticado nesta semana:
 
 - Convencao de nomes Java com `PascalCase`.
 - Queries automaticas do Spring Data JPA pelo nome dos metodos.
