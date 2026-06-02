@@ -2,7 +2,6 @@ package com.omni.besthardware.controllers;
 
 import com.omni.besthardware.dtos.ComponenteRequest;
 import com.omni.besthardware.dtos.ComponenteResponse;
-import com.omni.besthardware.exceptions.RecursoNaoEncontradoException;
 import com.omni.besthardware.mappers.DtoMapper;
 import com.omni.besthardware.models.ComponenteModel;
 import com.omni.besthardware.services.ComponenteService;
@@ -60,10 +59,7 @@ public class ComponenteController {
 
     @GetMapping("/{id}")
     public ResponseEntity<ComponenteResponse> buscarPorId(@PathVariable Integer id) {
-        return componenteService.buscarPorId(id)
-                .map(DtoMapper::toComponenteResponse)
-                .map(ResponseEntity::ok)
-                .orElseThrow(() -> new RecursoNaoEncontradoException("Componente", id));
+        return ResponseEntity.ok(DtoMapper.toComponenteResponse(componenteService.buscarObrigatorio(id)));
     }
 
     @PostMapping
@@ -77,18 +73,14 @@ public class ComponenteController {
             @PathVariable Integer id,
             @Valid @RequestBody ComponenteRequest request
     ) {
-        return componenteService.atualizar(id, toModel(request))
-                .map(DtoMapper::toComponenteResponse)
-                .map(ResponseEntity::ok)
-                .orElseThrow(() -> new RecursoNaoEncontradoException("Componente", id));
+        return ResponseEntity.ok(DtoMapper.toComponenteResponse(
+                componenteService.atualizarObrigatorio(id, toModel(request))
+        ));
     }
 
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> excluir(@PathVariable Integer id) {
-        if (!componenteService.excluirPorId(id)) {
-            throw new RecursoNaoEncontradoException("Componente", id);
-        }
-
+        componenteService.excluirObrigatorio(id);
         return ResponseEntity.noContent().build();
     }
 

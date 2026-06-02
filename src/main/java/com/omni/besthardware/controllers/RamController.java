@@ -3,7 +3,6 @@ package com.omni.besthardware.controllers;
 import com.omni.besthardware.dtos.ComponenteResponse;
 import com.omni.besthardware.dtos.RamFiltroRequest;
 import com.omni.besthardware.dtos.RamRequest;
-import com.omni.besthardware.exceptions.RecursoNaoEncontradoException;
 import com.omni.besthardware.mappers.DtoMapper;
 import com.omni.besthardware.models.RamModel;
 import com.omni.besthardware.services.RamService;
@@ -38,10 +37,7 @@ public class RamController {
 
     @GetMapping("/{id}")
     public ResponseEntity<ComponenteResponse> buscarPorId(@PathVariable Integer id) {
-        return ramService.buscarPorId(id)
-                .map(DtoMapper::toComponenteResponse)
-                .map(ResponseEntity::ok)
-                .orElseThrow(() -> new RecursoNaoEncontradoException("RAM", id));
+        return ResponseEntity.ok(DtoMapper.toComponenteResponse(ramService.buscarObrigatorio(id)));
     }
 
     @PostMapping
@@ -52,18 +48,12 @@ public class RamController {
 
     @PutMapping("/{id}")
     public ResponseEntity<ComponenteResponse> atualizar(@PathVariable Integer id, @Valid @RequestBody RamRequest request) {
-        return ramService.atualizar(id, toModel(request))
-                .map(DtoMapper::toComponenteResponse)
-                .map(ResponseEntity::ok)
-                .orElseThrow(() -> new RecursoNaoEncontradoException("RAM", id));
+        return ResponseEntity.ok(DtoMapper.toComponenteResponse(ramService.atualizarObrigatorio(id, toModel(request))));
     }
 
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> excluir(@PathVariable Integer id) {
-        if (!ramService.excluirPorId(id)) {
-            throw new RecursoNaoEncontradoException("RAM", id);
-        }
-
+        ramService.excluirObrigatorio(id);
         return ResponseEntity.noContent().build();
     }
 

@@ -1,6 +1,7 @@
 package com.omni.besthardware.services;
 
 import com.omni.besthardware.dtos.GpuFiltroRequest;
+import com.omni.besthardware.exceptions.RecursoNaoEncontradoException;
 import com.omni.besthardware.models.GpuModel;
 import com.omni.besthardware.repositories.GpuRepository;
 import com.omni.besthardware.specifications.GpuSpecification;
@@ -27,6 +28,12 @@ public class GpuService {
     @Transactional(readOnly = true)
     public Optional<GpuModel> buscarPorId(Integer id) {
         return gpuRepository.findById(id);
+    }
+
+    @Transactional(readOnly = true)
+    public GpuModel buscarObrigatorio(Integer id) {
+        return buscarPorId(id)
+                .orElseThrow(() -> new RecursoNaoEncontradoException("GPU", id));
     }
 
     @Transactional(readOnly = true)
@@ -80,6 +87,16 @@ public class GpuService {
     }
 
     @Transactional
+    public GpuModel atualizarObrigatorio(Integer id, GpuModel gpu) {
+        if (!gpuRepository.existsById(id)) {
+            throw new RecursoNaoEncontradoException("GPU", id);
+        }
+
+        gpu.setId(id);
+        return gpuRepository.save(gpu);
+    }
+
+    @Transactional
     public boolean excluirPorId(Integer id) {
         if (!gpuRepository.existsById(id)) {
             return false;
@@ -87,5 +104,12 @@ public class GpuService {
 
         gpuRepository.deleteById(id);
         return true;
+    }
+
+    @Transactional
+    public void excluirObrigatorio(Integer id) {
+        if (!excluirPorId(id)) {
+            throw new RecursoNaoEncontradoException("GPU", id);
+        }
     }
 }

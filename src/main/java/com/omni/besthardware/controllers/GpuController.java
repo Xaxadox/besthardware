@@ -3,7 +3,6 @@ package com.omni.besthardware.controllers;
 import com.omni.besthardware.dtos.ComponenteResponse;
 import com.omni.besthardware.dtos.GpuFiltroRequest;
 import com.omni.besthardware.dtos.GpuRequest;
-import com.omni.besthardware.exceptions.RecursoNaoEncontradoException;
 import com.omni.besthardware.mappers.DtoMapper;
 import com.omni.besthardware.models.GpuModel;
 import com.omni.besthardware.services.GpuService;
@@ -38,10 +37,7 @@ public class GpuController {
 
     @GetMapping("/{id}")
     public ResponseEntity<ComponenteResponse> buscarPorId(@PathVariable Integer id) {
-        return gpuService.buscarPorId(id)
-                .map(DtoMapper::toComponenteResponse)
-                .map(ResponseEntity::ok)
-                .orElseThrow(() -> new RecursoNaoEncontradoException("GPU", id));
+        return ResponseEntity.ok(DtoMapper.toComponenteResponse(gpuService.buscarObrigatorio(id)));
     }
 
     @PostMapping
@@ -52,18 +48,12 @@ public class GpuController {
 
     @PutMapping("/{id}")
     public ResponseEntity<ComponenteResponse> atualizar(@PathVariable Integer id, @Valid @RequestBody GpuRequest request) {
-        return gpuService.atualizar(id, toModel(request))
-                .map(DtoMapper::toComponenteResponse)
-                .map(ResponseEntity::ok)
-                .orElseThrow(() -> new RecursoNaoEncontradoException("GPU", id));
+        return ResponseEntity.ok(DtoMapper.toComponenteResponse(gpuService.atualizarObrigatorio(id, toModel(request))));
     }
 
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> excluir(@PathVariable Integer id) {
-        if (!gpuService.excluirPorId(id)) {
-            throw new RecursoNaoEncontradoException("GPU", id);
-        }
-
+        gpuService.excluirObrigatorio(id);
         return ResponseEntity.noContent().build();
     }
 

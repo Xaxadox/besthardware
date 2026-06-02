@@ -2,7 +2,6 @@ package com.omni.besthardware.controllers;
 
 import com.omni.besthardware.dtos.UsuarioRequest;
 import com.omni.besthardware.dtos.UsuarioResponse;
-import com.omni.besthardware.exceptions.RecursoNaoEncontradoException;
 import com.omni.besthardware.mappers.DtoMapper;
 import com.omni.besthardware.models.UsuarioModel;
 import com.omni.besthardware.services.UsuarioService;
@@ -42,18 +41,12 @@ public class UsuarioController {
 
     @GetMapping("/{id}")
     public ResponseEntity<UsuarioResponse> buscarPorId(@PathVariable Integer id) {
-        return usuarioService.buscarPorId(id)
-                .map(DtoMapper::toUsuarioResponse)
-                .map(ResponseEntity::ok)
-                .orElseThrow(() -> new RecursoNaoEncontradoException("Usuario", id));
+        return ResponseEntity.ok(DtoMapper.toUsuarioResponse(usuarioService.buscarObrigatorio(id)));
     }
 
     @GetMapping("/email/{email}")
     public ResponseEntity<UsuarioResponse> buscarPorEmail(@PathVariable String email) {
-        return usuarioService.buscarPorEmail(email)
-                .map(DtoMapper::toUsuarioResponse)
-                .map(ResponseEntity::ok)
-                .orElseThrow(() -> new RecursoNaoEncontradoException("Usuario nao encontrado para email " + email + "."));
+        return ResponseEntity.ok(DtoMapper.toUsuarioResponse(usuarioService.buscarPorEmailObrigatorio(email)));
     }
 
     @GetMapping("/existe-email")
@@ -69,18 +62,12 @@ public class UsuarioController {
 
     @PutMapping("/{id}")
     public ResponseEntity<UsuarioResponse> atualizar(@PathVariable Integer id, @Valid @RequestBody UsuarioRequest request) {
-        return usuarioService.atualizar(id, toModel(request))
-                .map(DtoMapper::toUsuarioResponse)
-                .map(ResponseEntity::ok)
-                .orElseThrow(() -> new RecursoNaoEncontradoException("Usuario", id));
+        return ResponseEntity.ok(DtoMapper.toUsuarioResponse(usuarioService.atualizarObrigatorio(id, toModel(request))));
     }
 
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> excluir(@PathVariable Integer id) {
-        if (!usuarioService.excluirPorId(id)) {
-            throw new RecursoNaoEncontradoException("Usuario", id);
-        }
-
+        usuarioService.excluirObrigatorio(id);
         return ResponseEntity.noContent().build();
     }
 

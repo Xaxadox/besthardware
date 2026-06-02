@@ -3,7 +3,6 @@ package com.omni.besthardware.controllers;
 import com.omni.besthardware.dtos.ArmazenamentoFiltroRequest;
 import com.omni.besthardware.dtos.ArmazenamentoRequest;
 import com.omni.besthardware.dtos.ComponenteResponse;
-import com.omni.besthardware.exceptions.RecursoNaoEncontradoException;
 import com.omni.besthardware.mappers.DtoMapper;
 import com.omni.besthardware.models.ArmazenamentoModel;
 import com.omni.besthardware.services.ArmazenamentoService;
@@ -38,10 +37,7 @@ public class ArmazenamentoController {
 
     @GetMapping("/{id}")
     public ResponseEntity<ComponenteResponse> buscarPorId(@PathVariable Integer id) {
-        return armazenamentoService.buscarPorId(id)
-                .map(DtoMapper::toComponenteResponse)
-                .map(ResponseEntity::ok)
-                .orElseThrow(() -> new RecursoNaoEncontradoException("Armazenamento", id));
+        return ResponseEntity.ok(DtoMapper.toComponenteResponse(armazenamentoService.buscarObrigatorio(id)));
     }
 
     @PostMapping
@@ -56,18 +52,14 @@ public class ArmazenamentoController {
             @PathVariable Integer id,
             @Valid @RequestBody ArmazenamentoRequest request
     ) {
-        return armazenamentoService.atualizar(id, toModel(request))
-                .map(DtoMapper::toComponenteResponse)
-                .map(ResponseEntity::ok)
-                .orElseThrow(() -> new RecursoNaoEncontradoException("Armazenamento", id));
+        return ResponseEntity.ok(DtoMapper.toComponenteResponse(
+                armazenamentoService.atualizarObrigatorio(id, toModel(request))
+        ));
     }
 
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> excluir(@PathVariable Integer id) {
-        if (!armazenamentoService.excluirPorId(id)) {
-            throw new RecursoNaoEncontradoException("Armazenamento", id);
-        }
-
+        armazenamentoService.excluirObrigatorio(id);
         return ResponseEntity.noContent().build();
     }
 

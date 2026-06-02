@@ -1,6 +1,7 @@
 package com.omni.besthardware.services;
 
 import com.omni.besthardware.dtos.RamFiltroRequest;
+import com.omni.besthardware.exceptions.RecursoNaoEncontradoException;
 import com.omni.besthardware.models.RamModel;
 import com.omni.besthardware.repositories.RamRepository;
 import com.omni.besthardware.specifications.RamSpecification;
@@ -27,6 +28,12 @@ public class RamService {
     @Transactional(readOnly = true)
     public Optional<RamModel> buscarPorId(Integer id) {
         return ramRepository.findById(id);
+    }
+
+    @Transactional(readOnly = true)
+    public RamModel buscarObrigatorio(Integer id) {
+        return buscarPorId(id)
+                .orElseThrow(() -> new RecursoNaoEncontradoException("RAM", id));
     }
 
     @Transactional(readOnly = true)
@@ -80,6 +87,16 @@ public class RamService {
     }
 
     @Transactional
+    public RamModel atualizarObrigatorio(Integer id, RamModel ram) {
+        if (!ramRepository.existsById(id)) {
+            throw new RecursoNaoEncontradoException("RAM", id);
+        }
+
+        ram.setId(id);
+        return ramRepository.save(ram);
+    }
+
+    @Transactional
     public boolean excluirPorId(Integer id) {
         if (!ramRepository.existsById(id)) {
             return false;
@@ -87,5 +104,12 @@ public class RamService {
 
         ramRepository.deleteById(id);
         return true;
+    }
+
+    @Transactional
+    public void excluirObrigatorio(Integer id) {
+        if (!excluirPorId(id)) {
+            throw new RecursoNaoEncontradoException("RAM", id);
+        }
     }
 }

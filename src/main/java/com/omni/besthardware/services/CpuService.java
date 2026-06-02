@@ -1,6 +1,7 @@
 package com.omni.besthardware.services;
 
 import com.omni.besthardware.dtos.CpuFiltroRequest;
+import com.omni.besthardware.exceptions.RecursoNaoEncontradoException;
 import com.omni.besthardware.models.CpuModel;
 import com.omni.besthardware.repositories.CpuRepository;
 import com.omni.besthardware.specifications.CpuSpecification;
@@ -28,6 +29,12 @@ public class CpuService {
     @Transactional(readOnly = true)
     public Optional<CpuModel> buscarPorId(Integer id) {
         return cpuRepository.findById(id);
+    }
+
+    @Transactional(readOnly = true)
+    public CpuModel buscarObrigatorio(Integer id) {
+        return buscarPorId(id)
+                .orElseThrow(() -> new RecursoNaoEncontradoException("CPU", id));
     }
 
     @Transactional(readOnly = true)
@@ -91,6 +98,16 @@ public class CpuService {
     }
 
     @Transactional
+    public CpuModel atualizarObrigatorio(Integer id, CpuModel cpu) {
+        if (!cpuRepository.existsById(id)) {
+            throw new RecursoNaoEncontradoException("CPU", id);
+        }
+
+        cpu.setId(id);
+        return cpuRepository.save(cpu);
+    }
+
+    @Transactional
     public boolean excluirPorId(Integer id) {
         if (!cpuRepository.existsById(id)) {
             return false;
@@ -98,5 +115,12 @@ public class CpuService {
 
         cpuRepository.deleteById(id);
         return true;
+    }
+
+    @Transactional
+    public void excluirObrigatorio(Integer id) {
+        if (!excluirPorId(id)) {
+            throw new RecursoNaoEncontradoException("CPU", id);
+        }
     }
 }

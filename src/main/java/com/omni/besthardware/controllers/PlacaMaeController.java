@@ -3,7 +3,6 @@ package com.omni.besthardware.controllers;
 import com.omni.besthardware.dtos.ComponenteResponse;
 import com.omni.besthardware.dtos.PlacaMaeFiltroRequest;
 import com.omni.besthardware.dtos.PlacaMaeRequest;
-import com.omni.besthardware.exceptions.RecursoNaoEncontradoException;
 import com.omni.besthardware.mappers.DtoMapper;
 import com.omni.besthardware.models.PlacaMaeModel;
 import com.omni.besthardware.services.PlacaMaeService;
@@ -38,10 +37,7 @@ public class PlacaMaeController {
 
     @GetMapping("/{id}")
     public ResponseEntity<ComponenteResponse> buscarPorId(@PathVariable Integer id) {
-        return placaMaeService.buscarPorId(id)
-                .map(DtoMapper::toComponenteResponse)
-                .map(ResponseEntity::ok)
-                .orElseThrow(() -> new RecursoNaoEncontradoException("Placa-mae", id));
+        return ResponseEntity.ok(DtoMapper.toComponenteResponse(placaMaeService.buscarObrigatorio(id)));
     }
 
     @PostMapping
@@ -52,18 +48,12 @@ public class PlacaMaeController {
 
     @PutMapping("/{id}")
     public ResponseEntity<ComponenteResponse> atualizar(@PathVariable Integer id, @Valid @RequestBody PlacaMaeRequest request) {
-        return placaMaeService.atualizar(id, toModel(request))
-                .map(DtoMapper::toComponenteResponse)
-                .map(ResponseEntity::ok)
-                .orElseThrow(() -> new RecursoNaoEncontradoException("Placa-mae", id));
+        return ResponseEntity.ok(DtoMapper.toComponenteResponse(placaMaeService.atualizarObrigatorio(id, toModel(request))));
     }
 
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> excluir(@PathVariable Integer id) {
-        if (!placaMaeService.excluirPorId(id)) {
-            throw new RecursoNaoEncontradoException("Placa-mae", id);
-        }
-
+        placaMaeService.excluirObrigatorio(id);
         return ResponseEntity.noContent().build();
     }
 

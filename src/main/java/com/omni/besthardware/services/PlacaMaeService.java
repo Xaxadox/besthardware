@@ -1,6 +1,7 @@
 package com.omni.besthardware.services;
 
 import com.omni.besthardware.dtos.PlacaMaeFiltroRequest;
+import com.omni.besthardware.exceptions.RecursoNaoEncontradoException;
 import com.omni.besthardware.models.PlacaMaeModel;
 import com.omni.besthardware.repositories.PlacaMaeRepository;
 import com.omni.besthardware.specifications.PlacaMaeSpecification;
@@ -27,6 +28,12 @@ public class PlacaMaeService {
     @Transactional(readOnly = true)
     public Optional<PlacaMaeModel> buscarPorId(Integer id) {
         return placaMaeRepository.findById(id);
+    }
+
+    @Transactional(readOnly = true)
+    public PlacaMaeModel buscarObrigatorio(Integer id) {
+        return buscarPorId(id)
+                .orElseThrow(() -> new RecursoNaoEncontradoException("Placa-mae", id));
     }
 
     @Transactional(readOnly = true)
@@ -80,6 +87,16 @@ public class PlacaMaeService {
     }
 
     @Transactional
+    public PlacaMaeModel atualizarObrigatorio(Integer id, PlacaMaeModel placaMae) {
+        if (!placaMaeRepository.existsById(id)) {
+            throw new RecursoNaoEncontradoException("Placa-mae", id);
+        }
+
+        placaMae.setId(id);
+        return placaMaeRepository.save(placaMae);
+    }
+
+    @Transactional
     public boolean excluirPorId(Integer id) {
         if (!placaMaeRepository.existsById(id)) {
             return false;
@@ -87,5 +104,12 @@ public class PlacaMaeService {
 
         placaMaeRepository.deleteById(id);
         return true;
+    }
+
+    @Transactional
+    public void excluirObrigatorio(Integer id) {
+        if (!excluirPorId(id)) {
+            throw new RecursoNaoEncontradoException("Placa-mae", id);
+        }
     }
 }

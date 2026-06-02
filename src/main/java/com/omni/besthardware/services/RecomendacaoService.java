@@ -3,6 +3,7 @@ package com.omni.besthardware.services;
 import com.omni.besthardware.dtos.CompatibilidadeResponse;
 import com.omni.besthardware.dtos.PerfilUsoResponse;
 import com.omni.besthardware.dtos.RecomendacaoResponse;
+import com.omni.besthardware.exceptions.RecursoNaoEncontradoException;
 import com.omni.besthardware.mappers.DtoMapper;
 import com.omni.besthardware.models.ArmazenamentoModel;
 import com.omni.besthardware.models.ComponenteModel;
@@ -117,6 +118,13 @@ public class RecomendacaoService {
                 compatibilidade,
                 observacoes
         ));
+    }
+
+    public RecomendacaoResponse recomendarObrigatorio(String codigoPerfil) {
+        return recomendar(codigoPerfil)
+                .orElseThrow(() -> new RecursoNaoEncontradoException(
+                        "Perfil de recomendacao nao encontrado: " + codigoPerfil + "."
+                ));
     }
 
     private Optional<CpuModel> selecionarCpu(CriterioRecomendacao criterio) {

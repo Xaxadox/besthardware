@@ -38,6 +38,16 @@ public class CompatibilidadeService {
         return Optional.of(verificar(componentes));
     }
 
+    public CompatibilidadeResponse verificarPorIdsObrigatorio(List<Integer> componenteIds) {
+        List<ComponenteModel> componentes = new ArrayList<>();
+
+        for (Integer componenteId : componenteIds) {
+            componentes.add(componenteService.buscarObrigatorio(componenteId));
+        }
+
+        return verificar(componentes);
+    }
+
     public CompatibilidadeResponse verificar(List<ComponenteModel> componentes) {
         List<String> erros = new ArrayList<>();
         List<String> avisos = new ArrayList<>();

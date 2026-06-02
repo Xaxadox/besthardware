@@ -3,11 +3,8 @@ package com.omni.besthardware.controllers;
 import com.omni.besthardware.dtos.PerfilRequest;
 import com.omni.besthardware.dtos.PerfilResponse;
 import com.omni.besthardware.dtos.PerfilUsoResponse;
-import com.omni.besthardware.exceptions.RecursoNaoEncontradoException;
 import com.omni.besthardware.mappers.DtoMapper;
-import com.omni.besthardware.models.ComponenteModel;
 import com.omni.besthardware.models.PerfilModel;
-import com.omni.besthardware.services.ComponenteService;
 import com.omni.besthardware.services.PerfilService;
 import com.omni.besthardware.services.PerfilUsoService;
 import jakarta.validation.Valid;
@@ -29,16 +26,13 @@ import org.springframework.web.bind.annotation.RestController;
 public class PerfilController {
 
     private final PerfilService perfilService;
-    private final ComponenteService componenteService;
     private final PerfilUsoService perfilUsoService;
 
     public PerfilController(
             PerfilService perfilService,
-            ComponenteService componenteService,
             PerfilUsoService perfilUsoService
     ) {
         this.perfilService = perfilService;
-        this.componenteService = componenteService;
         this.perfilUsoService = perfilUsoService;
     }
 
@@ -60,18 +54,12 @@ public class PerfilController {
 
     @GetMapping("/{id}")
     public ResponseEntity<PerfilResponse> buscarPorId(@PathVariable Integer id) {
-        return perfilService.buscarPorId(id)
-                .map(DtoMapper::toPerfilResponse)
-                .map(ResponseEntity::ok)
-                .orElseThrow(() -> new RecursoNaoEncontradoException("Perfil", id));
+        return ResponseEntity.ok(DtoMapper.toPerfilResponse(perfilService.buscarObrigatorio(id)));
     }
 
     @GetMapping("/nome/{nome}")
     public ResponseEntity<PerfilResponse> buscarPorNomeExato(@PathVariable String nome) {
-        return perfilService.buscarPorNomeExato(nome)
-                .map(DtoMapper::toPerfilResponse)
-                .map(ResponseEntity::ok)
-                .orElseThrow(() -> new RecursoNaoEncontradoException("Perfil nao encontrado para nome " + nome + "."));
+        return ResponseEntity.ok(DtoMapper.toPerfilResponse(perfilService.buscarPorNomeExatoObrigatorio(nome)));
     }
 
     @GetMapping("/escopos")
@@ -81,52 +69,27 @@ public class PerfilController {
 
     @GetMapping("/escopos/{codigo}")
     public ResponseEntity<PerfilUsoResponse> buscarEscopoPorCodigo(@PathVariable String codigo) {
-        return perfilUsoService.buscarPorCodigo(codigo)
-                .map(ResponseEntity::ok)
-                .orElseThrow(() -> new RecursoNaoEncontradoException("Escopo de perfil nao encontrado: " + codigo + "."));
+        return ResponseEntity.ok(perfilUsoService.buscarPorCodigoObrigatorio(codigo));
     }
 
     @PostMapping
     public ResponseEntity<PerfilResponse> criar(@Valid @RequestBody PerfilRequest request) {
         return ResponseEntity.status(HttpStatus.CREATED)
-                .body(DtoMapper.toPerfilResponse(perfilService.salvar(toModel(request))));
+                .body(DtoMapper.toPerfilResponse(perfilService.criar(request)));
     }
 
     @PutMapping("/{id}")
     public ResponseEntity<PerfilResponse> atualizar(@PathVariable Integer id, @Valid @RequestBody PerfilRequest request) {
-        return perfilService.atualizar(id, toModel(request))
-                .map(DtoMapper::toPerfilResponse)
-                .map(ResponseEntity::ok)
-                .orElseThrow(() -> new RecursoNaoEncontradoException("Perfil", id));
+        return ResponseEntity.ok(DtoMapper.toPerfilResponse(perfilService.atualizarObrigatorio(id, request)));
     }
 
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> excluir(@PathVariable Integer id) {
-        if (!perfilService.excluirPorId(id)) {
-            throw new RecursoNaoEncontradoException("Perfil", id);
-        }
-
+        perfilService.excluirObrigatorio(id);
         return ResponseEntity.noContent().build();
     }
 
     private List<PerfilResponse> toResponseList(List<PerfilModel> perfis) {
         return perfis.stream().map(DtoMapper::toPerfilResponse).toList();
-    }
-
-    private PerfilModel toModel(PerfilRequest request) {
-        PerfilModel perfil = new PerfilModel();
-        perfil.setNome(request.nome());
-
-        if (request.componenteIds() == null) {
-            return perfil;
-        }
-
-        for (Integer componenteId : request.componenteIds()) {
-            ComponenteModel componente = componenteService.buscarPorId(componenteId)
-                    .orElseThrow(() -> new RecursoNaoEncontradoException("Componente", componenteId));
-            perfil.getComponentes().add(componente);
-        }
-
-        return perfil;
     }
 }

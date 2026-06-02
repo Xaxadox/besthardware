@@ -1,5 +1,6 @@
 package com.omni.besthardware.services;
 
+import com.omni.besthardware.exceptions.RecursoNaoEncontradoException;
 import com.omni.besthardware.models.ComponenteModel;
 import com.omni.besthardware.repositories.ComponenteRepository;
 import java.math.BigDecimal;
@@ -25,6 +26,12 @@ public class ComponenteService {
     @Transactional(readOnly = true)
     public Optional<ComponenteModel> buscarPorId(Integer id) {
         return componenteRepository.findById(id);
+    }
+
+    @Transactional(readOnly = true)
+    public ComponenteModel buscarObrigatorio(Integer id) {
+        return buscarPorId(id)
+                .orElseThrow(() -> new RecursoNaoEncontradoException("Componente", id));
     }
 
     @Transactional(readOnly = true)
@@ -63,6 +70,16 @@ public class ComponenteService {
     }
 
     @Transactional
+    public ComponenteModel atualizarObrigatorio(Integer id, ComponenteModel componente) {
+        if (!componenteRepository.existsById(id)) {
+            throw new RecursoNaoEncontradoException("Componente", id);
+        }
+
+        componente.setId(id);
+        return componenteRepository.save(componente);
+    }
+
+    @Transactional
     public boolean excluirPorId(Integer id) {
         if (!componenteRepository.existsById(id)) {
             return false;
@@ -70,5 +87,12 @@ public class ComponenteService {
 
         componenteRepository.deleteById(id);
         return true;
+    }
+
+    @Transactional
+    public void excluirObrigatorio(Integer id) {
+        if (!excluirPorId(id)) {
+            throw new RecursoNaoEncontradoException("Componente", id);
+        }
     }
 }

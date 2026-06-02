@@ -1043,7 +1043,44 @@ Motivo:
 - separar documentacao de uso, arquitetura e historico de mudancas;
 - facilitar a apresentacao do projeto para professor ou avaliador.
 
-## 29. Testes executados
+## 29. Excecoes concentradas nos services
+
+Os controllers foram simplificados para evitar tratamento direto de recurso nao encontrado.
+
+Antes, varios controllers faziam:
+
+```java
+return service.buscarPorId(id)
+        .map(...)
+        .orElseThrow(() -> new RecursoNaoEncontradoException(...));
+```
+
+Ou:
+
+```java
+if (!service.excluirPorId(id)) {
+    throw new RecursoNaoEncontradoException(...);
+}
+```
+
+Depois, os services passaram a ter metodos obrigatorios, por exemplo:
+
+```java
+buscarObrigatorio(id)
+atualizarObrigatorio(id, model)
+excluirObrigatorio(id)
+```
+
+Motivo:
+
+- deixar os controllers focados em receber requisicoes e devolver respostas HTTP;
+- concentrar regra de busca obrigatoria na camada de service;
+- manter o `ApiExceptionHandler` como unico ponto de montagem da resposta de erro;
+- evitar repeticao do mesmo `orElseThrow` em varios controllers.
+
+Essa mudanca foi aplicada nos controllers de componentes, hardware, usuario, perfil e recomendacoes.
+
+## 30. Testes executados
 
 Depois das mudancas, foi executado:
 
@@ -1058,7 +1095,7 @@ BUILD SUCCESS
 Tests run: 7, Failures: 0, Errors: 0, Skipped: 0
 ```
 
-## 30. Resumo do aprendizado
+## 31. Resumo do aprendizado
 
 O que foi praticado nesta semana:
 
@@ -1084,6 +1121,8 @@ O que foi praticado nesta semana:
 - Separacao entre erros e avisos de compatibilidade.
 - Tratamento centralizado de erros com `@RestControllerAdvice`.
 - Padronizacao de respostas de erro com DTO.
+- Concentracao de buscas obrigatorias nos services.
+- Reducao de tratamento de excecao dentro dos controllers.
 - Documentacao interativa com Swagger/OpenAPI.
 - Criacao de testes de integracao com requisicoes HTTP reais.
 - Avaliacao tecnica de `SpecificationUtils` sem aplicar complexidade extra.

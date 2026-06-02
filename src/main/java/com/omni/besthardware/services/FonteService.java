@@ -1,6 +1,7 @@
 package com.omni.besthardware.services;
 
 import com.omni.besthardware.dtos.FonteFiltroRequest;
+import com.omni.besthardware.exceptions.RecursoNaoEncontradoException;
 import com.omni.besthardware.models.FonteModel;
 import com.omni.besthardware.repositories.FonteRepository;
 import com.omni.besthardware.specifications.FonteSpecification;
@@ -27,6 +28,12 @@ public class FonteService {
     @Transactional(readOnly = true)
     public Optional<FonteModel> buscarPorId(Integer id) {
         return fonteRepository.findById(id);
+    }
+
+    @Transactional(readOnly = true)
+    public FonteModel buscarObrigatorio(Integer id) {
+        return buscarPorId(id)
+                .orElseThrow(() -> new RecursoNaoEncontradoException("Fonte", id));
     }
 
     @Transactional(readOnly = true)
@@ -75,6 +82,16 @@ public class FonteService {
     }
 
     @Transactional
+    public FonteModel atualizarObrigatorio(Integer id, FonteModel fonte) {
+        if (!fonteRepository.existsById(id)) {
+            throw new RecursoNaoEncontradoException("Fonte", id);
+        }
+
+        fonte.setId(id);
+        return fonteRepository.save(fonte);
+    }
+
+    @Transactional
     public boolean excluirPorId(Integer id) {
         if (!fonteRepository.existsById(id)) {
             return false;
@@ -82,5 +99,12 @@ public class FonteService {
 
         fonteRepository.deleteById(id);
         return true;
+    }
+
+    @Transactional
+    public void excluirObrigatorio(Integer id) {
+        if (!excluirPorId(id)) {
+            throw new RecursoNaoEncontradoException("Fonte", id);
+        }
     }
 }

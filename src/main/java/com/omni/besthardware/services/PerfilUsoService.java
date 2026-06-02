@@ -1,6 +1,7 @@
 package com.omni.besthardware.services;
 
 import com.omni.besthardware.dtos.PerfilUsoResponse;
+import com.omni.besthardware.exceptions.RecursoNaoEncontradoException;
 import java.util.List;
 import java.util.Optional;
 import org.springframework.stereotype.Service;
@@ -84,5 +85,10 @@ public class PerfilUsoService {
         return PERFIS_DE_USO.stream()
                 .filter(perfil -> perfil.codigo().equalsIgnoreCase(codigo))
                 .findFirst();
+    }
+
+    public PerfilUsoResponse buscarPorCodigoObrigatorio(String codigo) {
+        return buscarPorCodigo(codigo)
+                .orElseThrow(() -> new RecursoNaoEncontradoException("Escopo de perfil nao encontrado: " + codigo + "."));
     }
 }

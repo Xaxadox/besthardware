@@ -1,6 +1,7 @@
 package com.omni.besthardware.services;
 
 import com.omni.besthardware.dtos.ArmazenamentoFiltroRequest;
+import com.omni.besthardware.exceptions.RecursoNaoEncontradoException;
 import com.omni.besthardware.models.ArmazenamentoModel;
 import com.omni.besthardware.repositories.ArmazenamentoRepository;
 import com.omni.besthardware.specifications.ArmazenamentoSpecification;
@@ -27,6 +28,12 @@ public class ArmazenamentoService {
     @Transactional(readOnly = true)
     public Optional<ArmazenamentoModel> buscarPorId(Integer id) {
         return armazenamentoRepository.findById(id);
+    }
+
+    @Transactional(readOnly = true)
+    public ArmazenamentoModel buscarObrigatorio(Integer id) {
+        return buscarPorId(id)
+                .orElseThrow(() -> new RecursoNaoEncontradoException("Armazenamento", id));
     }
 
     @Transactional(readOnly = true)
@@ -85,6 +92,16 @@ public class ArmazenamentoService {
     }
 
     @Transactional
+    public ArmazenamentoModel atualizarObrigatorio(Integer id, ArmazenamentoModel armazenamento) {
+        if (!armazenamentoRepository.existsById(id)) {
+            throw new RecursoNaoEncontradoException("Armazenamento", id);
+        }
+
+        armazenamento.setId(id);
+        return armazenamentoRepository.save(armazenamento);
+    }
+
+    @Transactional
     public boolean excluirPorId(Integer id) {
         if (!armazenamentoRepository.existsById(id)) {
             return false;
@@ -92,5 +109,12 @@ public class ArmazenamentoService {
 
         armazenamentoRepository.deleteById(id);
         return true;
+    }
+
+    @Transactional
+    public void excluirObrigatorio(Integer id) {
+        if (!excluirPorId(id)) {
+            throw new RecursoNaoEncontradoException("Armazenamento", id);
+        }
     }
 }

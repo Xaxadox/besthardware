@@ -3,7 +3,6 @@ package com.omni.besthardware.controllers;
 import com.omni.besthardware.dtos.ComponenteResponse;
 import com.omni.besthardware.dtos.CpuFiltroRequest;
 import com.omni.besthardware.dtos.CpuRequest;
-import com.omni.besthardware.exceptions.RecursoNaoEncontradoException;
 import com.omni.besthardware.mappers.DtoMapper;
 import com.omni.besthardware.models.CpuModel;
 import com.omni.besthardware.services.CpuService;
@@ -38,10 +37,7 @@ public class CpuController {
 
     @GetMapping("/{id}")
     public ResponseEntity<ComponenteResponse> buscarPorId(@PathVariable Integer id) {
-        return cpuService.buscarPorId(id)
-                .map(DtoMapper::toComponenteResponse)
-                .map(ResponseEntity::ok)
-                .orElseThrow(() -> new RecursoNaoEncontradoException("CPU", id));
+        return ResponseEntity.ok(DtoMapper.toComponenteResponse(cpuService.buscarObrigatorio(id)));
     }
 
     @PostMapping
@@ -52,18 +48,12 @@ public class CpuController {
 
     @PutMapping("/{id}")
     public ResponseEntity<ComponenteResponse> atualizar(@PathVariable Integer id, @Valid @RequestBody CpuRequest request) {
-        return cpuService.atualizar(id, toModel(request))
-                .map(DtoMapper::toComponenteResponse)
-                .map(ResponseEntity::ok)
-                .orElseThrow(() -> new RecursoNaoEncontradoException("CPU", id));
+        return ResponseEntity.ok(DtoMapper.toComponenteResponse(cpuService.atualizarObrigatorio(id, toModel(request))));
     }
 
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> excluir(@PathVariable Integer id) {
-        if (!cpuService.excluirPorId(id)) {
-            throw new RecursoNaoEncontradoException("CPU", id);
-        }
-
+        cpuService.excluirObrigatorio(id);
         return ResponseEntity.noContent().build();
     }
 
