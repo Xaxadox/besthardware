@@ -1,23 +1,23 @@
 package com.omni.besthardware.controllers;
 
+import com.omni.besthardware.dtos.ComponenteFiltroRequest;
 import com.omni.besthardware.dtos.ComponenteRequest;
 import com.omni.besthardware.dtos.ComponenteResponse;
 import com.omni.besthardware.mappers.DtoMapper;
 import com.omni.besthardware.models.ComponenteModel;
 import com.omni.besthardware.services.ComponenteService;
 import jakarta.validation.Valid;
-import java.math.BigDecimal;
 import java.util.List;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 @RestController
@@ -31,30 +31,8 @@ public class ComponenteController {
     }
 
     @GetMapping
-    public List<ComponenteResponse> listar(
-            @RequestParam(required = false) String tipo,
-            @RequestParam(required = false) BigDecimal precoMinimo,
-            @RequestParam(required = false) BigDecimal precoMaximo,
-            @RequestParam(required = false) Integer perfilId,
-            @RequestParam(required = false) Integer componenteCompativelId
-    ) {
-        if (tipo != null) {
-            return toResponseList(componenteService.buscarPorTipo(tipo));
-        }
-
-        if (precoMinimo != null && precoMaximo != null) {
-            return toResponseList(componenteService.buscarPorFaixaDePreco(precoMinimo, precoMaximo));
-        }
-
-        if (perfilId != null) {
-            return toResponseList(componenteService.buscarPorPerfil(perfilId));
-        }
-
-        if (componenteCompativelId != null) {
-            return toResponseList(componenteService.buscarCompativeisCom(componenteCompativelId));
-        }
-
-        return toResponseList(componenteService.listarTodos());
+    public List<ComponenteResponse> listar(@ModelAttribute ComponenteFiltroRequest filtro) {
+        return toResponseList(componenteService.buscarComFiltros(filtro));
     }
 
     @GetMapping("/{id}")

@@ -2,11 +2,9 @@ package com.omni.besthardware.controllers;
 
 import com.omni.besthardware.dtos.PerfilRequest;
 import com.omni.besthardware.dtos.PerfilResponse;
-import com.omni.besthardware.dtos.PerfilUsoResponse;
 import com.omni.besthardware.mappers.DtoMapper;
 import com.omni.besthardware.models.PerfilModel;
 import com.omni.besthardware.services.PerfilService;
-import com.omni.besthardware.services.PerfilUsoService;
 import jakarta.validation.Valid;
 import java.util.List;
 import org.springframework.http.HttpStatus;
@@ -26,14 +24,9 @@ import org.springframework.web.bind.annotation.RestController;
 public class PerfilController {
 
     private final PerfilService perfilService;
-    private final PerfilUsoService perfilUsoService;
 
-    public PerfilController(
-            PerfilService perfilService,
-            PerfilUsoService perfilUsoService
-    ) {
+    public PerfilController(PerfilService perfilService) {
         this.perfilService = perfilService;
-        this.perfilUsoService = perfilUsoService;
     }
 
     @GetMapping
@@ -60,16 +53,6 @@ public class PerfilController {
     @GetMapping("/nome/{nome}")
     public ResponseEntity<PerfilResponse> buscarPorNomeExato(@PathVariable String nome) {
         return ResponseEntity.ok(DtoMapper.toPerfilResponse(perfilService.buscarPorNomeExatoObrigatorio(nome)));
-    }
-
-    @GetMapping("/escopos")
-    public List<PerfilUsoResponse> listarEscopos() {
-        return perfilUsoService.listarTodos();
-    }
-
-    @GetMapping("/escopos/{codigo}")
-    public ResponseEntity<PerfilUsoResponse> buscarEscopoPorCodigo(@PathVariable String codigo) {
-        return ResponseEntity.ok(perfilUsoService.buscarPorCodigoObrigatorio(codigo));
     }
 
     @PostMapping

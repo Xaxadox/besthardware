@@ -1080,7 +1080,41 @@ Motivo:
 
 Essa mudanca foi aplicada nos controllers de componentes, hardware, usuario, perfil e recomendacoes.
 
-## 30. Testes executados
+## 30. Controllers de componente e perfil mais enxutos
+
+O `ComponenteController` deixou de decidir os filtros com varios `if`.
+
+Antes, o controller verificava parametros como:
+
+```java
+tipo
+precoMinimo
+precoMaximo
+perfilId
+componenteCompativelId
+```
+
+Depois, foi criado:
+
+```text
+ComponenteFiltroRequest
+ComponenteSpecification
+```
+
+Assim, o controller recebe o filtro com `@ModelAttribute` e delega a busca ao service, seguindo o mesmo padrao usado em CPU, GPU, RAM, fonte, armazenamento, monitor e placa-mae.
+
+Tambem foi criado o `PerfilUsoController`.
+
+Antes, `PerfilController` cuidava tanto dos perfis salvos no banco quanto dos escopos fixos de uso:
+
+```text
+/api/perfis/escopos
+/api/perfis/escopos/{codigo}
+```
+
+Depois, esses endpoints foram movidos para uma classe propria, mantendo as mesmas URLs. Isso reduz responsabilidade do `PerfilController` sem quebrar a API.
+
+## 31. Testes executados
 
 Depois das mudancas, foi executado:
 
@@ -1095,7 +1129,7 @@ BUILD SUCCESS
 Tests run: 7, Failures: 0, Errors: 0, Skipped: 0
 ```
 
-## 31. Resumo do aprendizado
+## 32. Resumo do aprendizado
 
 O que foi praticado nesta semana:
 
@@ -1123,6 +1157,8 @@ O que foi praticado nesta semana:
 - Padronizacao de respostas de erro com DTO.
 - Concentracao de buscas obrigatorias nos services.
 - Reducao de tratamento de excecao dentro dos controllers.
+- Criacao de filtro especifico para `ComponenteController`.
+- Separacao dos escopos de perfil em `PerfilUsoController`.
 - Documentacao interativa com Swagger/OpenAPI.
 - Criacao de testes de integracao com requisicoes HTTP reais.
 - Avaliacao tecnica de `SpecificationUtils` sem aplicar complexidade extra.

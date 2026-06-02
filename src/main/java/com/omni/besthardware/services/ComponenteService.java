@@ -1,8 +1,10 @@
 package com.omni.besthardware.services;
 
+import com.omni.besthardware.dtos.ComponenteFiltroRequest;
 import com.omni.besthardware.exceptions.RecursoNaoEncontradoException;
 import com.omni.besthardware.models.ComponenteModel;
 import com.omni.besthardware.repositories.ComponenteRepository;
+import com.omni.besthardware.specifications.ComponenteSpecification;
 import java.math.BigDecimal;
 import java.util.List;
 import java.util.Optional;
@@ -26,6 +28,11 @@ public class ComponenteService {
     @Transactional(readOnly = true)
     public Optional<ComponenteModel> buscarPorId(Integer id) {
         return componenteRepository.findById(id);
+    }
+
+    @Transactional(readOnly = true)
+    public List<ComponenteModel> buscarComFiltros(ComponenteFiltroRequest filtro) {
+        return componenteRepository.findAll(ComponenteSpecification.comFiltros(filtro));
     }
 
     @Transactional(readOnly = true)
