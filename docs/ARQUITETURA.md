@@ -1,0 +1,176 @@
+# Arquitetura
+
+Este documento descreve a organizacao interna do Best Hardware.
+
+## Estrutura Principal
+
+```text
+src/main/java/com/omni/besthardware
+├── config
+├── controllers
+├── dtos
+├── exceptions
+├── handlers
+├── mappers
+├── models
+├── repositories
+├── specifications
+└── services
+```
+
+Responsabilidades:
+
+- `models`: entidades JPA.
+- `repositories`: acesso ao banco com Spring Data JPA.
+- `services`: regras de negocio e coordenacao de repositories.
+- `controllers`: endpoints REST.
+- `dtos`: objetos de entrada e saida da API.
+- `mappers`: conversao entre models e DTOs.
+- `handlers`: tratamento centralizado de erros.
+- `exceptions`: excecoes especificas da API.
+- `specifications`: filtros dinamicos para consultas JPA.
+
+## Entidades
+
+Componentes usam heranca JPA com `ComponenteModel` como classe base.
+
+```text
+ComponenteModel
+├── CpuModel
+├── GpuModel
+├── RamModel
+├── FonteModel
+├── ArmazenamentoModel
+├── MonitorModel
+└── PlacaMaeModel
+```
+
+Outras entidades:
+
+```text
+UsuarioModel
+PerfilModel
+OrcamentoModel
+ItemOrcamentoModel
+OfertaPrecoModel
+```
+
+Relacionamentos principais:
+
+- `PerfilModel` possui varios componentes.
+- `ComponenteModel` pode ter componentes compativeis.
+- `OrcamentoModel` pertence a um usuario e a um perfil.
+- `OrcamentoModel` possui varios itens.
+- `ItemOrcamentoModel` referencia um orcamento e um componente.
+- `OfertaPrecoModel` referencia um componente.
+
+## DER
+
+DER base:
+
+![Diagrama ER](DER.png)
+
+DER com ofertas de preco:
+
+![Diagrama ER com ofertas](DER_oferta.png)
+
+## Banco De Dados
+
+O projeto usa H2 em memoria:
+
+```properties
+spring.datasource.url=jdbc:h2:mem:hardware_db
+spring.h2.console.enabled=true
+spring.h2.console.path=/h2-console
+```
+
+Como o banco e em memoria, os dados sao perdidos quando a aplicacao e reiniciada. A classe `TesteConfig` carrega dados iniciais para facilitar testes locais.
+
+## Ofertas De Preco
+
+A tabela `ofertaPreco` registra precos encontrados para componentes em lojas ou fontes diferentes.
+
+Campos principais:
+
+```text
+loja
+precoAvista
+precoParcelado
+parcelas
+cupom
+urlProduto
+fonte
+observacoes
+dataColeta
+idComponente
+```
+
+Cardinalidade:
+
+```text
+Componente 1 ---- N OfertaPreco
+```
+
+Regra usada pela API:
+
+- se o componente tiver ofertas cadastradas, orcamento e recomendacao usam a menor `precoAvista`;
+- se o componente nao tiver oferta, a API usa `ComponenteModel.preco` como fallback;
+- `ItemOrcamentoModel.preco` continua guardando o preco congelado no momento da criacao do orcamento.
+
+## Preco Base E Preco De Oferta
+
+`ComponenteModel.preco` continua existindo como preco base.
+
+`OfertaPrecoModel.precoAvista` representa uma oferta pesquisada em uma loja/fonte especifica.
+
+`ItemOrcamentoModel.preco` representa o preco congelado no momento em que o item entrou no orcamento.
+
+Essa separacao evita que um orcamento antigo mude quando uma oferta nova for cadastrada.
+
+## DTOs
+
+A API usa DTOs para separar o formato HTTP das entidades JPA.
+
+Exemplos:
+
+```text
+OrcamentoRequest
+OrcamentoResponse
+ItemOrcamentoCadastroRequest
+ItemOrcamentoResponse
+OfertaPrecoRequest
+OfertaPrecoResponse
+ComponenteResponse
+```
+
+Vantagens:
+
+- JSON mais simples.
+- Menos acoplamento com entidades JPA.
+- Validacao de entrada mais clara.
+- Respostas mais controladas.
+
+## Specifications
+
+Os filtros dinamicos usam `Specification` e `JpaSpecificationExecutor`.
+
+Isso permite combinar filtros na mesma requisicao:
+
+```text
+GET /api/cpus?socket=AM4&nucleosMinimos=6&precoMaximo=1200
+GET /api/ofertas-preco?loja=KaBuM&precoAvistaMaximo=1000
+```
+
+Controllers recebem os parametros como DTO de filtro e delegam ao service.
+
+## Planilha CSV
+
+Existe uma planilha de apoio:
+
+```text
+docs/ofertas_precos_exemplo.csv
+```
+
+Ela organiza pesquisas de preco com campos como loja, preco a vista, preco parcelado, cupom, URL, fonte e data de coleta.
+
+No estado atual, a API ainda nao importa esse CSV automaticamente.

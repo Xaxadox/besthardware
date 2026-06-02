@@ -1014,7 +1014,36 @@ docs/DER_oferta.pdf
 
 O DER antigo foi mantido para registrar a evolucao do projeto.
 
-## 28. Testes executados
+## 28. README enxuto e documentacao separada
+
+O `README.md` foi reduzido para funcionar como porta de entrada do projeto.
+
+Antes, ele misturava:
+
+```text
+apresentacao do projeto
+manual completo da API
+explicacao de arquitetura
+controle de mudancas
+```
+
+Depois, os detalhes foram separados em:
+
+```text
+docs/API.md
+docs/ARQUITETURA.md
+docs/GUIA_MUDANCAS_2026-05-SEMANA-5.md
+docs/GUIA_MUDANCAS_2026-06-SEMANA-1.md
+```
+
+Motivo:
+
+- deixar o README mais facil de ler no GitHub;
+- manter os detalhes tecnicos sem apagar conteudo;
+- separar documentacao de uso, arquitetura e historico de mudancas;
+- facilitar a apresentacao do projeto para professor ou avaliador.
+
+## 29. Testes executados
 
 Depois das mudancas, foi executado:
 
@@ -1029,7 +1058,7 @@ BUILD SUCCESS
 Tests run: 7, Failures: 0, Errors: 0, Skipped: 0
 ```
 
-## 29. Resumo do aprendizado
+## 30. Resumo do aprendizado
 
 O que foi praticado nesta semana:
 
@@ -1061,4 +1090,5 @@ O que foi praticado nesta semana:
 - Criacao de uma planilha CSV para organizar pesquisas de preco.
 - Criacao de uma tabela de ofertas de preco por componente.
 - Uso de preco preferencial em orcamentos e recomendacoes.
+- Organizacao do README e divisao da documentacao por assunto.
 - Uso de commits pequenos como controle de mudancas.
