@@ -1,0 +1,33 @@
+codigo;perfil_sugerido;categoria;modelo;marca;loja;preco_avista;preco_parcelado;parcelas;cupom;url_produto;fonte;data_coleta;observacoes
+CPU_RYZEN_5_5600;jogo-inicial;CPU;Ryzen 5 5600;AMD;Preencher;899.90;899.90;1;;https://exemplo.com/produto/ryzen-5-5600;Dados iniciais do projeto;2026-06-02;CPU AM4 sem video integrado
+CPU_RYZEN_5_5600G;trabalho;CPU;Ryzen 5 5600G;AMD;Preencher;799.90;799.90;1;;https://exemplo.com/produto/ryzen-5-5600g;Dados iniciais do projeto;2026-06-02;CPU AM4 com video integrado para uso leve
+CPU_RYZEN_5_7600;jogo-intermediario;CPU;Ryzen 5 7600;AMD;Preencher;1399.90;1399.90;1;;https://exemplo.com/produto/ryzen-5-7600;Dados iniciais do projeto;2026-06-02;CPU AM5 intermediaria
+CPU_RYZEN_7_7800X3D;jogos-pesados;CPU;Ryzen 7 7800X3D;AMD;Preencher;2499.90;2499.90;1;;https://exemplo.com/produto/ryzen-7-7800x3d;Dados iniciais do projeto;2026-06-02;CPU AM5 focada em jogos
+CPU_RYZEN_9_7900;profissional;CPU;Ryzen 9 7900;AMD;Preencher;3299.90;3299.90;1;;https://exemplo.com/produto/ryzen-9-7900;Dados iniciais do projeto;2026-06-02;CPU AM5 com mais nucleos
+PLACA_ASUS_B550;jogo-inicial;PlacaMae;B550 ATX;ASUS;Preencher;699.90;699.90;1;;https://exemplo.com/produto/asus-b550;Dados iniciais do projeto;2026-06-02;Placa-mae AM4 DDR4
+PLACA_GIGABYTE_A520;trabalho;PlacaMae;A520 mATX;Gigabyte;Preencher;449.90;449.90;1;;https://exemplo.com/produto/gigabyte-a520;Dados iniciais do projeto;2026-06-02;Placa-mae AM4 de entrada
+PLACA_MSI_B650;jogo-intermediario;PlacaMae;B650 ATX;MSI;Preencher;1199.90;1199.90;1;;https://exemplo.com/produto/msi-b650;Dados iniciais do projeto;2026-06-02;Placa-mae AM5 DDR5
+PLACA_ASUS_X670;profissional;PlacaMae;X670 ATX;ASUS;Preencher;2199.90;2199.90;1;;https://exemplo.com/produto/asus-x670;Dados iniciais do projeto;2026-06-02;Placa-mae AM5 DDR5 avancada
+GPU_RTX_3060;jogo-inicial;GPU;RTX 3060;NVIDIA;Preencher;1899.90;1899.90;1;;https://exemplo.com/produto/rtx-3060;Dados iniciais do projeto;2026-06-02;GPU dedicada para Full HD
+GPU_GTX_1650;jogo-inicial;GPU;GTX 1650;NVIDIA;Preencher;899.90;899.90;1;;https://exemplo.com/produto/gtx-1650;Dados iniciais do projeto;2026-06-02;GPU dedicada de entrada
+GPU_RTX_4060_TI;jogo-intermediario;GPU;RTX 4060 Ti;NVIDIA;Preencher;2499.90;2499.90;1;;https://exemplo.com/produto/rtx-4060-ti;Dados iniciais do projeto;2026-06-02;GPU para jogos em 2K
+GPU_RTX_4070_TI_SUPER;jogos-pesados;GPU;RTX 4070 Ti Super;NVIDIA;Preencher;5499.90;5499.90;1;;https://exemplo.com/produto/rtx-4070-ti-super;Dados iniciais do projeto;2026-06-02;GPU forte para altos FPS e 4K
+GPU_RTX_4080_SUPER;profissional;GPU;RTX 4080 Super;NVIDIA;Preencher;7999.90;7999.90;1;;https://exemplo.com/produto/rtx-4080-super;Dados iniciais do projeto;2026-06-02;GPU forte para uso profissional pesado
+RAM_KINGSTON_DDR4_8GB;jogo-inicial;RAM;DDR4 8GB 3200MHz;Kingston;Preencher;449.90;449.90;1;;https://exemplo.com/produto/kingston-ddr4-8gb;Dados iniciais do projeto;2026-06-02;Modulo DDR4 basico
+RAM_KINGSTON_DDR4_16GB;trabalho|jogo-inicial;RAM;DDR4 16GB 3200MHz;Kingston;Preencher;329.90;329.90;1;;https://exemplo.com/produto/kingston-ddr4-16gb;Dados iniciais do projeto;2026-06-02;Opcao DDR4 melhor para multitarefa
+RAM_CORSAIR_DDR5_16GB;jogo-intermediario;RAM;DDR5 16GB 5600MHz;Corsair;Preencher;499.90;499.90;1;;https://exemplo.com/produto/corsair-ddr5-16gb;Dados iniciais do projeto;2026-06-02;Opcao DDR5 intermediaria
+RAM_CORSAIR_DDR5_32GB;jogos-pesados|profissional;RAM;DDR5 32GB 6000MHz;Corsair;Preencher;899.90;899.90;1;;https://exemplo.com/produto/corsair-ddr5-32gb;Dados iniciais do projeto;2026-06-02;Opcao DDR5 para jogos pesados e trabalho profissional
+FONTE_CORSAIR_650W;jogo-inicial;Fonte;650W 80 Plus Bronze;Corsair;Preencher;399.90;399.90;1;;https://exemplo.com/produto/corsair-650w-bronze;Dados iniciais do projeto;2026-06-02;Fonte para configuracao com GPU intermediaria
+FONTE_CORSAIR_450W;trabalho;Fonte;450W 80 Plus Bronze;Corsair;Preencher;249.90;249.90;1;;https://exemplo.com/produto/corsair-450w-bronze;Dados iniciais do projeto;2026-06-02;Fonte para computador leve
+FONTE_COOLER_MASTER_550W;jogo-inicial;Fonte;550W 80 Plus Bronze;Cooler Master;Preencher;329.90;329.90;1;;https://exemplo.com/produto/cooler-master-550w-bronze;Dados iniciais do projeto;2026-06-02;Fonte de entrada para GPU dedicada
+FONTE_XPG_750W;jogo-intermediario|jogos-pesados;Fonte;750W 80 Plus Gold;XPG;Preencher;699.90;699.90;1;;https://exemplo.com/produto/xpg-750w-gold;Dados iniciais do projeto;2026-06-02;Fonte para GPU mais forte
+FONTE_CORSAIR_850W;profissional;Fonte;850W 80 Plus Gold;Corsair;Preencher;899.90;899.90;1;;https://exemplo.com/produto/corsair-850w-gold;Dados iniciais do projeto;2026-06-02;Fonte para configuracao profissional
+SSD_NVME_256GB;trabalho;Armazenamento;SSD NVME 256GB;Generico;Preencher;299.90;299.90;1;;https://exemplo.com/produto/ssd-nvme-256gb;Dados iniciais do projeto;2026-06-02;SSD basico
+SSD_NVME_512GB;trabalho|jogo-inicial;Armazenamento;SSD NVME 512GB;Generico;Preencher;349.90;349.90;1;;https://exemplo.com/produto/ssd-nvme-512gb;Dados iniciais do projeto;2026-06-02;SSD intermediario
+SSD_NVME_1TB;jogo-intermediario|jogos-pesados;Armazenamento;SSD NVME 1TB;Generico;Preencher;549.90;549.90;1;;https://exemplo.com/produto/ssd-nvme-1tb;Dados iniciais do projeto;2026-06-02;SSD recomendado para jogos atuais
+SSD_NVME_2TB;profissional;Armazenamento;SSD NVME 2TB;Generico;Preencher;999.90;999.90;1;;https://exemplo.com/produto/ssd-nvme-2tb;Dados iniciais do projeto;2026-06-02;SSD para projetos e arquivos grandes
+MONITOR_LG_24_FHD_144;jogo-inicial;Monitor;24 FHD 144Hz IPS;LG;Preencher;899.90;899.90;1;;https://exemplo.com/produto/lg-24-fhd-144hz;Dados iniciais do projeto;2026-06-02;Monitor Full HD com alta taxa de atualizacao
+MONITOR_LG_24_FHD_75;trabalho;Monitor;24 FHD 75Hz IPS;LG;Preencher;599.90;599.90;1;;https://exemplo.com/produto/lg-24-fhd-75hz;Dados iniciais do projeto;2026-06-02;Monitor simples para trabalho
+MONITOR_AOC_27_2K_144;jogo-intermediario;Monitor;27 2K 144Hz IPS;AOC;Preencher;1699.90;1699.90;1;;https://exemplo.com/produto/aoc-27-2k-144hz;Dados iniciais do projeto;2026-06-02;Monitor 2K para jogos
+MONITOR_GIGABYTE_28_4K_144;jogos-pesados;Monitor;28 4K 144Hz IPS;Gigabyte;Preencher;3999.90;3999.90;1;;https://exemplo.com/produto/gigabyte-28-4k-144hz;Dados iniciais do projeto;2026-06-02;Monitor 4K para jogos pesados
+MONITOR_DELL_27_4K_60;profissional;Monitor;27 4K 60Hz IPS;Dell;Preencher;2199.90;2199.90;1;;https://exemplo.com/produto/dell-27-4k-60hz;Dados iniciais do projeto;2026-06-02;Monitor 4K para uso profissional

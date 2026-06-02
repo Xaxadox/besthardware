@@ -56,6 +56,18 @@ Password: vazio
 
 Como o banco é em memória, os dados são perdidos quando a aplicação é reiniciada. A classe `TesteConfig` carrega dados iniciais para facilitar testes locais.
 
+## Planilha de preços
+
+Existe uma planilha CSV de exemplo para organizar pesquisas de preços:
+
+```text
+docs/ofertas_precos_exemplo.csv
+```
+
+Ela usa os componentes cadastrados em `TesteConfig` como base e possui campos para loja, preço à vista, preço parcelado, cupom, URL do produto, fonte da pesquisa e data de coleta. No estado atual, essa planilha é material de apoio: a API ainda não importa o CSV automaticamente.
+
+Ao usar sites de terceiros como referência de preço, preencha a fonte e a data da coleta. Evite scraping automático sem autorização; para o projeto, o caminho mais seguro é pesquisa manual com registro da URL consultada.
+
 ## Como executar
 
 No Windows:

@@ -891,7 +891,43 @@ Motivo:
 
 Ela continua sendo uma melhoria possivel para uma etapa futura, desde que seja pequena e simples.
 
-## 26. Testes executados
+## 26. Planilha CSV de precos
+
+Foi criada uma planilha CSV de exemplo:
+
+```text
+docs/ofertas_precos_exemplo.csv
+```
+
+Ela organiza pesquisas de preco por componente, com campos como:
+
+```text
+codigo
+perfil_sugerido
+categoria
+modelo
+marca
+loja
+preco_avista
+preco_parcelado
+parcelas
+cupom
+url_produto
+fonte
+data_coleta
+observacoes
+```
+
+A planilha usa os componentes de `TesteConfig` como base. Ela ainda nao e importada automaticamente pela API; por enquanto, serve como material de apoio para registrar precos pesquisados manualmente e preparar uma futura funcionalidade de importacao.
+
+Motivo da decisao:
+
+- preco de hardware muda muito rapido;
+- o mesmo componente pode aparecer em varias lojas;
+- registrar `fonte`, `url_produto` e `data_coleta` deixa a pesquisa mais rastreavel;
+- evitar scraping automatico sem autorizacao reduz risco tecnico e juridico.
+
+## 27. Testes executados
 
 Depois das mudancas, foi executado:
 
@@ -906,7 +942,7 @@ BUILD SUCCESS
 Tests run: 5, Failures: 0, Errors: 0, Skipped: 0
 ```
 
-## 27. Resumo do aprendizado
+## 28. Resumo do aprendizado
 
 O que foi praticado hoje:
 
@@ -935,4 +971,5 @@ O que foi praticado hoje:
 - Documentacao interativa com Swagger/OpenAPI.
 - Criacao de testes de integracao com requisicoes HTTP reais.
 - Avaliacao tecnica de `SpecificationUtils` sem aplicar complexidade extra.
+- Criacao de uma planilha CSV para organizar pesquisas de preco.
 - Uso de commits pequenos como controle de mudancas.
