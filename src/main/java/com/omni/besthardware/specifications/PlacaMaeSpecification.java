@@ -1,7 +1,7 @@
 package com.omni.besthardware.specifications;
 
-import com.omni.besthardware.dtos.PlacaMaeFiltroRequest;
-import com.omni.besthardware.models.PlacaMaeModel;
+import com.omni.besthardware.rest.dto.request.PlacaMaeFiltroRequest;
+import com.omni.besthardware.model.PlacaMaeModel;
 import jakarta.persistence.criteria.Predicate;
 import java.util.ArrayList;
 import java.util.List;

@@ -4,12 +4,12 @@ Este guia registra as mudancas feitas no projeto BestHardware na semana 1 de 202
 
 ## 1. Controllers REST
 
-As classes da pasta `controllers` deixaram de estar vazias e passaram a expor endpoints HTTP.
+As classes da pasta `rest/controller` deixaram de estar vazias e passaram a expor endpoints HTTP.
 
 Antes:
 
 ```java
-package com.omni.besthardware.controllers;
+package com.omni.besthardware.rest.controller;
 
 public class CpuController {
 }
@@ -168,7 +168,7 @@ Vantagens:
 
 ## 6. DTOs criados
 
-Foi criada a pasta `dtos` com os seguintes records:
+Foi criada a pasta `rest/dto` com os seguintes records:
 
 ```text
 ItemOrcamentoRequest
@@ -731,11 +731,11 @@ E a classe `CpuSpecification` monta a consulta de acordo com os campos preenchid
 O que foi criado:
 
 ```text
-dtos/*FiltroRequest
+rest/dto/request/*FiltroRequest
 specifications/*Specification
-repositories com JpaSpecificationExecutor
-services com buscarComFiltros(...)
-controllers usando @ModelAttribute
+repository com JpaSpecificationExecutor
+service com buscarComFiltros(...)
+rest/controller usando @ModelAttribute
 ```
 
 Controllers refatorados:
@@ -1114,12 +1114,53 @@ Antes, `PerfilController` cuidava tanto dos perfis salvos no banco quanto dos es
 
 Depois, esses endpoints foram movidos para uma classe propria, mantendo as mesmas URLs. Isso reduz responsabilidade do `PerfilController` sem quebrar a API.
 
-## 31. Testes executados
+## 31. Organizacao de pacotes inspirada no PedeAI
+
+A estrutura interna foi reorganizada para ficar mais parecida com o projeto PedeAI, separando melhor o que e camada REST, DTO, model, repository, service e exception.
+
+Antes, o projeto usava pacotes como:
+
+```text
+controllers
+dtos
+models
+repositories
+services
+exceptions
+handlers
+```
+
+Depois, passou a usar:
+
+```text
+rest/controller
+rest/dto/request
+rest/dto/response
+model
+repository
+service
+exception
+```
+
+O que mudou na pratica:
+
+- controllers ficaram dentro de `rest/controller`;
+- DTOs de entrada ficaram em `rest/dto/request`;
+- DTOs de resposta ficaram em `rest/dto/response`;
+- entidades JPA ficaram em `model`;
+- repositories ficaram em `repository`;
+- services ficaram em `service`;
+- excecoes e o handler global ficaram juntos em `exception`;
+- classes principais receberam comentarios JavaDoc curtos explicando sua responsabilidade.
+
+Essa mudanca nao altera as URLs da API. Ela melhora a leitura do codigo e deixa mais claro onde cada tipo de classe deve ficar.
+
+## 32. Testes executados
 
 Depois das mudancas, foi executado:
 
 ```powershell
-.\mvnw.cmd test
+.\mvnw.cmd clean test
 ```
 
 Resultado:
@@ -1129,7 +1170,7 @@ BUILD SUCCESS
 Tests run: 7, Failures: 0, Errors: 0, Skipped: 0
 ```
 
-## 32. Resumo do aprendizado
+## 33. Resumo do aprendizado
 
 O que foi praticado nesta semana:
 
@@ -1166,4 +1207,6 @@ O que foi praticado nesta semana:
 - Criacao de uma tabela de ofertas de preco por componente.
 - Uso de preco preferencial em orcamentos e recomendacoes.
 - Organizacao do README e divisao da documentacao por assunto.
+- Organizacao de pacotes no padrao `rest/controller`, `rest/dto/request`, `rest/dto/response`, `model`, `repository`, `service` e `exception`.
+- Uso de comentarios JavaDoc curtos para explicar a responsabilidade das classes.
 - Uso de commits pequenos como controle de mudancas.

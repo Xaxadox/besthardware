@@ -1,0 +1,118 @@
+package com.omni.besthardware.service;
+
+import com.omni.besthardware.rest.dto.request.RamFiltroRequest;
+import com.omni.besthardware.exception.RecursoNaoEncontradoException;
+import com.omni.besthardware.model.RamModel;
+import com.omni.besthardware.repository.RamRepository;
+import com.omni.besthardware.specifications.RamSpecification;
+import java.math.BigDecimal;
+import java.util.List;
+import java.util.Optional;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+
+/**
+ * Servico responsavel pelas regras de negocio de Ram no projeto BestHardware.
+ */
+@Service
+public class RamService {
+
+    private final RamRepository ramRepository;
+
+    public RamService(RamRepository ramRepository) {
+        this.ramRepository = ramRepository;
+    }
+
+    @Transactional(readOnly = true)
+    public List<RamModel> listarTodos() {
+        return ramRepository.findAll();
+    }
+
+    @Transactional(readOnly = true)
+    public Optional<RamModel> buscarPorId(Integer id) {
+        return ramRepository.findById(id);
+    }
+
+    @Transactional(readOnly = true)
+    public RamModel buscarObrigatorio(Integer id) {
+        return buscarPorId(id)
+                .orElseThrow(() -> new RecursoNaoEncontradoException("RAM", id));
+    }
+
+    @Transactional(readOnly = true)
+    public List<RamModel> buscarComFiltros(RamFiltroRequest filtro) {
+        return ramRepository.findAll(RamSpecification.comFiltros(filtro));
+    }
+
+    @Transactional(readOnly = true)
+    public List<RamModel> buscarPorTipo(String tipo) {
+        return ramRepository.findByTipoIgnoreCase(tipo);
+    }
+
+    @Transactional(readOnly = true)
+    public List<RamModel> buscarPorFaixaDePreco(BigDecimal precoMinimo, BigDecimal precoMaximo) {
+        return ramRepository.findByPrecoBetween(precoMinimo, precoMaximo);
+    }
+
+    @Transactional(readOnly = true)
+    public List<RamModel> buscarPorGeracao(String geracao) {
+        return ramRepository.findByGeracaoIgnoreCase(geracao);
+    }
+
+    @Transactional(readOnly = true)
+    public List<RamModel> buscarPorFrequenciaMinima(Integer frequencia) {
+        return ramRepository.findByFrequenciaGreaterThanEqual(frequencia);
+    }
+
+    @Transactional(readOnly = true)
+    public List<RamModel> buscarPorMarca(String marca) {
+        return ramRepository.findByMarcaContainingIgnoreCase(marca);
+    }
+
+    @Transactional(readOnly = true)
+    public List<RamModel> buscarPorMemoriaMinima(Integer memoria) {
+        return ramRepository.findByMemoriaGreaterThanEqual(memoria);
+    }
+
+    @Transactional
+    public RamModel salvar(RamModel ram) {
+        return ramRepository.save(ram);
+    }
+
+    @Transactional
+    public Optional<RamModel> atualizar(Integer id, RamModel ram) {
+        if (!ramRepository.existsById(id)) {
+            return Optional.empty();
+        }
+
+        ram.setId(id);
+        return Optional.of(ramRepository.save(ram));
+    }
+
+    @Transactional
+    public RamModel atualizarObrigatorio(Integer id, RamModel ram) {
+        if (!ramRepository.existsById(id)) {
+            throw new RecursoNaoEncontradoException("RAM", id);
+        }
+
+        ram.setId(id);
+        return ramRepository.save(ram);
+    }
+
+    @Transactional
+    public boolean excluirPorId(Integer id) {
+        if (!ramRepository.existsById(id)) {
+            return false;
+        }
+
+        ramRepository.deleteById(id);
+        return true;
+    }
+
+    @Transactional
+    public void excluirObrigatorio(Integer id) {
+        if (!excluirPorId(id)) {
+            throw new RecursoNaoEncontradoException("RAM", id);
+        }
+    }
+}

@@ -1,6 +1,6 @@
 # Guia das mudancas de 2026-05 - semana 5
 
-Este guia resume as mudancas feitas na semana 5 de 2026-05 no projeto BestHardware e explica o motivo tecnico de cada uma. A ideia e servir como material de estudo para entender a evolucao das camadas `models`, `repositories`, `services` e `controllers`.
+Este guia resume as mudancas feitas na semana 5 de 2026-05 no projeto BestHardware e explica o motivo tecnico de cada uma. A ideia e servir como material de estudo para entender a evolucao das camadas `model`, `repository`, `service` e `rest/controller`.
 
 ## 1. Padronizacao dos nomes das classes
 
@@ -30,11 +30,11 @@ Convencao usada:
 - Classe: `CpuModel`, `UsuarioModel`, `PlacaMaeModel`
 - Interface: `CpuRepository`, `UsuarioRepository`
 - Metodo/variavel: `findByTipoIgnoreCase`, `cpuRepository`
-- Package: `com.omni.besthardware.models`
+- Package: `com.omni.besthardware.model`
 
-## 2. Desenvolvimento dos repositories
+## 2. Desenvolvimento da camada repository
 
-Os repositories deixaram de ser apenas interfaces genericas e passaram a ter metodos de consulta especificos para cada entidade.
+As interfaces Repository deixaram de ser apenas interfaces genericas e passaram a ter metodos de consulta especificos para cada entidade.
 
 Exemplo em um repository:
 

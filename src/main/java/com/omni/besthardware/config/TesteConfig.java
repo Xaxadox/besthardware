@@ -1,7 +1,7 @@
 package com.omni.besthardware.config;
 
-import com.omni.besthardware.models.*;
-import com.omni.besthardware.repositories.*;
+import com.omni.besthardware.model.*;
+import com.omni.besthardware.repository.*;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.CommandLineRunner;

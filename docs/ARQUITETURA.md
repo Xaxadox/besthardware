@@ -7,27 +7,29 @@ Este documento descreve a organizacao interna do Best Hardware.
 ```text
 src/main/java/com/omni/besthardware
 ├── config
-├── controllers
-├── dtos
-├── exceptions
-├── handlers
+├── exception
 ├── mappers
-├── models
-├── repositories
-├── specifications
-└── services
+├── model
+├── repository
+├── rest
+│   ├── controller
+│   └── dto
+│       ├── request
+│       └── response
+├── service
+└── specifications
 ```
 
 Responsabilidades:
 
-- `models`: entidades JPA.
-- `repositories`: acesso ao banco com Spring Data JPA.
-- `services`: regras de negocio e coordenacao de repositories.
-- `controllers`: endpoints REST.
-- `dtos`: objetos de entrada e saida da API.
-- `mappers`: conversao entre models e DTOs.
-- `handlers`: tratamento centralizado de erros.
-- `exceptions`: excecoes especificas da API.
+- `model`: entidades JPA.
+- `repository`: acesso ao banco com Spring Data JPA.
+- `service`: regras de negocio e coordenacao da camada `repository`.
+- `rest/controller`: endpoints REST.
+- `rest/dto/request`: objetos de entrada da API.
+- `rest/dto/response`: objetos de saida da API.
+- `mappers`: conversao entre entidades e DTOs.
+- `exception`: excecoes especificas e tratamento centralizado de erros.
 - `specifications`: filtros dinamicos para consultas JPA.
 
 ## Entidades

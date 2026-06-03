@@ -1,7 +1,7 @@
 package com.omni.besthardware.specifications;
 
-import com.omni.besthardware.dtos.ArmazenamentoFiltroRequest;
-import com.omni.besthardware.models.ArmazenamentoModel;
+import com.omni.besthardware.rest.dto.request.ArmazenamentoFiltroRequest;
+import com.omni.besthardware.model.ArmazenamentoModel;
 import jakarta.persistence.criteria.Predicate;
 import java.util.ArrayList;
 import java.util.List;

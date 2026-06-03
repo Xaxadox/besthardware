@@ -1,0 +1,78 @@
+package com.omni.besthardware.rest.controller;
+
+import com.omni.besthardware.rest.dto.response.ComponenteResponse;
+import com.omni.besthardware.rest.dto.request.MonitorFiltroRequest;
+import com.omni.besthardware.rest.dto.request.MonitorRequest;
+import com.omni.besthardware.mappers.DtoMapper;
+import com.omni.besthardware.model.MonitorModel;
+import com.omni.besthardware.service.MonitorService;
+import jakarta.validation.Valid;
+import java.util.List;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.DeleteMapping;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.ModelAttribute;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RestController;
+
+/**
+ * Controlador REST responsavel pelas operacoes de Monitor no projeto BestHardware.
+ */
+@RestController
+@RequestMapping("/api/monitores")
+public class MonitorController {
+
+    private final MonitorService monitorService;
+
+    public MonitorController(MonitorService monitorService) {
+        this.monitorService = monitorService;
+    }
+
+    @GetMapping
+    public List<ComponenteResponse> listar(@ModelAttribute MonitorFiltroRequest filtro) {
+        return toResponseList(monitorService.buscarComFiltros(filtro));
+    }
+
+    @GetMapping("/{id}")
+    public ResponseEntity<ComponenteResponse> buscarPorId(@PathVariable Integer id) {
+        return ResponseEntity.ok(DtoMapper.toComponenteResponse(monitorService.buscarObrigatorio(id)));
+    }
+
+    @PostMapping
+    public ResponseEntity<ComponenteResponse> criar(@Valid @RequestBody MonitorRequest request) {
+        return ResponseEntity.status(HttpStatus.CREATED)
+                .body(DtoMapper.toComponenteResponse(monitorService.salvar(toModel(request))));
+    }
+
+    @PutMapping("/{id}")
+    public ResponseEntity<ComponenteResponse> atualizar(@PathVariable Integer id, @Valid @RequestBody MonitorRequest request) {
+        return ResponseEntity.ok(DtoMapper.toComponenteResponse(monitorService.atualizarObrigatorio(id, toModel(request))));
+    }
+
+    @DeleteMapping("/{id}")
+    public ResponseEntity<Void> excluir(@PathVariable Integer id) {
+        monitorService.excluirObrigatorio(id);
+        return ResponseEntity.noContent().build();
+    }
+
+    private List<ComponenteResponse> toResponseList(List<MonitorModel> monitores) {
+        return monitores.stream().map(DtoMapper::toComponenteResponse).toList();
+    }
+
+    private MonitorModel toModel(MonitorRequest request) {
+        MonitorModel monitor = new MonitorModel();
+        monitor.setTipo(request.tipo());
+        monitor.setPreco(request.preco());
+        monitor.setMarca(request.marca());
+        monitor.setTamanho(request.tamanho());
+        monitor.setResolucao(request.resolucao());
+        monitor.setFrequencia(request.frequencia());
+        monitor.setTecnologia(request.tecnologia());
+        return monitor;
+    }
+}

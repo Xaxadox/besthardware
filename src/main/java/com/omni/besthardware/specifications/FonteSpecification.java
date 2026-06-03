@@ -1,7 +1,7 @@
 package com.omni.besthardware.specifications;
 
-import com.omni.besthardware.dtos.FonteFiltroRequest;
-import com.omni.besthardware.models.FonteModel;
+import com.omni.besthardware.rest.dto.request.FonteFiltroRequest;
+import com.omni.besthardware.model.FonteModel;
 import jakarta.persistence.criteria.Predicate;
 import java.util.ArrayList;
 import java.util.List;

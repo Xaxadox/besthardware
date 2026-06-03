@@ -147,7 +147,7 @@ DER com ofertas de preco:
 
 Implementado:
 
-- models JPA, repositories, services e controllers REST;
+- entidades JPA em `model`, acesso a dados em `repository`, regras em `service` e controllers REST em `rest/controller`;
 - DTOs e validacoes;
 - filtros dinamicos com `Specification`;
 - Swagger/OpenAPI;

@@ -1,0 +1,20 @@
+package com.omni.besthardware.repository;
+
+import com.omni.besthardware.model.ComponenteModel;
+import java.math.BigDecimal;
+import java.util.List;
+import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
+
+/**
+ * Repositorio responsavel pelo acesso aos dados de Componente.
+ */
+public interface ComponenteRepository extends JpaRepository<ComponenteModel, Integer>, JpaSpecificationExecutor<ComponenteModel> {
+    List<ComponenteModel> findByTipoIgnoreCase(String tipo);
+
+    List<ComponenteModel> findByPrecoBetween(BigDecimal precoMinimo, BigDecimal precoMaximo);
+
+    List<ComponenteModel> findByPerfisId(Integer perfilId);
+
+    List<ComponenteModel> findByComponentesCompativeisId(Integer componenteCompativelId);
+}

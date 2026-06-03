@@ -1,7 +1,7 @@
 package com.omni.besthardware.specifications;
 
-import com.omni.besthardware.dtos.MonitorFiltroRequest;
-import com.omni.besthardware.models.MonitorModel;
+import com.omni.besthardware.rest.dto.request.MonitorFiltroRequest;
+import com.omni.besthardware.model.MonitorModel;
 import jakarta.persistence.criteria.Predicate;
 import java.util.ArrayList;
 import java.util.List;

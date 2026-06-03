@@ -1,7 +1,7 @@
 package com.omni.besthardware.specifications;
 
-import com.omni.besthardware.dtos.OfertaPrecoFiltroRequest;
-import com.omni.besthardware.models.OfertaPrecoModel;
+import com.omni.besthardware.rest.dto.request.OfertaPrecoFiltroRequest;
+import com.omni.besthardware.model.OfertaPrecoModel;
 import jakarta.persistence.criteria.Predicate;
 import java.util.ArrayList;
 import java.util.List;

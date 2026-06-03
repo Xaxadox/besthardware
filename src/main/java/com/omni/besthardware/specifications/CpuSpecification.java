@@ -1,7 +1,7 @@
 package com.omni.besthardware.specifications;
 
-import com.omni.besthardware.dtos.CpuFiltroRequest;
-import com.omni.besthardware.models.CpuModel;
+import com.omni.besthardware.rest.dto.request.CpuFiltroRequest;
+import com.omni.besthardware.model.CpuModel;
 import jakarta.persistence.criteria.Predicate;
 import java.util.ArrayList;
 import java.util.List;

@@ -1,18 +1,18 @@
 package com.omni.besthardware.mappers;
 
-import com.omni.besthardware.dtos.ComponenteResponse;
-import com.omni.besthardware.dtos.PerfilResponse;
-import com.omni.besthardware.dtos.UsuarioResponse;
-import com.omni.besthardware.models.ArmazenamentoModel;
-import com.omni.besthardware.models.ComponenteModel;
-import com.omni.besthardware.models.CpuModel;
-import com.omni.besthardware.models.FonteModel;
-import com.omni.besthardware.models.GpuModel;
-import com.omni.besthardware.models.MonitorModel;
-import com.omni.besthardware.models.PerfilModel;
-import com.omni.besthardware.models.PlacaMaeModel;
-import com.omni.besthardware.models.RamModel;
-import com.omni.besthardware.models.UsuarioModel;
+import com.omni.besthardware.rest.dto.response.ComponenteResponse;
+import com.omni.besthardware.rest.dto.response.PerfilResponse;
+import com.omni.besthardware.rest.dto.response.UsuarioResponse;
+import com.omni.besthardware.model.ArmazenamentoModel;
+import com.omni.besthardware.model.ComponenteModel;
+import com.omni.besthardware.model.CpuModel;
+import com.omni.besthardware.model.FonteModel;
+import com.omni.besthardware.model.GpuModel;
+import com.omni.besthardware.model.MonitorModel;
+import com.omni.besthardware.model.PerfilModel;
+import com.omni.besthardware.model.PlacaMaeModel;
+import com.omni.besthardware.model.RamModel;
+import com.omni.besthardware.model.UsuarioModel;
 import java.math.BigDecimal;
 import java.util.List;
 
