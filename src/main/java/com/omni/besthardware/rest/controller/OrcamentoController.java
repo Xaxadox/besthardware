@@ -19,9 +19,7 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
-/**
- * Controlador REST responsavel pelas operacoes de Orcamento no projeto BestHardware.
- */
+
 @RestController
 @RequestMapping("/api/orcamentos")
 public class OrcamentoController {

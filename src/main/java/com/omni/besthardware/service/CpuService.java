@@ -1,43 +1,26 @@
 package com.omni.besthardware.service;
 
-import com.omni.besthardware.rest.dto.request.CpuFiltroRequest;
-import com.omni.besthardware.exception.RecursoNaoEncontradoException;
-import com.omni.besthardware.model.CpuModel;
-import com.omni.besthardware.repository.CpuRepository;
-import com.omni.besthardware.specifications.CpuSpecification;
 import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.util.List;
-import java.util.Optional;
+
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-/**
- * Servico responsavel pelas regras de negocio de Cpu no projeto BestHardware.
- */
+import com.omni.besthardware.model.CpuModel;
+import com.omni.besthardware.repository.CpuRepository;
+import com.omni.besthardware.rest.dto.request.CpuFiltroRequest;
+import com.omni.besthardware.specifications.CpuSpecification;
+
+
 @Service
-public class CpuService {
+public class CpuService extends AbstractCrudService<CpuModel, Integer> {
 
     private final CpuRepository cpuRepository;
 
     public CpuService(CpuRepository cpuRepository) {
+        super(cpuRepository, "CPU", CpuModel::setId);
         this.cpuRepository = cpuRepository;
-    }
-
-    @Transactional(readOnly = true)
-    public List<CpuModel> listarTodos() {
-        return cpuRepository.findAll();
-    }
-
-    @Transactional(readOnly = true)
-    public Optional<CpuModel> buscarPorId(Integer id) {
-        return cpuRepository.findById(id);
-    }
-
-    @Transactional(readOnly = true)
-    public CpuModel buscarObrigatorio(Integer id) {
-        return buscarPorId(id)
-                .orElseThrow(() -> new RecursoNaoEncontradoException("CPU", id));
     }
 
     @Transactional(readOnly = true)
@@ -83,47 +66,5 @@ public class CpuService {
     @Transactional(readOnly = true)
     public List<CpuModel> buscarPorPeriodoLancamento(LocalDate dataInicial, LocalDate dataFinal) {
         return cpuRepository.findByAnoLancamentoBetween(dataInicial, dataFinal);
-    }
-
-    @Transactional
-    public CpuModel salvar(CpuModel cpu) {
-        return cpuRepository.save(cpu);
-    }
-
-    @Transactional
-    public Optional<CpuModel> atualizar(Integer id, CpuModel cpu) {
-        if (!cpuRepository.existsById(id)) {
-            return Optional.empty();
-        }
-
-        cpu.setId(id);
-        return Optional.of(cpuRepository.save(cpu));
-    }
-
-    @Transactional
-    public CpuModel atualizarObrigatorio(Integer id, CpuModel cpu) {
-        if (!cpuRepository.existsById(id)) {
-            throw new RecursoNaoEncontradoException("CPU", id);
-        }
-
-        cpu.setId(id);
-        return cpuRepository.save(cpu);
-    }
-
-    @Transactional
-    public boolean excluirPorId(Integer id) {
-        if (!cpuRepository.existsById(id)) {
-            return false;
-        }
-
-        cpuRepository.deleteById(id);
-        return true;
-    }
-
-    @Transactional
-    public void excluirObrigatorio(Integer id) {
-        if (!excluirPorId(id)) {
-            throw new RecursoNaoEncontradoException("CPU", id);
-        }
     }
 }

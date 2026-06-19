@@ -6,9 +6,7 @@ import java.util.List;
 import java.util.Optional;
 import org.springframework.stereotype.Service;
 
-/**
- * Servico responsavel pelas regras de negocio de PerfilUso no projeto BestHardware.
- */
+
 @Service
 public class PerfilUsoService {
 

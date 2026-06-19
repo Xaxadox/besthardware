@@ -1,7 +1,6 @@
 package com.omni.besthardware.service;
 
-import com.omni.besthardware.rest.dto.response.CompatibilidadeResponse;
-import com.omni.besthardware.mappers.DtoMapper;
+import com.omni.besthardware.mappers.ComponenteMapper;
 import com.omni.besthardware.model.ArmazenamentoModel;
 import com.omni.besthardware.model.ComponenteModel;
 import com.omni.besthardware.model.CpuModel;
@@ -9,45 +8,39 @@ import com.omni.besthardware.model.FonteModel;
 import com.omni.besthardware.model.GpuModel;
 import com.omni.besthardware.model.PlacaMaeModel;
 import com.omni.besthardware.model.RamModel;
+import com.omni.besthardware.rest.dto.response.CompatibilidadeResponse;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 import org.springframework.stereotype.Service;
 
-/**
- * Servico responsavel pelas regras de negocio de Compatibilidade no projeto BestHardware.
- */
 @Service
 public class CompatibilidadeService {
 
     private final ComponenteService componenteService;
+    private final ComponenteMapper componenteMapper;
 
-    public CompatibilidadeService(ComponenteService componenteService) {
+    public CompatibilidadeService(ComponenteService componenteService, ComponenteMapper componenteMapper) {
         this.componenteService = componenteService;
+        this.componenteMapper = componenteMapper;
     }
 
     public Optional<CompatibilidadeResponse> verificarPorIds(List<Integer> componenteIds) {
         List<ComponenteModel> componentes = new ArrayList<>();
-
         for (Integer componenteId : componenteIds) {
             Optional<ComponenteModel> componente = componenteService.buscarPorId(componenteId);
             if (componente.isEmpty()) {
                 return Optional.empty();
             }
-
             componentes.add(componente.get());
         }
-
         return Optional.of(verificar(componentes));
     }
 
     public CompatibilidadeResponse verificarPorIdsObrigatorio(List<Integer> componenteIds) {
-        List<ComponenteModel> componentes = new ArrayList<>();
-
-        for (Integer componenteId : componenteIds) {
-            componentes.add(componenteService.buscarObrigatorio(componenteId));
-        }
-
+        List<ComponenteModel> componentes = componenteIds.stream()
+                .map(componenteService::buscarObrigatorio)
+                .toList();
         return verificar(componentes);
     }
 
@@ -69,7 +62,6 @@ public class CompatibilidadeService {
         if (memorias.isEmpty()) {
             avisos.add("Nenhuma memoria RAM foi informada.");
         }
-
         if (armazenamentos.isEmpty()) {
             avisos.add("Nenhum armazenamento foi informado.");
         }
@@ -97,11 +89,9 @@ public class CompatibilidadeService {
         }
 
         if (fonte != null && cpu != null) {
-            int consumoEstimado = cpu.getConsumo() + 100;
-            if (gpu != null) {
-                consumoEstimado = cpu.getConsumo() + gpu.getConsumo() + 150;
-            }
-
+            int consumoEstimado = gpu != null
+                    ? cpu.getConsumo() + gpu.getConsumo() + 150
+                    : cpu.getConsumo() + 100;
             if (fonte.getPotencia() < consumoEstimado) {
                 erros.add("Fonte de " + fonte.getPotencia() + "W abaixo do consumo estimado de " + consumoEstimado + "W.");
             }
@@ -121,24 +111,21 @@ public class CompatibilidadeService {
                 erros.isEmpty(),
                 erros,
                 avisos,
-                componentes.stream().map(DtoMapper::toComponenteResponse).toList()
+                componentes.stream().map(componenteMapper::toComponenteResponse).toList()
         );
     }
 
     public String inferirGeracaoRam(PlacaMaeModel placaMae) {
         String chipset = placaMae.getChipset().toUpperCase();
-
         if (chipset.contains("B650") || chipset.contains("X670") || chipset.contains("A620")
                 || chipset.contains("Z790") || chipset.contains("B760") || chipset.contains("H770")) {
             return "DDR5";
         }
-
         if (chipset.contains("B550") || chipset.contains("A520") || chipset.contains("X570")
                 || chipset.contains("B450") || chipset.contains("A320") || chipset.contains("H510")
                 || chipset.contains("H610") || chipset.contains("B660") || chipset.contains("Z690")) {
             return "DDR4";
         }
-
         return null;
     }
 
@@ -148,20 +135,12 @@ public class CompatibilidadeService {
     }
 
     private void validarQuantidade(String tipo, int quantidade, List<String> erros, List<String> avisos) {
-        if (quantidade == 0) {
-            avisos.add("Nenhum componente do tipo " + tipo + " foi informado.");
-        }
-
-        if (quantidade > 1) {
-            erros.add("Mais de um componente do tipo " + tipo + " foi informado.");
-        }
+        if (quantidade == 0) avisos.add("Nenhum componente do tipo " + tipo + " foi informado.");
+        if (quantidade > 1) erros.add("Mais de um componente do tipo " + tipo + " foi informado.");
     }
 
     private <T> List<T> filtrar(List<ComponenteModel> componentes, Class<T> tipo) {
-        return componentes.stream()
-                .filter(tipo::isInstance)
-                .map(tipo::cast)
-                .toList();
+        return componentes.stream().filter(tipo::isInstance).map(tipo::cast).toList();
     }
 
     private <T> T primeiro(List<T> itens) {

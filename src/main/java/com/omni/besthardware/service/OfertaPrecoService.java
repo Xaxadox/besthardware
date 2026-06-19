@@ -1,50 +1,35 @@
 package com.omni.besthardware.service;
 
+import com.omni.besthardware.model.ComponenteModel;
+import com.omni.besthardware.model.OfertaPrecoModel;
+import com.omni.besthardware.repository.OfertaPrecoRepository;
 import com.omni.besthardware.rest.dto.request.OfertaPrecoFiltroRequest;
 import com.omni.besthardware.rest.dto.request.OfertaPrecoRequest;
 import com.omni.besthardware.rest.dto.response.OfertaPrecoResponse;
 import com.omni.besthardware.exception.RecursoNaoEncontradoException;
-import com.omni.besthardware.model.ComponenteModel;
-import com.omni.besthardware.model.OfertaPrecoModel;
-import com.omni.besthardware.repository.OfertaPrecoRepository;
 import com.omni.besthardware.specifications.OfertaPrecoSpecification;
 import java.math.BigDecimal;
-import java.time.LocalDate;
 import java.util.List;
 import java.util.Optional;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-/**
- * Servico responsavel pelas regras de negocio de OfertaPreco no projeto BestHardware.
- */
+
 @Service
-public class OfertaPrecoService {
+public class OfertaPrecoService extends AbstractCrudService<OfertaPrecoModel, Integer> {
 
     private final OfertaPrecoRepository ofertaPrecoRepository;
     private final ComponenteService componenteService;
 
     public OfertaPrecoService(OfertaPrecoRepository ofertaPrecoRepository, ComponenteService componenteService) {
+        super(ofertaPrecoRepository, "Oferta de preco", OfertaPrecoModel::setId);
         this.ofertaPrecoRepository = ofertaPrecoRepository;
         this.componenteService = componenteService;
     }
 
-    @Transactional(readOnly = true)
-    public List<OfertaPrecoModel> listarTodos() {
-        return ofertaPrecoRepository.findAll();
-    }
-
-    @Transactional(readOnly = true)
-    public Optional<OfertaPrecoModel> buscarPorId(Integer id) {
-        return ofertaPrecoRepository.findById(id);
-    }
-
-    @Transactional(readOnly = true)
-    public OfertaPrecoResponse buscarRespostaPorId(Integer id) {
-        return buscarPorId(id)
-                .map(this::toResponse)
-                .orElseThrow(() -> new RecursoNaoEncontradoException("Oferta de preco", id));
-    }
+    // -------------------------------------------------------------------------
+    // Buscas
+    // -------------------------------------------------------------------------
 
     @Transactional(readOnly = true)
     public List<OfertaPrecoModel> buscarComFiltros(OfertaPrecoFiltroRequest filtro) {
@@ -53,9 +38,12 @@ public class OfertaPrecoService {
 
     @Transactional(readOnly = true)
     public List<OfertaPrecoResponse> listarRespostas(OfertaPrecoFiltroRequest filtro) {
-        return buscarComFiltros(filtro).stream()
-                .map(this::toResponse)
-                .toList();
+        return buscarComFiltros(filtro).stream().map(this::toResponse).toList();
+    }
+
+    @Transactional(readOnly = true)
+    public OfertaPrecoResponse buscarRespostaPorId(Integer id) {
+        return toResponse(buscarObrigatorio(id));
     }
 
     @Transactional(readOnly = true)
@@ -70,7 +58,8 @@ public class OfertaPrecoService {
 
     @Transactional(readOnly = true)
     public OfertaPrecoResponse buscarMenorOfertaResposta(Integer componenteId) {
-        validarComponenteExistente(componenteId);
+        // Valida existencia do componente via buscarObrigatorio (lanca 404 se ausente)
+        componenteService.buscarObrigatorio(componenteId);
         return buscarMenorOferta(componenteId)
                 .map(this::toResponse)
                 .orElseThrow(() -> new RecursoNaoEncontradoException("Oferta de preco para componente", componenteId));
@@ -81,7 +70,6 @@ public class OfertaPrecoService {
         if (componente == null || componente.getId() == null) {
             return BigDecimal.ZERO;
         }
-
         return buscarMenorOferta(componente.getId())
                 .map(OfertaPrecoModel::getPrecoAvista)
                 .orElse(componente.getPreco());
@@ -89,10 +77,12 @@ public class OfertaPrecoService {
 
     @Transactional(readOnly = true)
     public BigDecimal calcularPrecoPreferencial(Integer componenteId) {
-        ComponenteModel componente = componenteService.buscarPorId(componenteId)
-                .orElseThrow(() -> new RecursoNaoEncontradoException("Componente", componenteId));
-        return calcularPrecoPreferencial(componente);
+        return calcularPrecoPreferencial(componenteService.buscarObrigatorio(componenteId));
     }
+
+    // -------------------------------------------------------------------------
+    // Escrita
+    // -------------------------------------------------------------------------
 
     @Transactional
     public OfertaPrecoResponse criar(OfertaPrecoRequest request) {
@@ -101,32 +91,15 @@ public class OfertaPrecoService {
 
     @Transactional
     public OfertaPrecoResponse atualizar(Integer id, OfertaPrecoRequest request) {
-        OfertaPrecoModel ofertaPreco = buscarPorId(id)
-                .orElseThrow(() -> new RecursoNaoEncontradoException("Oferta de preco", id));
-
-        return toResponse(ofertaPrecoRepository.save(toModel(ofertaPreco, request)));
+        return toResponse(ofertaPrecoRepository.save(toModel(buscarObrigatorio(id), request)));
     }
 
-    @Transactional
-    public boolean excluirPorId(Integer id) {
-        if (!ofertaPrecoRepository.existsById(id)) {
-            return false;
-        }
-
-        ofertaPrecoRepository.deleteById(id);
-        return true;
-    }
-
-    @Transactional
-    public void excluirObrigatorio(Integer id) {
-        if (!excluirPorId(id)) {
-            throw new RecursoNaoEncontradoException("Oferta de preco", id);
-        }
-    }
+    // -------------------------------------------------------------------------
+    // Auxiliares
+    // -------------------------------------------------------------------------
 
     public OfertaPrecoResponse toResponse(OfertaPrecoModel ofertaPreco) {
         ComponenteModel componente = ofertaPreco.getComponente();
-
         return new OfertaPrecoResponse(
                 ofertaPreco.getId(),
                 ofertaPreco.getLoja(),
@@ -144,9 +117,7 @@ public class OfertaPrecoService {
     }
 
     private OfertaPrecoModel toModel(OfertaPrecoModel ofertaPreco, OfertaPrecoRequest request) {
-        ComponenteModel componente = componenteService.buscarPorId(request.componenteId())
-                .orElseThrow(() -> new RecursoNaoEncontradoException("Componente", request.componenteId()));
-
+        ComponenteModel componente = componenteService.buscarObrigatorio(request.componenteId());
         ofertaPreco.setLoja(request.loja());
         ofertaPreco.setPrecoAvista(request.precoAvista());
         ofertaPreco.setPrecoParcelado(request.precoParcelado());
@@ -158,11 +129,5 @@ public class OfertaPrecoService {
         ofertaPreco.setDataColeta(request.dataColeta());
         ofertaPreco.setComponente(componente);
         return ofertaPreco;
-    }
-
-    private void validarComponenteExistente(Integer componenteId) {
-        if (componenteService.buscarPorId(componenteId).isEmpty()) {
-            throw new RecursoNaoEncontradoException("Componente", componenteId);
-        }
     }
 }

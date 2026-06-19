@@ -24,7 +24,7 @@ Responsabilidades:
 
 - `model`: entidades JPA.
 - `repository`: acesso ao banco com Spring Data JPA.
-- `service`: regras de negocio e coordenacao da camada `repository`.
+- `service`: regras de negocio e coordenacao da camada `repository`. O fluxo CRUD padrao (listar, buscar, salvar, atualizar, excluir) fica concentrado em `AbstractCrudService`; cada service concreto de componente (Cpu, Gpu, Ram, Fonte, Armazenamento, Monitor, PlacaMae) e tambem Usuario estendem essa classe e implementam apenas suas consultas especificas.
 - `rest/controller`: endpoints REST.
 - `rest/dto/request`: objetos de entrada da API.
 - `rest/dto/response`: objetos de saida da API.
@@ -152,6 +152,26 @@ Vantagens:
 - Validacao de entrada mais clara.
 - Respostas mais controladas.
 
+### Resposta polimorfica de componente
+
+`ComponenteResponse` e uma interface selada (`sealed interface`), nao um record unico. Cada tipo de componente tem seu proprio record de resposta, com somente os campos que fazem sentido para ele:
+
+```text
+ComponenteResponse (sealed interface)
+├── CpuResponse
+├── GpuResponse
+├── RamResponse
+├── FonteResponse
+├── ArmazenamentoResponse
+├── MonitorResponse
+├── PlacaMaeResponse
+└── ComponenteGenericoResponse
+```
+
+Os controllers especificos (`CpuController`, `GpuController` etc.) devolvem o record do seu proprio tipo (`CpuResponse`, `GpuResponse`...). O `DtoMapper` tem um metodo de conversao tipado para cada um (`toCpuResponse`, `toGpuResponse`...) e um metodo generico, `toComponenteResponse(ComponenteModel, BigDecimal)`, que despacha para o metodo correto via `switch` com pattern matching.
+
+O metodo generico e usado nos pontos da API que lidam com listas heterogeneas de componentes, onde o tipo concreto so e conhecido em tempo de execucao: `PerfilResponse.componentes`, `CompatibilidadeResponse.componentes`, `RecomendacaoResponse.componentes` e o `ComponenteController` (endpoints da base `/api/componentes`).
+
 ## Specifications
 
 Os filtros dinamicos usam `Specification` e `JpaSpecificationExecutor`.
@@ -176,3 +196,45 @@ docs/ofertas_precos_exemplo.csv
 Ela organiza pesquisas de preco com campos como loja, preco a vista, preco parcelado, cupom, URL, fonte e data de coleta.
 
 No estado atual, a API ainda nao importa esse CSV automaticamente.
+
+
+## Atualizações arquiteturais da semana 3.2
+
+A evolução da arquitetura continuou após a introdução inicial do `AbstractCrudService`.
+
+### Services que utilizam AbstractCrudService
+
+Atualmente utilizam a abstração:
+
+```text
+CpuService
+GpuService
+RamService
+FonteService
+ArmazenamentoService
+MonitorService
+PlacaMaeService
+ComponenteService
+UsuarioService
+PerfilService
+OrcamentoService
+OfertaPrecoService
+ItemOrcamentoService
+```
+
+`ItemOrcamentoService` mantém sobrescrita de operações específicas para preservar regras de negócio.
+
+### Estratégia de mapeamento
+
+O uso direto do `DtoMapper` foi removido dos controllers e services principais.
+
+A conversão passou a ser centralizada em mappers especializados:
+
+```text
+ComponenteMapper
+UsuarioMapper
+PerfilMapper
+ArquivoMapper
+```
+
+O `PerfilMapper` é responsável por converter `PerfilModel` em `PerfilResponse`, incluindo a transformação da coleção de componentes utilizando `ComponenteMapper`.

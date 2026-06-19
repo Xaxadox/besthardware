@@ -1,10 +1,10 @@
 package com.omni.besthardware.service;
 
-import com.omni.besthardware.rest.dto.request.PerfilRequest;
 import com.omni.besthardware.exception.RecursoNaoEncontradoException;
 import com.omni.besthardware.model.ComponenteModel;
 import com.omni.besthardware.model.PerfilModel;
 import com.omni.besthardware.repository.PerfilRepository;
+import com.omni.besthardware.rest.dto.request.PerfilRequest;
 import java.util.List;
 import java.util.Optional;
 import org.springframework.stereotype.Service;
@@ -12,32 +12,21 @@ import org.springframework.transaction.annotation.Transactional;
 
 /**
  * Servico responsavel pelas regras de negocio de Perfil no projeto BestHardware.
+ *
+ * <p>Estende AbstractCrudService para herdar buscarObrigatorio(), atualizarObrigatorio(),
+ * excluirObrigatorio() e demais operacoes CRUD padrao, evitando reimplementar o mesmo
+ * padrao orElseThrow em cada service de dominio.</p>
  */
 @Service
-public class PerfilService {
+public class PerfilService extends AbstractCrudService<PerfilModel, Integer> {
 
     private final PerfilRepository perfilRepository;
     private final ComponenteService componenteService;
 
     public PerfilService(PerfilRepository perfilRepository, ComponenteService componenteService) {
+        super(perfilRepository, "Perfil", PerfilModel::setId);
         this.perfilRepository = perfilRepository;
         this.componenteService = componenteService;
-    }
-
-    @Transactional(readOnly = true)
-    public List<PerfilModel> listarTodos() {
-        return perfilRepository.findAll();
-    }
-
-    @Transactional(readOnly = true)
-    public Optional<PerfilModel> buscarPorId(Integer id) {
-        return perfilRepository.findById(id);
-    }
-
-    @Transactional(readOnly = true)
-    public PerfilModel buscarObrigatorio(Integer id) {
-        return buscarPorId(id)
-                .orElseThrow(() -> new RecursoNaoEncontradoException("Perfil", id));
     }
 
     @Transactional(readOnly = true)
@@ -61,67 +50,41 @@ public class PerfilService {
         return perfilRepository.findByComponentesId(componenteId);
     }
 
-    @Transactional
-    public PerfilModel salvar(PerfilModel perfil) {
-        return perfilRepository.save(perfil);
-    }
+    // -------------------------------------------------------------------------
+    // Operacoes com semantica de PerfilRequest (componentes por ID)
+    // -------------------------------------------------------------------------
 
     @Transactional
     public PerfilModel criar(PerfilRequest request) {
-        return perfilRepository.save(toModel(request));
+        return salvar(toModel(request));
     }
 
-    @Transactional
-    public Optional<PerfilModel> atualizar(Integer id, PerfilModel perfil) {
-        if (!perfilRepository.existsById(id)) {
-            return Optional.empty();
-        }
-
-        perfil.setId(id);
-        return Optional.of(perfilRepository.save(perfil));
-    }
-
+    /**
+     * Atualiza um Perfil a partir de um PerfilRequest, resolvendo os componentes por ID.
+     * Sobrecarga proposital — nao sobrescreve atualizarObrigatorio(ID, T) da superclasse,
+     * que continua disponivel para chamadas que ja tenham o model montado.
+     */
     @Transactional
     public PerfilModel atualizarObrigatorio(Integer id, PerfilRequest request) {
-        if (!perfilRepository.existsById(id)) {
-            throw new RecursoNaoEncontradoException("Perfil", id);
-        }
-
+        buscarObrigatorio(id); // lanca 404 se nao existir
         PerfilModel perfil = toModel(request);
         perfil.setId(id);
-        return perfilRepository.save(perfil);
+        return salvar(perfil);
     }
 
-    @Transactional
-    public boolean excluirPorId(Integer id) {
-        if (!perfilRepository.existsById(id)) {
-            return false;
-        }
-
-        perfilRepository.deleteById(id);
-        return true;
-    }
-
-    @Transactional
-    public void excluirObrigatorio(Integer id) {
-        if (!excluirPorId(id)) {
-            throw new RecursoNaoEncontradoException("Perfil", id);
-        }
-    }
+    // -------------------------------------------------------------------------
+    // Auxiliares
+    // -------------------------------------------------------------------------
 
     private PerfilModel toModel(PerfilRequest request) {
         PerfilModel perfil = new PerfilModel();
         perfil.setNome(request.nome());
-
-        if (request.componenteIds() == null) {
-            return perfil;
+        if (request.componenteIds() != null) {
+            for (Integer componenteId : request.componenteIds()) {
+                ComponenteModel componente = componenteService.buscarObrigatorio(componenteId);
+                perfil.getComponentes().add(componente);
+            }
         }
-
-        for (Integer componenteId : request.componenteIds()) {
-            ComponenteModel componente = componenteService.buscarObrigatorio(componenteId);
-            perfil.getComponentes().add(componente);
-        }
-
         return perfil;
     }
 }

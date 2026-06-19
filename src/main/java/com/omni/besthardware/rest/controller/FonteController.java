@@ -1,67 +1,56 @@
 package com.omni.besthardware.rest.controller;
 
-import com.omni.besthardware.rest.dto.response.ComponenteResponse;
+import com.omni.besthardware.mappers.ComponenteMapper;
+import com.omni.besthardware.model.FonteModel;
 import com.omni.besthardware.rest.dto.request.FonteFiltroRequest;
 import com.omni.besthardware.rest.dto.request.FonteRequest;
-import com.omni.besthardware.mappers.DtoMapper;
-import com.omni.besthardware.model.FonteModel;
+import com.omni.besthardware.rest.dto.response.FonteResponse;
 import com.omni.besthardware.service.FonteService;
 import jakarta.validation.Valid;
 import java.util.List;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.DeleteMapping;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.ModelAttribute;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.PutMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
-/**
- * Controlador REST responsavel pelas operacoes de Fonte no projeto BestHardware.
- */
 @RestController
 @RequestMapping("/api/fontes")
 public class FonteController {
 
     private final FonteService fonteService;
+    private final ComponenteMapper componenteMapper;
 
-    public FonteController(FonteService fonteService) {
+    public FonteController(FonteService fonteService, ComponenteMapper componenteMapper) {
         this.fonteService = fonteService;
+        this.componenteMapper = componenteMapper;
     }
 
     @GetMapping
-    public List<ComponenteResponse> listar(@ModelAttribute FonteFiltroRequest filtro) {
-        return toResponseList(fonteService.buscarComFiltros(filtro));
+    public List<FonteResponse> listar(@ModelAttribute FonteFiltroRequest filtro) {
+        return fonteService.buscarComFiltros(filtro).stream()
+                .map(componenteMapper::toFonteResponse)
+                .toList();
     }
 
     @GetMapping("/{id}")
-    public ResponseEntity<ComponenteResponse> buscarPorId(@PathVariable Integer id) {
-        return ResponseEntity.ok(DtoMapper.toComponenteResponse(fonteService.buscarObrigatorio(id)));
+    public ResponseEntity<FonteResponse> buscarPorId(@PathVariable Integer id) {
+        return ResponseEntity.ok(componenteMapper.toFonteResponse(fonteService.buscarObrigatorio(id)));
     }
 
     @PostMapping
-    public ResponseEntity<ComponenteResponse> criar(@Valid @RequestBody FonteRequest request) {
+    public ResponseEntity<FonteResponse> criar(@Valid @RequestBody FonteRequest request) {
         return ResponseEntity.status(HttpStatus.CREATED)
-                .body(DtoMapper.toComponenteResponse(fonteService.salvar(toModel(request))));
+                .body(componenteMapper.toFonteResponse(fonteService.salvar(toModel(request))));
     }
 
     @PutMapping("/{id}")
-    public ResponseEntity<ComponenteResponse> atualizar(@PathVariable Integer id, @Valid @RequestBody FonteRequest request) {
-        return ResponseEntity.ok(DtoMapper.toComponenteResponse(fonteService.atualizarObrigatorio(id, toModel(request))));
+    public ResponseEntity<FonteResponse> atualizar(@PathVariable Integer id, @Valid @RequestBody FonteRequest request) {
+        return ResponseEntity.ok(componenteMapper.toFonteResponse(fonteService.atualizarObrigatorio(id, toModel(request))));
     }
 
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> excluir(@PathVariable Integer id) {
         fonteService.excluirObrigatorio(id);
         return ResponseEntity.noContent().build();
-    }
-
-    private List<ComponenteResponse> toResponseList(List<FonteModel> fontes) {
-        return fontes.stream().map(DtoMapper::toComponenteResponse).toList();
     }
 
     private FonteModel toModel(FonteRequest request) {

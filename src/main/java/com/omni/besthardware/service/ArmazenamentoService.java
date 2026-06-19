@@ -1,42 +1,24 @@
 package com.omni.besthardware.service;
 
-import com.omni.besthardware.rest.dto.request.ArmazenamentoFiltroRequest;
-import com.omni.besthardware.exception.RecursoNaoEncontradoException;
-import com.omni.besthardware.model.ArmazenamentoModel;
-import com.omni.besthardware.repository.ArmazenamentoRepository;
-import com.omni.besthardware.specifications.ArmazenamentoSpecification;
 import java.math.BigDecimal;
 import java.util.List;
-import java.util.Optional;
+
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-/**
- * Servico responsavel pelas regras de negocio de Armazenamento no projeto BestHardware.
- */
+import com.omni.besthardware.model.ArmazenamentoModel;
+import com.omni.besthardware.repository.ArmazenamentoRepository;
+import com.omni.besthardware.rest.dto.request.ArmazenamentoFiltroRequest;
+import com.omni.besthardware.specifications.ArmazenamentoSpecification;
+
 @Service
-public class ArmazenamentoService {
+public class ArmazenamentoService extends AbstractCrudService<ArmazenamentoModel, Integer> {
 
     private final ArmazenamentoRepository armazenamentoRepository;
 
     public ArmazenamentoService(ArmazenamentoRepository armazenamentoRepository) {
+        super(armazenamentoRepository, "Armazenamento", ArmazenamentoModel::setId);
         this.armazenamentoRepository = armazenamentoRepository;
-    }
-
-    @Transactional(readOnly = true)
-    public List<ArmazenamentoModel> listarTodos() {
-        return armazenamentoRepository.findAll();
-    }
-
-    @Transactional(readOnly = true)
-    public Optional<ArmazenamentoModel> buscarPorId(Integer id) {
-        return armazenamentoRepository.findById(id);
-    }
-
-    @Transactional(readOnly = true)
-    public ArmazenamentoModel buscarObrigatorio(Integer id) {
-        return buscarPorId(id)
-                .orElseThrow(() -> new RecursoNaoEncontradoException("Armazenamento", id));
     }
 
     @Transactional(readOnly = true)
@@ -77,47 +59,5 @@ public class ArmazenamentoService {
     @Transactional(readOnly = true)
     public List<ArmazenamentoModel> buscarPorVelocidadeEscritaMinima(Integer velocidadeEscrita) {
         return armazenamentoRepository.findByVelocidadeEscritaGreaterThanEqual(velocidadeEscrita);
-    }
-
-    @Transactional
-    public ArmazenamentoModel salvar(ArmazenamentoModel armazenamento) {
-        return armazenamentoRepository.save(armazenamento);
-    }
-
-    @Transactional
-    public Optional<ArmazenamentoModel> atualizar(Integer id, ArmazenamentoModel armazenamento) {
-        if (!armazenamentoRepository.existsById(id)) {
-            return Optional.empty();
-        }
-
-        armazenamento.setId(id);
-        return Optional.of(armazenamentoRepository.save(armazenamento));
-    }
-
-    @Transactional
-    public ArmazenamentoModel atualizarObrigatorio(Integer id, ArmazenamentoModel armazenamento) {
-        if (!armazenamentoRepository.existsById(id)) {
-            throw new RecursoNaoEncontradoException("Armazenamento", id);
-        }
-
-        armazenamento.setId(id);
-        return armazenamentoRepository.save(armazenamento);
-    }
-
-    @Transactional
-    public boolean excluirPorId(Integer id) {
-        if (!armazenamentoRepository.existsById(id)) {
-            return false;
-        }
-
-        armazenamentoRepository.deleteById(id);
-        return true;
-    }
-
-    @Transactional
-    public void excluirObrigatorio(Integer id) {
-        if (!excluirPorId(id)) {
-            throw new RecursoNaoEncontradoException("Armazenamento", id);
-        }
     }
 }

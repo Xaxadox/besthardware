@@ -1,67 +1,56 @@
 package com.omni.besthardware.rest.controller;
 
-import com.omni.besthardware.rest.dto.response.ComponenteResponse;
+import com.omni.besthardware.mappers.ComponenteMapper;
+import com.omni.besthardware.model.MonitorModel;
 import com.omni.besthardware.rest.dto.request.MonitorFiltroRequest;
 import com.omni.besthardware.rest.dto.request.MonitorRequest;
-import com.omni.besthardware.mappers.DtoMapper;
-import com.omni.besthardware.model.MonitorModel;
+import com.omni.besthardware.rest.dto.response.MonitorResponse;
 import com.omni.besthardware.service.MonitorService;
 import jakarta.validation.Valid;
 import java.util.List;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.DeleteMapping;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.ModelAttribute;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.PutMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
-/**
- * Controlador REST responsavel pelas operacoes de Monitor no projeto BestHardware.
- */
 @RestController
 @RequestMapping("/api/monitores")
 public class MonitorController {
 
     private final MonitorService monitorService;
+    private final ComponenteMapper componenteMapper;
 
-    public MonitorController(MonitorService monitorService) {
+    public MonitorController(MonitorService monitorService, ComponenteMapper componenteMapper) {
         this.monitorService = monitorService;
+        this.componenteMapper = componenteMapper;
     }
 
     @GetMapping
-    public List<ComponenteResponse> listar(@ModelAttribute MonitorFiltroRequest filtro) {
-        return toResponseList(monitorService.buscarComFiltros(filtro));
+    public List<MonitorResponse> listar(@ModelAttribute MonitorFiltroRequest filtro) {
+        return monitorService.buscarComFiltros(filtro).stream()
+                .map(componenteMapper::toMonitorResponse)
+                .toList();
     }
 
     @GetMapping("/{id}")
-    public ResponseEntity<ComponenteResponse> buscarPorId(@PathVariable Integer id) {
-        return ResponseEntity.ok(DtoMapper.toComponenteResponse(monitorService.buscarObrigatorio(id)));
+    public ResponseEntity<MonitorResponse> buscarPorId(@PathVariable Integer id) {
+        return ResponseEntity.ok(componenteMapper.toMonitorResponse(monitorService.buscarObrigatorio(id)));
     }
 
     @PostMapping
-    public ResponseEntity<ComponenteResponse> criar(@Valid @RequestBody MonitorRequest request) {
+    public ResponseEntity<MonitorResponse> criar(@Valid @RequestBody MonitorRequest request) {
         return ResponseEntity.status(HttpStatus.CREATED)
-                .body(DtoMapper.toComponenteResponse(monitorService.salvar(toModel(request))));
+                .body(componenteMapper.toMonitorResponse(monitorService.salvar(toModel(request))));
     }
 
     @PutMapping("/{id}")
-    public ResponseEntity<ComponenteResponse> atualizar(@PathVariable Integer id, @Valid @RequestBody MonitorRequest request) {
-        return ResponseEntity.ok(DtoMapper.toComponenteResponse(monitorService.atualizarObrigatorio(id, toModel(request))));
+    public ResponseEntity<MonitorResponse> atualizar(@PathVariable Integer id, @Valid @RequestBody MonitorRequest request) {
+        return ResponseEntity.ok(componenteMapper.toMonitorResponse(monitorService.atualizarObrigatorio(id, toModel(request))));
     }
 
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> excluir(@PathVariable Integer id) {
         monitorService.excluirObrigatorio(id);
         return ResponseEntity.noContent().build();
-    }
-
-    private List<ComponenteResponse> toResponseList(List<MonitorModel> monitores) {
-        return monitores.stream().map(DtoMapper::toComponenteResponse).toList();
     }
 
     private MonitorModel toModel(MonitorRequest request) {

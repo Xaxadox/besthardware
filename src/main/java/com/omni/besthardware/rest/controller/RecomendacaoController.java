@@ -15,9 +15,7 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
-/**
- * Controlador REST responsavel pelas operacoes de Recomendacao no projeto BestHardware.
- */
+
 @RestController
 @RequestMapping("/api/recomendacoes")
 public class RecomendacaoController {

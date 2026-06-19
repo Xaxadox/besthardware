@@ -1,10 +1,7 @@
 package com.omni.besthardware.service;
 
-import com.omni.besthardware.rest.dto.response.CompatibilidadeResponse;
-import com.omni.besthardware.rest.dto.response.PerfilUsoResponse;
-import com.omni.besthardware.rest.dto.response.RecomendacaoResponse;
 import com.omni.besthardware.exception.RecursoNaoEncontradoException;
-import com.omni.besthardware.mappers.DtoMapper;
+import com.omni.besthardware.mappers.ComponenteMapper;
 import com.omni.besthardware.model.ArmazenamentoModel;
 import com.omni.besthardware.model.ComponenteModel;
 import com.omni.besthardware.model.CpuModel;
@@ -13,6 +10,9 @@ import com.omni.besthardware.model.GpuModel;
 import com.omni.besthardware.model.MonitorModel;
 import com.omni.besthardware.model.PlacaMaeModel;
 import com.omni.besthardware.model.RamModel;
+import com.omni.besthardware.rest.dto.response.CompatibilidadeResponse;
+import com.omni.besthardware.rest.dto.response.PerfilUsoResponse;
+import com.omni.besthardware.rest.dto.response.RecomendacaoResponse;
 import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.Comparator;
@@ -20,9 +20,6 @@ import java.util.List;
 import java.util.Optional;
 import org.springframework.stereotype.Service;
 
-/**
- * Servico responsavel pelas regras de negocio de Recomendacao no projeto BestHardware.
- */
 @Service
 public class RecomendacaoService {
 
@@ -36,6 +33,7 @@ public class RecomendacaoService {
     private final ArmazenamentoService armazenamentoService;
     private final MonitorService monitorService;
     private final OfertaPrecoService ofertaPrecoService;
+    private final ComponenteMapper componenteMapper;
 
     public RecomendacaoService(
             PerfilUsoService perfilUsoService,
@@ -47,7 +45,8 @@ public class RecomendacaoService {
             FonteService fonteService,
             ArmazenamentoService armazenamentoService,
             MonitorService monitorService,
-            OfertaPrecoService ofertaPrecoService
+            OfertaPrecoService ofertaPrecoService,
+            ComponenteMapper componenteMapper
     ) {
         this.perfilUsoService = perfilUsoService;
         this.compatibilidadeService = compatibilidadeService;
@@ -59,6 +58,7 @@ public class RecomendacaoService {
         this.armazenamentoService = armazenamentoService;
         this.monitorService = monitorService;
         this.ofertaPrecoService = ofertaPrecoService;
+        this.componenteMapper = componenteMapper;
     }
 
     public List<RecomendacaoResponse> listarTodas() {
@@ -113,7 +113,7 @@ public class RecomendacaoService {
                 perfil.get(),
                 precoTotal,
                 componentes.stream()
-                        .map(componente -> DtoMapper.toComponenteResponse(
+                        .map(componente -> componenteMapper.toComponenteResponse(
                                 componente,
                                 ofertaPrecoService.calcularPrecoPreferencial(componente)
                         ))
@@ -134,7 +134,6 @@ public class RecomendacaoService {
         Comparator<CpuModel> comparador = Comparator
                 .comparing((CpuModel cpu) -> criterio.prefereGpuIntegrada() && !compatibilidadeService.temGpuIntegrada(cpu))
                 .thenComparing(ofertaPrecoService::calcularPrecoPreferencial);
-
         return cpuService.listarTodos().stream()
                 .filter(cpu -> cpu.getNucleos() >= criterio.nucleosCpuMinimos())
                 .sorted(comparador)
@@ -149,7 +148,6 @@ public class RecomendacaoService {
 
     private Optional<RamModel> selecionarRam(CriterioRecomendacao criterio, PlacaMaeModel placaMae) {
         String geracao = placaMae == null ? null : compatibilidadeService.inferirGeracaoRam(placaMae);
-
         return ramService.listarTodos().stream()
                 .filter(ram -> ram.getMemoria() >= criterio.memoriaRamMinima())
                 .filter(ram -> geracao == null || ram.getGeracao().equalsIgnoreCase(geracao))
@@ -166,22 +164,15 @@ public class RecomendacaoService {
         return armazenamentoService.listarTodos().stream()
                 .filter(armazenamento -> armazenamento.getMemoria() >= criterio.armazenamentoMinimo())
                 .sorted(Comparator
-                        .comparing((ArmazenamentoModel armazenamento) -> !"NVME".equalsIgnoreCase(armazenamento.getPadrao()))
+                        .comparing((ArmazenamentoModel a) -> !"NVME".equalsIgnoreCase(a.getPadrao()))
                         .thenComparing(ofertaPrecoService::calcularPrecoPreferencial))
                 .findFirst();
     }
 
     private Optional<FonteModel> selecionarFonte(CriterioRecomendacao criterio, CpuModel cpu, GpuModel gpu) {
         int potenciaMinima = criterio.potenciaFonteMinima();
-
-        if (cpu != null) {
-            potenciaMinima = Math.max(potenciaMinima, cpu.getConsumo() + 100);
-        }
-
-        if (cpu != null && gpu != null) {
-            potenciaMinima = Math.max(potenciaMinima, cpu.getConsumo() + gpu.getConsumo() + 150);
-        }
-
+        if (cpu != null) potenciaMinima = Math.max(potenciaMinima, cpu.getConsumo() + 100);
+        if (cpu != null && gpu != null) potenciaMinima = Math.max(potenciaMinima, cpu.getConsumo() + gpu.getConsumo() + 150);
         int potenciaNecessaria = potenciaMinima;
         return fonteService.listarTodos().stream()
                 .filter(fonte -> fonte.getPotencia() >= potenciaNecessaria)
@@ -198,12 +189,12 @@ public class RecomendacaoService {
 
     private CriterioRecomendacao criterio(String codigoPerfil) {
         return switch (codigoPerfil.toLowerCase()) {
-            case "trabalho" -> new CriterioRecomendacao(false, true, 4, 8, 0, 256, 400, "1920x1080", 60);
-            case "jogo-inicial" -> new CriterioRecomendacao(true, false, 4, 16, 4, 512, 500, "1920x1080", 75);
-            case "jogo-intermediario" -> new CriterioRecomendacao(true, false, 6, 16, 8, 1000, 650, "2560x1440", 120);
-            case "jogos-pesados" -> new CriterioRecomendacao(true, false, 8, 32, 12, 1000, 750, "3840x2160", 120);
-            case "profissional" -> new CriterioRecomendacao(true, false, 12, 32, 12, 1000, 750, "3840x2160", 60);
-            default -> new CriterioRecomendacao(false, false, 4, 8, 0, 256, 400, null, 60);
+            case "trabalho"            -> new CriterioRecomendacao(false, true,  4, 8,  0,  256, 400, "1920x1080",  60);
+            case "jogo-inicial"        -> new CriterioRecomendacao(true,  false, 4, 16, 4,  512, 500, "1920x1080",  75);
+            case "jogo-intermediario"  -> new CriterioRecomendacao(true,  false, 6, 16, 8,  1000,650, "2560x1440", 120);
+            case "jogos-pesados"       -> new CriterioRecomendacao(true,  false, 8, 32, 12, 1000,750, "3840x2160", 120);
+            case "profissional"        -> new CriterioRecomendacao(true,  false, 12,32, 12, 1000,750, "3840x2160",  60);
+            default                    -> new CriterioRecomendacao(false, false, 4, 8,  0,  256, 400, null,         60);
         };
     }
 
@@ -217,6 +208,5 @@ public class RecomendacaoService {
             int potenciaFonteMinima,
             String resolucaoMonitor,
             int frequenciaMonitorMinima
-    ) {
-    }
+    ) {}
 }

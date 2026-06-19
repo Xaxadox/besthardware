@@ -1,10 +1,10 @@
 package com.omni.besthardware.rest.controller;
 
-import com.omni.besthardware.rest.dto.response.ComponenteResponse;
+import com.omni.besthardware.mappers.ComponenteMapper;
+import com.omni.besthardware.model.CpuModel;
 import com.omni.besthardware.rest.dto.request.CpuFiltroRequest;
 import com.omni.besthardware.rest.dto.request.CpuRequest;
-import com.omni.besthardware.mappers.DtoMapper;
-import com.omni.besthardware.model.CpuModel;
+import com.omni.besthardware.rest.dto.response.CpuResponse;
 import com.omni.besthardware.service.CpuService;
 import jakarta.validation.Valid;
 import java.util.List;
@@ -20,38 +20,39 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
-/**
- * Controlador REST responsavel pelas operacoes de Cpu no projeto BestHardware.
- */
 @RestController
 @RequestMapping("/api/cpus")
 public class CpuController {
 
     private final CpuService cpuService;
+    private final ComponenteMapper componenteMapper;
 
-    public CpuController(CpuService cpuService) {
+    public CpuController(CpuService cpuService, ComponenteMapper componenteMapper) {
         this.cpuService = cpuService;
+        this.componenteMapper = componenteMapper;
     }
 
     @GetMapping
-    public List<ComponenteResponse> listar(@ModelAttribute CpuFiltroRequest filtro) {
-        return toResponseList(cpuService.buscarComFiltros(filtro));
+    public List<CpuResponse> listar(@ModelAttribute CpuFiltroRequest filtro) {
+        return cpuService.buscarComFiltros(filtro).stream()
+                .map(componenteMapper::toCpuResponse)
+                .toList();
     }
 
     @GetMapping("/{id}")
-    public ResponseEntity<ComponenteResponse> buscarPorId(@PathVariable Integer id) {
-        return ResponseEntity.ok(DtoMapper.toComponenteResponse(cpuService.buscarObrigatorio(id)));
+    public ResponseEntity<CpuResponse> buscarPorId(@PathVariable Integer id) {
+        return ResponseEntity.ok(componenteMapper.toCpuResponse(cpuService.buscarObrigatorio(id)));
     }
 
     @PostMapping
-    public ResponseEntity<ComponenteResponse> criar(@Valid @RequestBody CpuRequest request) {
+    public ResponseEntity<CpuResponse> criar(@Valid @RequestBody CpuRequest request) {
         return ResponseEntity.status(HttpStatus.CREATED)
-                .body(DtoMapper.toComponenteResponse(cpuService.salvar(toModel(request))));
+                .body(componenteMapper.toCpuResponse(cpuService.salvar(toModel(request))));
     }
 
     @PutMapping("/{id}")
-    public ResponseEntity<ComponenteResponse> atualizar(@PathVariable Integer id, @Valid @RequestBody CpuRequest request) {
-        return ResponseEntity.ok(DtoMapper.toComponenteResponse(cpuService.atualizarObrigatorio(id, toModel(request))));
+    public ResponseEntity<CpuResponse> atualizar(@PathVariable Integer id, @Valid @RequestBody CpuRequest request) {
+        return ResponseEntity.ok(componenteMapper.toCpuResponse(cpuService.atualizarObrigatorio(id, toModel(request))));
     }
 
     @DeleteMapping("/{id}")
@@ -60,20 +61,16 @@ public class CpuController {
         return ResponseEntity.noContent().build();
     }
 
-    private List<ComponenteResponse> toResponseList(List<CpuModel> cpus) {
-        return cpus.stream().map(DtoMapper::toComponenteResponse).toList();
-    }
-
     private CpuModel toModel(CpuRequest request) {
         CpuModel cpu = new CpuModel();
         cpu.setTipo(request.tipo());
         cpu.setPreco(request.preco());
         cpu.setModelo(request.modelo());
+        cpu.setSocket(request.socket());
         cpu.setFrequencia(request.frequencia());
         cpu.setConsumo(request.consumo());
         cpu.setAnoLancamento(request.anoLancamento());
         cpu.setNucleos(request.nucleos());
-        cpu.setSocket(request.socket());
         return cpu;
     }
 }

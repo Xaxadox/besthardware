@@ -1,12 +1,5 @@
 package com.omni.besthardware.service;
 
-import com.omni.besthardware.rest.dto.request.ItemOrcamentoRequest;
-import com.omni.besthardware.rest.dto.response.ItemOrcamentoResponse;
-import com.omni.besthardware.rest.dto.request.OrcamentoAtualizacaoRequest;
-import com.omni.besthardware.rest.dto.request.OrcamentoFiltroRequest;
-import com.omni.besthardware.rest.dto.request.OrcamentoRequest;
-import com.omni.besthardware.rest.dto.response.OrcamentoResponse;
-import com.omni.besthardware.exception.RecursoNaoEncontradoException;
 import com.omni.besthardware.model.ComponenteModel;
 import com.omni.besthardware.model.ItemOrcamentoModel;
 import com.omni.besthardware.model.OrcamentoModel;
@@ -14,19 +7,22 @@ import com.omni.besthardware.model.PerfilModel;
 import com.omni.besthardware.model.UsuarioModel;
 import com.omni.besthardware.repository.ItemOrcamentoRepository;
 import com.omni.besthardware.repository.OrcamentoRepository;
+import com.omni.besthardware.rest.dto.request.ItemOrcamentoRequest;
+import com.omni.besthardware.rest.dto.request.OrcamentoAtualizacaoRequest;
+import com.omni.besthardware.rest.dto.request.OrcamentoFiltroRequest;
+import com.omni.besthardware.rest.dto.request.OrcamentoRequest;
+import com.omni.besthardware.rest.dto.response.ItemOrcamentoResponse;
+import com.omni.besthardware.rest.dto.response.OrcamentoResponse;
 import com.omni.besthardware.specifications.OrcamentoSpecification;
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.util.List;
-import java.util.Optional;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-/**
- * Servico responsavel pelas regras de negocio de Orcamento no projeto BestHardware.
- */
+
 @Service
-public class OrcamentoService {
+public class OrcamentoService extends AbstractCrudService<OrcamentoModel, Integer> {
 
     private final OrcamentoRepository orcamentoRepository;
     private final ItemOrcamentoRepository itemOrcamentoRepository;
@@ -43,6 +39,7 @@ public class OrcamentoService {
             ComponenteService componenteService,
             OfertaPrecoService ofertaPrecoService
     ) {
+        super(orcamentoRepository, "Orcamento", OrcamentoModel::setId);
         this.orcamentoRepository = orcamentoRepository;
         this.itemOrcamentoRepository = itemOrcamentoRepository;
         this.usuarioService = usuarioService;
@@ -51,15 +48,9 @@ public class OrcamentoService {
         this.ofertaPrecoService = ofertaPrecoService;
     }
 
-    @Transactional(readOnly = true)
-    public List<OrcamentoModel> listarTodos() {
-        return orcamentoRepository.findAll();
-    }
-
-    @Transactional(readOnly = true)
-    public Optional<OrcamentoModel> buscarPorId(Integer id) {
-        return orcamentoRepository.findById(id);
-    }
+    // -------------------------------------------------------------------------
+    // Buscas
+    // -------------------------------------------------------------------------
 
     @Transactional(readOnly = true)
     public List<OrcamentoModel> buscarComFiltros(OrcamentoFiltroRequest filtro) {
@@ -68,16 +59,12 @@ public class OrcamentoService {
 
     @Transactional(readOnly = true)
     public List<OrcamentoResponse> listarRespostas(OrcamentoFiltroRequest filtro) {
-        return buscarComFiltros(filtro).stream()
-                .map(this::toResponse)
-                .toList();
+        return buscarComFiltros(filtro).stream().map(this::toResponse).toList();
     }
 
     @Transactional(readOnly = true)
     public OrcamentoResponse buscarRespostaPorId(Integer id) {
-        return buscarPorId(id)
-                .map(this::toResponse)
-                .orElseThrow(() -> new RecursoNaoEncontradoException("Orcamento", id));
+        return toResponse(buscarObrigatorio(id));
     }
 
     @Transactional(readOnly = true)
@@ -105,17 +92,14 @@ public class OrcamentoService {
         return orcamentoRepository.findByPrecoBetween(precoMinimo, precoMaximo);
     }
 
-    @Transactional
-    public OrcamentoModel salvar(OrcamentoModel orcamento) {
-        return orcamentoRepository.save(orcamento);
-    }
+    // -------------------------------------------------------------------------
+    // Escrita com semantica de Request
+    // -------------------------------------------------------------------------
 
     @Transactional
     public OrcamentoResponse criar(OrcamentoRequest request) {
-        UsuarioModel usuario = usuarioService.buscarPorId(request.usuarioId())
-                .orElseThrow(() -> new RecursoNaoEncontradoException("Usuario", request.usuarioId()));
-        PerfilModel perfil = perfilService.buscarPorId(request.perfilId())
-                .orElseThrow(() -> new RecursoNaoEncontradoException("Perfil", request.perfilId()));
+        UsuarioModel usuario = usuarioService.buscarObrigatorio(request.usuarioId());
+        PerfilModel perfil = perfilService.buscarObrigatorio(request.perfilId());
 
         OrcamentoModel orcamento = new OrcamentoModel();
         orcamento.setNome(request.nome());
@@ -135,51 +119,19 @@ public class OrcamentoService {
 
     @Transactional
     public OrcamentoResponse atualizar(Integer id, OrcamentoAtualizacaoRequest request) {
-        OrcamentoModel orcamento = buscarPorId(id)
-                .orElseThrow(() -> new RecursoNaoEncontradoException("Orcamento", id));
-        UsuarioModel usuario = usuarioService.buscarPorId(request.usuarioId())
-                .orElseThrow(() -> new RecursoNaoEncontradoException("Usuario", request.usuarioId()));
-        PerfilModel perfil = perfilService.buscarPorId(request.perfilId())
-                .orElseThrow(() -> new RecursoNaoEncontradoException("Perfil", request.perfilId()));
-
+        OrcamentoModel orcamento = buscarObrigatorio(id);
         orcamento.setNome(request.nome());
-        orcamento.setUsuario(usuario);
-        orcamento.setPerfil(perfil);
-
+        orcamento.setUsuario(usuarioService.buscarObrigatorio(request.usuarioId()));
+        orcamento.setPerfil(perfilService.buscarObrigatorio(request.perfilId()));
         return toResponse(orcamentoRepository.save(orcamento));
     }
 
-    @Transactional
-    public Optional<OrcamentoModel> atualizar(Integer id, OrcamentoModel orcamento) {
-        if (!orcamentoRepository.existsById(id)) {
-            return Optional.empty();
-        }
-
-        orcamento.setId(id);
-        return Optional.of(orcamentoRepository.save(orcamento));
-    }
-
-    @Transactional
-    public boolean excluirPorId(Integer id) {
-        if (!orcamentoRepository.existsById(id)) {
-            return false;
-        }
-
-        orcamentoRepository.deleteById(id);
-        return true;
-    }
-
-    @Transactional
-    public void excluirObrigatorio(Integer id) {
-        if (!excluirPorId(id)) {
-            throw new RecursoNaoEncontradoException("Orcamento", id);
-        }
-    }
+    // -------------------------------------------------------------------------
+    // Auxiliares
+    // -------------------------------------------------------------------------
 
     private ItemOrcamentoModel criarItem(OrcamentoModel orcamento, ItemOrcamentoRequest itemRequest) {
-        ComponenteModel componente = componenteService.buscarPorId(itemRequest.componenteId())
-                .orElseThrow(() -> new RecursoNaoEncontradoException("Componente", itemRequest.componenteId()));
-
+        ComponenteModel componente = componenteService.buscarObrigatorio(itemRequest.componenteId());
         ItemOrcamentoModel item = new ItemOrcamentoModel();
         item.setOrcamento(orcamento);
         item.setComponente(componente);
@@ -216,9 +168,7 @@ public class OrcamentoService {
     }
 
     private BigDecimal calcularTotal(List<ItemOrcamentoModel> itens) {
-        return itens.stream()
-                .map(this::calcularSubtotal)
-                .reduce(BigDecimal.ZERO, BigDecimal::add);
+        return itens.stream().map(this::calcularSubtotal).reduce(BigDecimal.ZERO, BigDecimal::add);
     }
 
     private BigDecimal calcularSubtotal(ItemOrcamentoModel item) {

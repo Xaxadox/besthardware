@@ -1,67 +1,56 @@
 package com.omni.besthardware.rest.controller;
 
-import com.omni.besthardware.rest.dto.response.ComponenteResponse;
+import com.omni.besthardware.mappers.ComponenteMapper;
+import com.omni.besthardware.model.PlacaMaeModel;
 import com.omni.besthardware.rest.dto.request.PlacaMaeFiltroRequest;
 import com.omni.besthardware.rest.dto.request.PlacaMaeRequest;
-import com.omni.besthardware.mappers.DtoMapper;
-import com.omni.besthardware.model.PlacaMaeModel;
+import com.omni.besthardware.rest.dto.response.PlacaMaeResponse;
 import com.omni.besthardware.service.PlacaMaeService;
 import jakarta.validation.Valid;
 import java.util.List;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.DeleteMapping;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.ModelAttribute;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.PutMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
-/**
- * Controlador REST responsavel pelas operacoes de PlacaMae no projeto BestHardware.
- */
 @RestController
 @RequestMapping("/api/placas-mae")
 public class PlacaMaeController {
 
     private final PlacaMaeService placaMaeService;
+    private final ComponenteMapper componenteMapper;
 
-    public PlacaMaeController(PlacaMaeService placaMaeService) {
+    public PlacaMaeController(PlacaMaeService placaMaeService, ComponenteMapper componenteMapper) {
         this.placaMaeService = placaMaeService;
+        this.componenteMapper = componenteMapper;
     }
 
     @GetMapping
-    public List<ComponenteResponse> listar(@ModelAttribute PlacaMaeFiltroRequest filtro) {
-        return toResponseList(placaMaeService.buscarComFiltros(filtro));
+    public List<PlacaMaeResponse> listar(@ModelAttribute PlacaMaeFiltroRequest filtro) {
+        return placaMaeService.buscarComFiltros(filtro).stream()
+                .map(componenteMapper::toPlacaMaeResponse)
+                .toList();
     }
 
     @GetMapping("/{id}")
-    public ResponseEntity<ComponenteResponse> buscarPorId(@PathVariable Integer id) {
-        return ResponseEntity.ok(DtoMapper.toComponenteResponse(placaMaeService.buscarObrigatorio(id)));
+    public ResponseEntity<PlacaMaeResponse> buscarPorId(@PathVariable Integer id) {
+        return ResponseEntity.ok(componenteMapper.toPlacaMaeResponse(placaMaeService.buscarObrigatorio(id)));
     }
 
     @PostMapping
-    public ResponseEntity<ComponenteResponse> criar(@Valid @RequestBody PlacaMaeRequest request) {
+    public ResponseEntity<PlacaMaeResponse> criar(@Valid @RequestBody PlacaMaeRequest request) {
         return ResponseEntity.status(HttpStatus.CREATED)
-                .body(DtoMapper.toComponenteResponse(placaMaeService.salvar(toModel(request))));
+                .body(componenteMapper.toPlacaMaeResponse(placaMaeService.salvar(toModel(request))));
     }
 
     @PutMapping("/{id}")
-    public ResponseEntity<ComponenteResponse> atualizar(@PathVariable Integer id, @Valid @RequestBody PlacaMaeRequest request) {
-        return ResponseEntity.ok(DtoMapper.toComponenteResponse(placaMaeService.atualizarObrigatorio(id, toModel(request))));
+    public ResponseEntity<PlacaMaeResponse> atualizar(@PathVariable Integer id, @Valid @RequestBody PlacaMaeRequest request) {
+        return ResponseEntity.ok(componenteMapper.toPlacaMaeResponse(placaMaeService.atualizarObrigatorio(id, toModel(request))));
     }
 
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> excluir(@PathVariable Integer id) {
         placaMaeService.excluirObrigatorio(id);
         return ResponseEntity.noContent().build();
-    }
-
-    private List<ComponenteResponse> toResponseList(List<PlacaMaeModel> placasMae) {
-        return placasMae.stream().map(DtoMapper::toComponenteResponse).toList();
     }
 
     private PlacaMaeModel toModel(PlacaMaeRequest request) {
