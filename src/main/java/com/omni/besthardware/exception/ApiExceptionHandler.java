@@ -8,6 +8,8 @@ import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.ConstraintViolationException;
 import java.util.List;
 import java.util.Objects;
+import org.springframework.security.access.AccessDeniedException;
+import org.springframework.security.core.AuthenticationException;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -17,6 +19,7 @@ import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.MissingServletRequestParameterException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
+import org.springframework.web.method.annotation.HandlerMethodValidationException;
 import org.springframework.web.method.annotation.MethodArgumentTypeMismatchException;
 
 @RestControllerAdvice
@@ -80,6 +83,41 @@ public class ApiExceptionHandler {
                 request,
                 detalhes
         );
+    }
+
+    @ExceptionHandler(HandlerMethodValidationException.class)
+    public ResponseEntity<ErroResponse> tratarValidacaoDeMetodo(
+            HandlerMethodValidationException exception,
+            HttpServletRequest request
+    ) {
+        List<String> detalhes = exception.getParameterValidationResults().stream()
+                .flatMap(resultado -> resultado.getResolvableErrors().stream())
+                .map(erro -> Objects.requireNonNullElse(erro.getDefaultMessage(), "valor invalido"))
+                .distinct()
+                .toList();
+
+        return build(
+                HttpStatus.BAD_REQUEST,
+                "Existem parametros invalidos na requisicao.",
+                request,
+                detalhes
+        );
+    }
+
+    @ExceptionHandler(AuthenticationException.class)
+    public ResponseEntity<ErroResponse> tratarFalhaAutenticacao(
+            AuthenticationException exception,
+            HttpServletRequest request
+    ) {
+        return build(HttpStatus.UNAUTHORIZED, "Credenciais invalidas ou token ausente.", request);
+    }
+
+    @ExceptionHandler(AccessDeniedException.class)
+    public ResponseEntity<ErroResponse> tratarAcessoNegado(
+            AccessDeniedException exception,
+            HttpServletRequest request
+    ) {
+        return build(HttpStatus.FORBIDDEN, "Usuario autenticado sem permissao para esta operacao.", request);
     }
 
     @ExceptionHandler(MethodArgumentTypeMismatchException.class)

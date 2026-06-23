@@ -7,12 +7,15 @@ import com.omni.besthardware.rest.dto.request.ComponenteRequest;
 import com.omni.besthardware.rest.dto.response.ComponenteResponse;
 import com.omni.besthardware.service.ComponenteService;
 import jakarta.validation.Valid;
+import jakarta.validation.constraints.Positive;
 import java.util.List;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
+@Validated
 @RequestMapping("/api/componentes")
 public class ComponenteController {
 
@@ -25,14 +28,14 @@ public class ComponenteController {
     }
 
     @GetMapping
-    public List<ComponenteResponse> listar(@ModelAttribute ComponenteFiltroRequest filtro) {
+    public List<ComponenteResponse> listar(@Valid @ModelAttribute ComponenteFiltroRequest filtro) {
         return componenteService.buscarComFiltros(filtro).stream()
                 .map(componenteMapper::toComponenteResponse)
                 .toList();
     }
 
     @GetMapping("/{id}")
-    public ResponseEntity<ComponenteResponse> buscarPorId(@PathVariable Integer id) {
+    public ResponseEntity<ComponenteResponse> buscarPorId(@PathVariable @Positive Integer id) {
         return ResponseEntity.ok(componenteMapper.toComponenteResponse(componenteService.buscarObrigatorio(id)));
     }
 
@@ -44,7 +47,7 @@ public class ComponenteController {
 
     @PutMapping("/{id}")
     public ResponseEntity<ComponenteResponse> atualizar(
-            @PathVariable Integer id,
+            @PathVariable @Positive Integer id,
             @Valid @RequestBody ComponenteRequest request
     ) {
         return ResponseEntity.ok(componenteMapper.toComponenteResponse(
@@ -53,7 +56,7 @@ public class ComponenteController {
     }
 
     @DeleteMapping("/{id}")
-    public ResponseEntity<Void> excluir(@PathVariable Integer id) {
+    public ResponseEntity<Void> excluir(@PathVariable @Positive Integer id) {
         componenteService.excluirObrigatorio(id);
         return ResponseEntity.noContent().build();
     }

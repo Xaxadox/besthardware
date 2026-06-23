@@ -7,12 +7,15 @@ import com.omni.besthardware.rest.dto.request.PlacaMaeRequest;
 import com.omni.besthardware.rest.dto.response.PlacaMaeResponse;
 import com.omni.besthardware.service.PlacaMaeService;
 import jakarta.validation.Valid;
+import jakarta.validation.constraints.Positive;
 import java.util.List;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
+@Validated
 @RequestMapping("/api/placas-mae")
 public class PlacaMaeController {
 
@@ -25,14 +28,14 @@ public class PlacaMaeController {
     }
 
     @GetMapping
-    public List<PlacaMaeResponse> listar(@ModelAttribute PlacaMaeFiltroRequest filtro) {
+    public List<PlacaMaeResponse> listar(@Valid @ModelAttribute PlacaMaeFiltroRequest filtro) {
         return placaMaeService.buscarComFiltros(filtro).stream()
                 .map(componenteMapper::toPlacaMaeResponse)
                 .toList();
     }
 
     @GetMapping("/{id}")
-    public ResponseEntity<PlacaMaeResponse> buscarPorId(@PathVariable Integer id) {
+    public ResponseEntity<PlacaMaeResponse> buscarPorId(@PathVariable @Positive Integer id) {
         return ResponseEntity.ok(componenteMapper.toPlacaMaeResponse(placaMaeService.buscarObrigatorio(id)));
     }
 
@@ -43,12 +46,12 @@ public class PlacaMaeController {
     }
 
     @PutMapping("/{id}")
-    public ResponseEntity<PlacaMaeResponse> atualizar(@PathVariable Integer id, @Valid @RequestBody PlacaMaeRequest request) {
+    public ResponseEntity<PlacaMaeResponse> atualizar(@PathVariable @Positive Integer id, @Valid @RequestBody PlacaMaeRequest request) {
         return ResponseEntity.ok(componenteMapper.toPlacaMaeResponse(placaMaeService.atualizarObrigatorio(id, toModel(request))));
     }
 
     @DeleteMapping("/{id}")
-    public ResponseEntity<Void> excluir(@PathVariable Integer id) {
+    public ResponseEntity<Void> excluir(@PathVariable @Positive Integer id) {
         placaMaeService.excluirObrigatorio(id);
         return ResponseEntity.noContent().build();
     }

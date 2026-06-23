@@ -19,6 +19,50 @@ User: sa
 Password: vazio
 ```
 
+## Autenticacao
+
+A API usa JWT. O login fica publico:
+
+```text
+POST /api/auth/login
+```
+
+Payload:
+
+```json
+{
+  "username": "admin",
+  "password": "admin123"
+}
+```
+
+Resposta:
+
+```json
+{
+  "token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...",
+  "tipo": "Bearer",
+  "expiraEmSegundos": 3600,
+  "usuario": "admin",
+  "permissoes": ["ROLE_ADMIN", "ROLE_USER"]
+}
+```
+
+Use o token nas demais chamadas:
+
+```text
+Authorization: Bearer {token}
+```
+
+Usuarios de demonstracao:
+
+```text
+admin / admin123: consulta, cria, altera e exclui.
+usuario / usuario123: consulta e valida compatibilidade.
+```
+
+Swagger, OpenAPI JSON, H2 Console e `/api/auth/login` ficam liberados para facilitar a demonstracao.
+
 ## Padrao REST
 
 Os recursos principais seguem o padrao:
@@ -34,6 +78,7 @@ DELETE /api/recurso/{id}
 Recursos:
 
 ```text
+/api/auth/login
 /api/usuarios
 /api/perfis
 /api/componentes
@@ -69,6 +114,7 @@ GET  /api/ofertas-preco/componentes/{componenteId}/menor-preco
 ## Filtros
 
 Os endpoints de listagem aceitam filtros por query params.
+Os parametros numericos de rota e filtros numericos devem ser positivos.
 
 Exemplos:
 

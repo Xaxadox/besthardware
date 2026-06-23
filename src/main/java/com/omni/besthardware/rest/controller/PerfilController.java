@@ -6,12 +6,16 @@ import com.omni.besthardware.rest.dto.request.PerfilRequest;
 import com.omni.besthardware.rest.dto.response.PerfilResponse;
 import com.omni.besthardware.service.PerfilService;
 import jakarta.validation.Valid;
+import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.Positive;
 import java.util.List;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
+@Validated
 @RequestMapping("/api/perfis")
 public class PerfilController {
 
@@ -26,7 +30,7 @@ public class PerfilController {
     @GetMapping
     public List<PerfilResponse> listar(
             @RequestParam(required = false) String nome,
-            @RequestParam(required = false) Integer componenteId
+            @RequestParam(required = false) @Positive Integer componenteId
     ) {
         List<PerfilModel> perfis;
         if (nome != null) {
@@ -42,12 +46,12 @@ public class PerfilController {
     }
 
     @GetMapping("/{id}")
-    public ResponseEntity<PerfilResponse> buscarPorId(@PathVariable Integer id) {
+    public ResponseEntity<PerfilResponse> buscarPorId(@PathVariable @Positive Integer id) {
         return ResponseEntity.ok(perfilMapper.toPerfilResponse(perfilService.buscarObrigatorio(id)));
     }
 
     @GetMapping("/nome/{nome}")
-    public ResponseEntity<PerfilResponse> buscarPorNomeExato(@PathVariable String nome) {
+    public ResponseEntity<PerfilResponse> buscarPorNomeExato(@PathVariable @NotBlank String nome) {
         return ResponseEntity.ok(perfilMapper.toPerfilResponse(perfilService.buscarPorNomeExatoObrigatorio(nome)));
     }
 
@@ -58,12 +62,12 @@ public class PerfilController {
     }
 
     @PutMapping("/{id}")
-    public ResponseEntity<PerfilResponse> atualizar(@PathVariable Integer id, @Valid @RequestBody PerfilRequest request) {
+    public ResponseEntity<PerfilResponse> atualizar(@PathVariable @Positive Integer id, @Valid @RequestBody PerfilRequest request) {
         return ResponseEntity.ok(perfilMapper.toPerfilResponse(perfilService.atualizarObrigatorio(id, request)));
     }
 
     @DeleteMapping("/{id}")
-    public ResponseEntity<Void> excluir(@PathVariable Integer id) {
+    public ResponseEntity<Void> excluir(@PathVariable @Positive Integer id) {
         perfilService.excluirObrigatorio(id);
         return ResponseEntity.noContent().build();
     }

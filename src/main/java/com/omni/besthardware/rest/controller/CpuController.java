@@ -7,9 +7,11 @@ import com.omni.besthardware.rest.dto.request.CpuRequest;
 import com.omni.besthardware.rest.dto.response.CpuResponse;
 import com.omni.besthardware.service.CpuService;
 import jakarta.validation.Valid;
+import jakarta.validation.constraints.Positive;
 import java.util.List;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.ModelAttribute;
@@ -21,6 +23,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 @RestController
+@Validated
 @RequestMapping("/api/cpus")
 public class CpuController {
 
@@ -33,14 +36,14 @@ public class CpuController {
     }
 
     @GetMapping
-    public List<CpuResponse> listar(@ModelAttribute CpuFiltroRequest filtro) {
+    public List<CpuResponse> listar(@Valid @ModelAttribute CpuFiltroRequest filtro) {
         return cpuService.buscarComFiltros(filtro).stream()
                 .map(componenteMapper::toCpuResponse)
                 .toList();
     }
 
     @GetMapping("/{id}")
-    public ResponseEntity<CpuResponse> buscarPorId(@PathVariable Integer id) {
+    public ResponseEntity<CpuResponse> buscarPorId(@PathVariable @Positive Integer id) {
         return ResponseEntity.ok(componenteMapper.toCpuResponse(cpuService.buscarObrigatorio(id)));
     }
 
@@ -51,12 +54,12 @@ public class CpuController {
     }
 
     @PutMapping("/{id}")
-    public ResponseEntity<CpuResponse> atualizar(@PathVariable Integer id, @Valid @RequestBody CpuRequest request) {
+    public ResponseEntity<CpuResponse> atualizar(@PathVariable @Positive Integer id, @Valid @RequestBody CpuRequest request) {
         return ResponseEntity.ok(componenteMapper.toCpuResponse(cpuService.atualizarObrigatorio(id, toModel(request))));
     }
 
     @DeleteMapping("/{id}")
-    public ResponseEntity<Void> excluir(@PathVariable Integer id) {
+    public ResponseEntity<Void> excluir(@PathVariable @Positive Integer id) {
         cpuService.excluirObrigatorio(id);
         return ResponseEntity.noContent().build();
     }
