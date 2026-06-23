@@ -168,7 +168,7 @@ ComponenteResponse (sealed interface)
 └── ComponenteGenericoResponse
 ```
 
-Os controllers especificos (`CpuController`, `GpuController` etc.) devolvem o record do seu proprio tipo (`CpuResponse`, `GpuResponse`...). O `DtoMapper` tem um metodo de conversao tipado para cada um (`toCpuResponse`, `toGpuResponse`...) e um metodo generico, `toComponenteResponse(ComponenteModel, BigDecimal)`, que despacha para o metodo correto via `switch` com pattern matching.
+Os controllers especificos (`CpuController`, `GpuController` etc.) devolvem o record do seu proprio tipo (`CpuResponse`, `GpuResponse`...). O `ComponenteMapper` tem um metodo de conversao tipado para cada um (`toCpuResponse`, `toGpuResponse`...) e um metodo generico, `toComponenteResponse(ComponenteModel, BigDecimal)`, que despacha para o metodo correto via `switch` com pattern matching.
 
 O metodo generico e usado nos pontos da API que lidam com listas heterogeneas de componentes, onde o tipo concreto so e conhecido em tempo de execucao: `PerfilResponse.componentes`, `CompatibilidadeResponse.componentes`, `RecomendacaoResponse.componentes` e o `ComponenteController` (endpoints da base `/api/componentes`).
 
@@ -234,7 +234,6 @@ A conversão passou a ser centralizada em mappers especializados:
 ComponenteMapper
 UsuarioMapper
 PerfilMapper
-ArquivoMapper
 ```
 
 O `PerfilMapper` é responsável por converter `PerfilModel` em `PerfilResponse`, incluindo a transformação da coleção de componentes utilizando `ComponenteMapper`.

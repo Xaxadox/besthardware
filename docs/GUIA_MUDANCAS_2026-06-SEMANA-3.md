@@ -116,21 +116,21 @@ public record CpuResponse(
 
 Cada record tem somente os campos que fazem sentido para o seu tipo (`GpuResponse` nao tem `socket`, `MonitorResponse` nao tem `nucleos` etc.). `ComponenteGenericoResponse` cobre o caso de um `ComponenteModel` sem subtipo conhecido (usado pelo `/api/componentes`).
 
-### DtoMapper com metodo tipado por componente
+### ComponenteMapper com metodo tipado por componente
 
-O `DtoMapper` ganhou um metodo de conversao dedicado para cada tipo (`toCpuResponse`, `toGpuResponse` etc.). Os controllers especificos (`CpuController`, `GpuController`...) passaram a usar o metodo do seu proprio tipo e a devolver o record especifico, em vez da interface generica:
+O `ComponenteMapper` passou a concentrar um metodo de conversao dedicado para cada tipo (`toCpuResponse`, `toGpuResponse` etc.). Os controllers especificos (`CpuController`, `GpuController`...) usam o metodo do seu proprio tipo e devolvem o record especifico, em vez da interface generica:
 
 ```java
 @GetMapping("/{id}")
 public ResponseEntity<CpuResponse> buscarPorId(@PathVariable Integer id) {
-    return ResponseEntity.ok(DtoMapper.toCpuResponse(cpuService.buscarObrigatorio(id)));
+    return ResponseEntity.ok(componenteMapper.toCpuResponse(cpuService.buscarObrigatorio(id)));
 }
 ```
 
-O metodo generico `DtoMapper.toComponenteResponse(ComponenteModel, BigDecimal)` continua existindo, mas agora apenas delega para os metodos tipados via `switch` com pattern matching (Java 21):
+O metodo generico `ComponenteMapper.toComponenteResponse(ComponenteModel, BigDecimal)` tambem existe, mas apenas delega para os metodos tipados via `switch` com pattern matching (Java 21):
 
 ```java
-public static ComponenteResponse toComponenteResponse(ComponenteModel componente, BigDecimal preco) {
+public ComponenteResponse toComponenteResponse(ComponenteModel componente, BigDecimal preco) {
     return switch (componente) {
         case CpuModel cpu -> toCpuResponse(cpu, preco);
         case GpuModel gpu -> toGpuResponse(gpu, preco);
@@ -208,7 +208,6 @@ Foi concluída a migração para mappers especializados, removendo o uso direto 
 Os mappers especializados passaram a ser injetados onde necessário:
 
 ```text
-ArquivoMapper
 ComponenteMapper
 UsuarioMapper
 PerfilMapper

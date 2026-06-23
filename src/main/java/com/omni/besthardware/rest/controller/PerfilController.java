@@ -1,6 +1,7 @@
 package com.omni.besthardware.rest.controller;
 
 import com.omni.besthardware.mappers.PerfilMapper;
+import com.omni.besthardware.model.PerfilModel;
 import com.omni.besthardware.rest.dto.request.PerfilRequest;
 import com.omni.besthardware.rest.dto.response.PerfilResponse;
 import com.omni.besthardware.service.PerfilService;
@@ -27,7 +28,7 @@ public class PerfilController {
             @RequestParam(required = false) String nome,
             @RequestParam(required = false) Integer componenteId
     ) {
-        List<?> perfis;
+        List<PerfilModel> perfis;
         if (nome != null) {
             perfis = perfilService.buscarPorNome(nome);
         } else if (componenteId != null) {
@@ -35,7 +36,7 @@ public class PerfilController {
         } else {
             perfis = perfilService.listarTodos();
         }
-        return ((List<com.omni.besthardware.model.PerfilModel>) perfis).stream()
+        return perfis.stream()
                 .map(perfilMapper::toPerfilResponse)
                 .toList();
     }

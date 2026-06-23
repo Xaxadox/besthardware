@@ -142,6 +142,7 @@ DER com ofertas de preco:
 - [Arquitetura](docs/ARQUITETURA.md): camadas, entidades, DTOs, Specifications e regra de preco preferencial.
 - [Guia de mudancas 2026-05 semana 5](docs/GUIA_MUDANCAS_2026-05-SEMANA-5.md)
 - [Guia de mudancas 2026-06 semana 1](docs/GUIA_MUDANCAS_2026-06-SEMANA-1.md)
+- [Guia de mudancas 2026-06 semana 3](docs/GUIA_MUDANCAS_2026-06-SEMANA-3.md)
 
 ## Estado atual
 
