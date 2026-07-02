@@ -7,12 +7,15 @@ import com.omni.besthardware.rest.dto.request.RamRequest;
 import com.omni.besthardware.rest.dto.response.RamResponse;
 import com.omni.besthardware.service.RamService;
 import jakarta.validation.Valid;
+import jakarta.validation.constraints.Positive;
 import java.util.List;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
+@Validated
 @RequestMapping("/api/rams")
 public class RamController {
 
@@ -25,14 +28,14 @@ public class RamController {
     }
 
     @GetMapping
-    public List<RamResponse> listar(@ModelAttribute RamFiltroRequest filtro) {
+    public List<RamResponse> listar(@Valid @ModelAttribute RamFiltroRequest filtro) {
         return ramService.buscarComFiltros(filtro).stream()
                 .map(componenteMapper::toRamResponse)
                 .toList();
     }
 
     @GetMapping("/{id}")
-    public ResponseEntity<RamResponse> buscarPorId(@PathVariable Integer id) {
+    public ResponseEntity<RamResponse> buscarPorId(@PathVariable @Positive Integer id) {
         return ResponseEntity.ok(componenteMapper.toRamResponse(ramService.buscarObrigatorio(id)));
     }
 
@@ -43,12 +46,12 @@ public class RamController {
     }
 
     @PutMapping("/{id}")
-    public ResponseEntity<RamResponse> atualizar(@PathVariable Integer id, @Valid @RequestBody RamRequest request) {
+    public ResponseEntity<RamResponse> atualizar(@PathVariable @Positive Integer id, @Valid @RequestBody RamRequest request) {
         return ResponseEntity.ok(componenteMapper.toRamResponse(ramService.atualizarObrigatorio(id, toModel(request))));
     }
 
     @DeleteMapping("/{id}")
-    public ResponseEntity<Void> excluir(@PathVariable Integer id) {
+    public ResponseEntity<Void> excluir(@PathVariable @Positive Integer id) {
         ramService.excluirObrigatorio(id);
         return ResponseEntity.noContent().build();
     }

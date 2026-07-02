@@ -6,13 +6,18 @@ import com.omni.besthardware.rest.dto.request.UsuarioRequest;
 import com.omni.besthardware.rest.dto.response.UsuarioResponse;
 import com.omni.besthardware.service.UsuarioService;
 import jakarta.validation.Valid;
+import jakarta.validation.constraints.Email;
+import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.Positive;
 import java.util.List;
 import java.util.Map;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
+@Validated
 @RequestMapping("/api/usuarios")
 public class UsuarioController {
 
@@ -33,17 +38,17 @@ public class UsuarioController {
     }
 
     @GetMapping("/{id}")
-    public ResponseEntity<UsuarioResponse> buscarPorId(@PathVariable Integer id) {
+    public ResponseEntity<UsuarioResponse> buscarPorId(@PathVariable @Positive Integer id) {
         return ResponseEntity.ok(usuarioMapper.toUsuarioResponse(usuarioService.buscarObrigatorio(id)));
     }
 
     @GetMapping("/email/{email}")
-    public ResponseEntity<UsuarioResponse> buscarPorEmail(@PathVariable String email) {
+    public ResponseEntity<UsuarioResponse> buscarPorEmail(@PathVariable @NotBlank @Email String email) {
         return ResponseEntity.ok(usuarioMapper.toUsuarioResponse(usuarioService.buscarPorEmailObrigatorio(email)));
     }
 
     @GetMapping("/existe-email")
-    public Map<String, Boolean> existePorEmail(@RequestParam String email) {
+    public Map<String, Boolean> existePorEmail(@RequestParam @NotBlank @Email String email) {
         return Map.of("existe", usuarioService.existePorEmail(email));
     }
 
@@ -54,12 +59,12 @@ public class UsuarioController {
     }
 
     @PutMapping("/{id}")
-    public ResponseEntity<UsuarioResponse> atualizar(@PathVariable Integer id, @Valid @RequestBody UsuarioRequest request) {
+    public ResponseEntity<UsuarioResponse> atualizar(@PathVariable @Positive Integer id, @Valid @RequestBody UsuarioRequest request) {
         return ResponseEntity.ok(usuarioMapper.toUsuarioResponse(usuarioService.atualizarObrigatorio(id, toModel(request))));
     }
 
     @DeleteMapping("/{id}")
-    public ResponseEntity<Void> excluir(@PathVariable Integer id) {
+    public ResponseEntity<Void> excluir(@PathVariable @Positive Integer id) {
         usuarioService.excluirObrigatorio(id);
         return ResponseEntity.noContent().build();
     }

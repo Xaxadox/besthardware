@@ -12,6 +12,7 @@ O projeto permite cadastrar pecas, consultar filtros por especificacoes, registr
 - Ofertas de preco por componente.
 - Uso da menor oferta a vista em orcamentos e recomendacoes, com fallback para o preco base do componente.
 - Validacao de compatibilidade entre pecas.
+- Autenticacao JWT e autorizacao por perfil de acesso.
 - Swagger/OpenAPI para testar a API pelo navegador.
 
 ## Tecnologias
@@ -21,6 +22,7 @@ O projeto permite cadastrar pecas, consultar filtros por especificacoes, registr
 - Spring Web
 - Spring Data JPA
 - Bean Validation
+- Spring Security
 - Swagger/OpenAPI com springdoc
 - H2 Database em memoria
 - Lombok
@@ -67,6 +69,13 @@ User: sa
 Password: vazio
 ```
 
+Usuarios de demonstracao:
+
+```text
+admin / admin123: pode consultar, criar, alterar e excluir.
+usuario / usuario123: pode consultar e validar compatibilidade.
+```
+
 ## Endpoints principais
 
 ```text
@@ -89,6 +98,7 @@ Password: vazio
 Exemplos rapidos:
 
 ```text
+POST /api/auth/login
 GET  /api/cpus?socket=AM4&nucleosMinimos=6
 GET  /api/ofertas-preco?componenteId=1
 GET  /api/ofertas-preco/componentes/1/menor-preco
@@ -101,10 +111,21 @@ POST /api/orcamentos
 
 1. Suba a aplicacao com `.\mvnw.cmd spring-boot:run`.
 2. Abra `http://localhost:8080/swagger-ui.html`.
-3. Consulte componentes em `GET /api/cpus?socket=AM4&nucleosMinimos=6`.
-4. Veja a menor oferta em `GET /api/ofertas-preco/componentes/1/menor-preco`.
-5. Gere uma recomendacao em `GET /api/recomendacoes/perfis/jogo-inicial`.
-6. Crie um orcamento em `POST /api/orcamentos`.
+3. Faca login em `POST /api/auth/login` usando `admin/admin123`.
+4. Copie o token retornado e use no Swagger em `Authorize` como Bearer JWT.
+5. Consulte componentes em `GET /api/cpus?socket=AM4&nucleosMinimos=6`.
+6. Veja a menor oferta em `GET /api/ofertas-preco/componentes/1/menor-preco`.
+7. Gere uma recomendacao em `GET /api/recomendacoes/perfis/jogo-inicial`.
+8. Crie um orcamento em `POST /api/orcamentos`.
+
+Exemplo de login:
+
+```json
+{
+  "username": "admin",
+  "password": "admin123"
+}
+```
 
 Exemplo de orcamento:
 
@@ -142,6 +163,7 @@ DER com ofertas de preco:
 - [Arquitetura](docs/ARQUITETURA.md): camadas, entidades, DTOs, Specifications e regra de preco preferencial.
 - [Guia de mudancas 2026-05 semana 5](docs/GUIA_MUDANCAS_2026-05-SEMANA-5.md)
 - [Guia de mudancas 2026-06 semana 1](docs/GUIA_MUDANCAS_2026-06-SEMANA-1.md)
+- [Guia de mudancas 2026-06 semana 4](docs/GUIA_MUDANCAS_2026-06-SEMANA-4.md)
 - [Guia de mudancas 2026-06 semana 3](docs/GUIA_MUDANCAS_2026-06-SEMANA-3.md)
 
 ## Estado atual
@@ -151,6 +173,7 @@ Implementado:
 - entidades JPA em `model`, acesso a dados em `repository`, regras em `service` e controllers REST em `rest/controller`;
 - DTOs e validacoes;
 - filtros dinamicos com `Specification`;
+- autenticacao JWT e autorizacao com Spring Security;
 - Swagger/OpenAPI;
 - ofertas de preco por componente;
 - recomendacoes por perfil;

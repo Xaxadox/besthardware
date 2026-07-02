@@ -7,12 +7,15 @@ import com.omni.besthardware.rest.dto.request.ArmazenamentoRequest;
 import com.omni.besthardware.rest.dto.response.ArmazenamentoResponse;
 import com.omni.besthardware.service.ArmazenamentoService;
 import jakarta.validation.Valid;
+import jakarta.validation.constraints.Positive;
 import java.util.List;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
+@Validated
 @RequestMapping("/api/armazenamentos")
 public class ArmazenamentoController {
 
@@ -25,14 +28,14 @@ public class ArmazenamentoController {
     }
 
     @GetMapping
-    public List<ArmazenamentoResponse> listar(@ModelAttribute ArmazenamentoFiltroRequest filtro) {
+    public List<ArmazenamentoResponse> listar(@Valid @ModelAttribute ArmazenamentoFiltroRequest filtro) {
         return armazenamentoService.buscarComFiltros(filtro).stream()
                 .map(componenteMapper::toArmazenamentoResponse)
                 .toList();
     }
 
     @GetMapping("/{id}")
-    public ResponseEntity<ArmazenamentoResponse> buscarPorId(@PathVariable Integer id) {
+    public ResponseEntity<ArmazenamentoResponse> buscarPorId(@PathVariable @Positive Integer id) {
         return ResponseEntity.ok(componenteMapper.toArmazenamentoResponse(armazenamentoService.buscarObrigatorio(id)));
     }
 
@@ -44,7 +47,7 @@ public class ArmazenamentoController {
 
     @PutMapping("/{id}")
     public ResponseEntity<ArmazenamentoResponse> atualizar(
-            @PathVariable Integer id,
+            @PathVariable @Positive Integer id,
             @Valid @RequestBody ArmazenamentoRequest request
     ) {
         return ResponseEntity.ok(componenteMapper.toArmazenamentoResponse(
@@ -53,7 +56,7 @@ public class ArmazenamentoController {
     }
 
     @DeleteMapping("/{id}")
-    public ResponseEntity<Void> excluir(@PathVariable Integer id) {
+    public ResponseEntity<Void> excluir(@PathVariable @Positive Integer id) {
         armazenamentoService.excluirObrigatorio(id);
         return ResponseEntity.noContent().build();
     }

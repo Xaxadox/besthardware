@@ -7,12 +7,15 @@ import com.omni.besthardware.rest.dto.request.FonteRequest;
 import com.omni.besthardware.rest.dto.response.FonteResponse;
 import com.omni.besthardware.service.FonteService;
 import jakarta.validation.Valid;
+import jakarta.validation.constraints.Positive;
 import java.util.List;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
+@Validated
 @RequestMapping("/api/fontes")
 public class FonteController {
 
@@ -25,14 +28,14 @@ public class FonteController {
     }
 
     @GetMapping
-    public List<FonteResponse> listar(@ModelAttribute FonteFiltroRequest filtro) {
+    public List<FonteResponse> listar(@Valid @ModelAttribute FonteFiltroRequest filtro) {
         return fonteService.buscarComFiltros(filtro).stream()
                 .map(componenteMapper::toFonteResponse)
                 .toList();
     }
 
     @GetMapping("/{id}")
-    public ResponseEntity<FonteResponse> buscarPorId(@PathVariable Integer id) {
+    public ResponseEntity<FonteResponse> buscarPorId(@PathVariable @Positive Integer id) {
         return ResponseEntity.ok(componenteMapper.toFonteResponse(fonteService.buscarObrigatorio(id)));
     }
 
@@ -43,12 +46,12 @@ public class FonteController {
     }
 
     @PutMapping("/{id}")
-    public ResponseEntity<FonteResponse> atualizar(@PathVariable Integer id, @Valid @RequestBody FonteRequest request) {
+    public ResponseEntity<FonteResponse> atualizar(@PathVariable @Positive Integer id, @Valid @RequestBody FonteRequest request) {
         return ResponseEntity.ok(componenteMapper.toFonteResponse(fonteService.atualizarObrigatorio(id, toModel(request))));
     }
 
     @DeleteMapping("/{id}")
-    public ResponseEntity<Void> excluir(@PathVariable Integer id) {
+    public ResponseEntity<Void> excluir(@PathVariable @Positive Integer id) {
         fonteService.excluirObrigatorio(id);
         return ResponseEntity.noContent().build();
     }

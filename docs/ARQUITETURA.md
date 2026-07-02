@@ -185,6 +185,35 @@ GET /api/ofertas-preco?loja=KaBuM&precoAvistaMaximo=1000
 
 Controllers recebem os parametros como DTO de filtro e delegam ao service.
 
+## Seguranca
+
+O projeto usa Spring Security com JWT para autenticacao e autorizacao.
+
+Arquivos principais:
+
+```text
+config/SecurityConfig.java
+security/JwtService.java
+security/JwtAuthenticationFilter.java
+rest/controller/AuthController.java
+```
+
+Fluxo:
+
+- `POST /api/auth/login` autentica usuario e senha.
+- `JwtService` gera um token JWT assinado com HMAC-SHA256.
+- `JwtAuthenticationFilter` valida o header `Authorization: Bearer {token}`.
+- `SecurityConfig` libera Swagger, OpenAPI, H2 Console e login; protege `/api/**` por papel de acesso.
+
+Perfis de demonstracao:
+
+```text
+admin: ROLE_ADMIN e ROLE_USER
+usuario: ROLE_USER
+```
+
+As controllers usam `@Validated` para validar parametros simples de rota e query params, como IDs positivos e strings obrigatorias.
+
 ## Planilha CSV
 
 Existe uma planilha de apoio:
